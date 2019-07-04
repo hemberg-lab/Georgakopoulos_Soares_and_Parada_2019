@@ -1292,18 +1292,18 @@ Here we analized the intron size of distribution of exon which are flanked by G4
 ```{r}
 
 
-intron_size_upstream_non_template  <- rbind(fread('/Users /gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_upstream_100nt_window.bed.plus_strand_genome.plus_G4s'),  
- fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_upstream_100nt_window.bed.minus_strand_genome.minus_G4s'))
+intron_size_upstream_non_template  <- rbind(fread('./Intron_size/Introns.hg19_upstream_100nt_window.bed.plus_strand_genome.plus_G4s'),  
+ fread('./Intron_size/Introns.hg19_upstream_100nt_window.bed.minus_strand_genome.minus_G4s'))
 
-intron_size_downstream_non_template  <- rbind(fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_downstream_100nt_window.bed.plus_strand_genome.plus_G4s'),  
- fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_downstream_100nt_window.bed.minus_strand_genome.minus_G4s'))
+intron_size_downstream_non_template  <- rbind(fread('./Intron_size/Introns.hg19_downstream_100nt_window.bed.plus_strand_genome.plus_G4s'),  
+ fread('./Intron_size/Introns.hg19_downstream_100nt_window.bed.minus_strand_genome.minus_G4s'))
 
 
-intron_size_upstream_template  <- rbind(fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_upstream_100nt_window.bed.plus_strand_genome.minus_G4s'),  
- fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_upstream_100nt_window.bed.minus_strand_genome.plus_G4s'))
+intron_size_upstream_template  <- rbind(fread('./Intron_size/Introns.hg19_upstream_100nt_window.bed.plus_strand_genome.minus_G4s'),  
+ fread('./Intron_size/Introns.hg19_upstream_100nt_window.bed.minus_strand_genome.plus_G4s'))
 
-intron_size_downstream_template  <- rbind(fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_downstream_100nt_window.bed.minus_strand_genome.plus_G4s'),  
- fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_downstream_100nt_window.bed.plus_strand_genome.minus_G4s'))
+intron_size_downstream_template  <- rbind(fread('./Intron_size/Introns.hg19_downstream_100nt_window.bed.minus_strand_genome.plus_G4s'),  
+ fread('./Intron_size/Introns.hg19_downstream_100nt_window.bed.plus_strand_genome.minus_G4s'))
 
 
 intron_size_upstream_non_template[ , `:=`(exon_pos="upstream", strand="non_template") ]
@@ -1339,6 +1339,123 @@ Fig3.A
 ```
 
 
+```{r}
+long_introns.5ss <- fread("./Intron_size/GC_correction/long_introns.same_GC.bed.intron_5ss_.bed.closest.G4s")
+short_introns.5ss <- fread("./Intron_size/GC_correction/short_introns.same_GC.bed.intron_5ss_.bed.closest.G4s")
+long_introns.3ss <- fread("./Intron_size/GC_correction/long_introns.same_GC.bed.intron_3ss_.bed.closest.G4s")
+short_introns.3ss <- fread("./Intron_size/GC_correction/short_introns.same_GC.bed.intron_3ss_.bed.closest.G4s")
+
+
+colnames(long_introns.5ss) <- c("i.chrom", "i.start", "i.end", "i.id", "i.GC", "i.strand", "g.chrom", "g.start", "g.end", "dist")
+colnames(short_introns.5ss) <- c("i.chrom", "i.start", "i.end", "i.id", "i.GC", "i.strand", "g.chrom", "g.start", "g.end", "dist")
+colnames(long_introns.3ss) <- c("i.chrom", "i.start", "i.end", "i.id", "i.GC", "i.strand", "g.chrom", "g.start", "g.end", "dist")
+colnames(short_introns.3ss) <- c("i.chrom", "i.start", "i.end", "i.id", "i.GC", "i.strand", "g.chrom", "g.start", "g.end", "dist")
+
+long_introns.bed <- fread("./Intron_size/GC_correction/long_introns.same_GC.bed")
+short_introns.bed <- fread("./Intron_size/GC_correction/short_introns.same_GC.bed")
+long_short_correspondence <-  cbind(long_introns.bed, short_introns.bed)[ , c(4, 2, 3 , 5,10, 8, 9, 11)]
+
+colnames(long_short_correspondence) <- c("l.id", "l.start", "l.end", "l.GC", "s.id", "s.start", "s.end", "s.GC"  )
+long_short_correspondence[, s.len:=(s.end-s.start)]
+
+
+long_introns.5ss[, G4.5ss:=FALSE ]
+long_introns.5ss[ dist<=100 & i.strand=="+" & i.start<g.end , G4.5ss:=TRUE ]
+long_introns.5ss[ dist<=100 & i.strand=="-" & i.start>g.end , G4.5ss:=TRUE ]
+
+short_introns.5ss[, G4.5ss:=FALSE ]
+short_introns.5ss[ dist<=100 & i.strand=="+" & i.start<g.end , G4.5ss:=TRUE ]
+short_introns.5ss[ dist<=100 & i.strand=="-" & i.start>g.end , G4.5ss:=TRUE ]
+
+long_short.2x2.5ss <- matrix(nrow = 2, c(nrow(long_introns.5ss[G4.5ss==FALSE]), nrow(short_introns.5ss[G4.5ss==FALSE]), nrow(long_introns.5ss[G4.5ss==TRUE]), nrow(short_introns.5ss[G4.5ss==TRUE]) ))
+
+chisq.test(long_short.2x2.5ss)
+
+
+long_introns.3ss[, G4.3ss:=FALSE ]
+long_introns.3ss[ dist<=100 & i.strand=="+" & i.start<g.end , G4.3ss:=TRUE ]
+long_introns.3ss[ dist<=100 & i.strand=="-" & i.start>g.end , G4.3ss:=TRUE ]
+
+short_introns.3ss[, G4.3ss:=FALSE ]
+short_introns.3ss[ dist<=100 & i.strand=="+" & i.start<g.end , G4.3ss:=TRUE ]
+short_introns.3ss[ dist<=100 & i.strand=="-" & i.start>g.end , G4.3ss:=TRUE ]
+
+long_short.2x2.3ss <- matrix(nrow = 2, c(nrow(long_introns.3ss[G4.3ss==FALSE]), nrow(short_introns.3ss[G4.3ss==FALSE]), nrow(long_introns.3ss[G4.3ss==TRUE]), nrow(short_introns.3ss[G4.3ss==TRUE]) ))
+
+chisq.test(long_short.2x2.3ss)
+
+
+
+
+
+long_introns <- merge( long_introns.5ss, long_introns.3ss, by=c("i.id", "i.GC" ))
+short_introns <- merge( short_introns.5ss, short_introns.3ss, by=c("i.id", "i.GC" ))
+
+
+
+
+
+long_short.2x2 <- matrix(nrow = 2, c(nrow(long_introns[(!G4.3ss & !G4.5ss), ]),
+                                         nrow(short_introns[(!G4.3ss & !G4.5ss), ]),
+                                         nrow(long_introns[(G4.3ss | G4.5ss), ]),
+                                         nrow(short_introns[(G4.3ss | G4.5ss), ]) ))
+
+
+                                         
+chisq.test(long_short.2x2)
+
+
+## Only considering short introns longer than 50
+
+
+
+
+
+long_introns <- long_introns[i.id %in% long_short_correspondence[s.len>50, l.id]]
+short_introns <- short_introns[i.id %in% long_short_correspondence[s.len>50, s.id]]
+
+
+long_short.2x2 <- matrix(nrow = 2, c(nrow(long_introns[(!G4.3ss & !G4.5ss), ]),
+                                         nrow(short_introns[(!G4.3ss & !G4.5ss), ]),
+                                         nrow(long_introns[(G4.3ss | G4.5ss), ]),
+                                         nrow(short_introns[(G4.3ss | G4.5ss), ]) ))
+
+
+                                         
+chisq.test(long_short.2x2)
+
+
+
+
+
+
+
+
+
+
+
+
+short_introns[, type:="Short"]
+long_introns[, type:="Long"]
+
+long_introns$type <- factor(long_introns$type, levels=c("Short", "Long"))
+
+
+
+long_short_introns <- rbind(long_introns, short_introns)
+
+ggplot(long_short_introns) +
+  geom_violin(aes( type, i.GC))
+
+
+ggplot(long_short_introns) +
+  geom_bar(aes(x=type, fill=((G4.3ss | G4.5ss) ), stat="count" ))
+
+
+                                         
+```
+
+
 
 ## Exon number
 
@@ -1346,13 +1463,13 @@ Fig3.A
 Here we explored how G4 enrichments change thorugh gene body
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-exons_1.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_1_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_1.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_1_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_1.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_1_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_1.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_1_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_1.up_plus <- read_dist_table("./exon_numbers/exons_1_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_1.down_plus <- read_dist_table("./exon_numbers/exons_1_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_1.up_minus <- read_dist_table("./exon_numbers/exons_1_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_1.down_minus <- read_dist_table("./exon_numbers/exons_1_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_1.up_minus[,Position:=Position*-1]
 exons_1.down_minus[,Position:=Position*-1]
 
@@ -1362,13 +1479,13 @@ exons_1.TOTAL <- plot_density(exons_1.up_plus, exons_1.up_minus, exons_1.down_pl
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-exons_2.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_2_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_2.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_2_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_2.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_2_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_2.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_2_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_2.up_plus <- read_dist_table("./exon_numbers/exons_2_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_2.down_plus <- read_dist_table("./exon_numbers/exons_2_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_2.up_minus <- read_dist_table("./exon_numbers/exons_2_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_2.down_minus <- read_dist_table("./exon_numbers/exons_2_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_2.up_minus[,Position:=Position*-1]
 exons_2.down_minus[,Position:=Position*-1]
 
@@ -1379,14 +1496,14 @@ exons_2.TOTAL <- plot_density(exons_2.up_plus, exons_2.up_minus, exons_2.down_pl
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 
-exons_3.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_3_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_3.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_3_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_3.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_3_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_3.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_3_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_3.up_plus <- read_dist_table("./exon_numbers/exons_3_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_3.down_plus <- read_dist_table("./exon_numbers/exons_3_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_3.up_minus <- read_dist_table("./exon_numbers/exons_3_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_3.down_minus <- read_dist_table("./exon_numbers/exons_3_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_3.up_minus[,Position:=Position*-1]
 exons_3.down_minus[,Position:=Position*-1]
 
@@ -1398,14 +1515,14 @@ exons_3.TOTAL <- plot_density(exons_3.up_plus, exons_3.up_minus, exons_3.down_pl
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 
-exons_4.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_4_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_4.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_4_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_4.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_4_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_4.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_4_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_4.up_plus <- read_dist_table("./exon_numbers/exons_4_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_4.down_plus <- read_dist_table("./exon_numbers/exons_4_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_4.up_minus <- read_dist_table("./exon_numbers/exons_4_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_4.down_minus <- read_dist_table("./exon_numbers/exons_4_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_4.up_minus[,Position:=Position*-1]
 exons_4.down_minus[,Position:=Position*-1]
 
@@ -1418,14 +1535,14 @@ exons_4.TOTAL <- plot_density(exons_4.up_plus, exons_4.up_minus, exons_4.down_pl
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 
-exons_middle.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_middle_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_middle.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_middle_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_middle.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_middle_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_middle.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_middle_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_middle.up_plus <- read_dist_table("./exon_numbers/exons_middle_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_middle.down_plus <- read_dist_table("./exon_numbers/exons_middle_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_middle.up_minus <- read_dist_table("./exon_numbers/exons_middle_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_middle.down_minus <- read_dist_table("./exon_numbers/exons_middle_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_middle.up_minus[,Position:=Position*-1]
 exons_middle.down_minus[,Position:=Position*-1]
 
@@ -1437,14 +1554,14 @@ exons_middle.TOTAL <- plot_density(exons_middle.up_plus, exons_middle.up_minus, 
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 
-exons_minus4.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus4_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_minus4.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus4_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_minus4.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus4_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_minus4.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus4_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_minus4.up_plus <- read_dist_table("./exon_numbers/exons_minus4_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_minus4.down_plus <- read_dist_table("./exon_numbers/exons_minus4_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_minus4.up_minus <- read_dist_table("./exon_numbers/exons_minus4_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_minus4.down_minus <- read_dist_table("./exon_numbers/exons_minus4_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_minus4.up_minus[,Position:=Position*-1]
 exons_minus4.down_minus[,Position:=Position*-1]
 
@@ -1455,14 +1572,14 @@ exons_minus4.TOTAL <- plot_density(exons_minus4.up_plus, exons_minus4.up_minus, 
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 
-exons_minus3.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus3_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_minus3.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus3_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_minus3.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus3_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_minus3.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus3_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_minus3.up_plus <- read_dist_table("./exon_numbers/exons_minus3_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_minus3.down_plus <- read_dist_table("./exon_numbers/exons_minus3_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_minus3.up_minus <- read_dist_table("./exon_numbers/exons_minus3_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_minus3.down_minus <- read_dist_table("./exon_numbers/exons_minus3_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_minus3.up_minus[,Position:=Position*-1]
 exons_minus3.down_minus[,Position:=Position*-1]
 
@@ -1474,14 +1591,14 @@ exons_minus3.TOTAL <- plot_density(exons_minus3.up_plus, exons_minus3.up_minus, 
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 
-exons_minus2.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus2_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_minus2.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus2_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_minus2.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus2_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_minus2.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus2_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_minus2.up_plus <- read_dist_table("./exon_numbers/exons_minus2_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_minus2.down_plus <- read_dist_table("./exon_numbers/exons_minus2_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_minus2.up_minus <- read_dist_table("./exon_numbers/exons_minus2_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_minus2.down_minus <- read_dist_table("./exon_numbers/exons_minus2_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_minus2.up_minus[,Position:=Position*-1]
 exons_minus2.down_minus[,Position:=Position*-1]
 
@@ -1492,14 +1609,14 @@ exons_minus2.TOTAL <- plot_density(exons_minus2.up_plus, exons_minus2.up_minus, 
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 
-exons_minus1.up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus1_plus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_minus1.down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus1_plus_strand_downstream.txt.score.G4.bed.list.out.num")
-exons_minus1.up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus1_minus_strand_upstream.txt.score.G4.bed.list.out.num")
-exons_minus1.down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/exon_numbers/exons_minus1_minus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_minus1.up_plus <- read_dist_table("./exon_numbers/exons_minus1_plus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_minus1.down_plus <- read_dist_table("./exon_numbers/exons_minus1_plus_strand_downstream.txt.score.G4.bed.list.out.num")
+exons_minus1.up_minus <- read_dist_table("./exon_numbers/exons_minus1_minus_strand_upstream.txt.score.G4.bed.list.out.num")
+exons_minus1.down_minus <- read_dist_table("./exon_numbers/exons_minus1_minus_strand_downstream.txt.score.G4.bed.list.out.num")
 exons_minus1.up_minus[,Position:=Position*-1]
 exons_minus1.down_minus[,Position:=Position*-1]
 
@@ -1556,32 +1673,32 @@ Here we distribution of G4-seq experiments
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-G4_2019.K.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q1_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q2_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q3_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q4_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
-G4_2019.K.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q1_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q2_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q3_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q4_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
 
-G4_2019.K.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q1_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q2_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q3_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q4_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
-G4_2019.K.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.K.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q1_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q2_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q3_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.K.Q4_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
 
@@ -1612,32 +1729,32 @@ ggplot(G4_2019.K.Qs.total)+
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-G4_2019.PDS.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q1_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q2_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q3_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q4_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
-G4_2019.PDS.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q1_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q2_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q3_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q4_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
 
-G4_2019.PDS.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q1_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q2_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q3_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q4_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
-G4_2019.PDS.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.PDS.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q1_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q2_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q3_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.PDS.Q4_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
 
@@ -1666,63 +1783,63 @@ ggplot(G4_2019.PDS.Qs.total)+
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-G4_2019.template.PDS.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q1_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q2_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q3_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q4_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
-G4_2019.template.PDS.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-
-
-
-
-G4_2019.non_template.PDS.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-
-
-G4_2019.non_template.PDS.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q1_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q2_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q3_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q4_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
 
 
+G4_2019.non_template.PDS.Q1_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q2_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q3_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q4_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
-G4_2019.template.PDS.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-
-
-G4_2019.template.PDS.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.template.PDS.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-
+G4_2019.non_template.PDS.Q1_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q2_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q3_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q4_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
 
-G4_2019.non_template.PDS.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
-G4_2019.non_template.PDS.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
-G4_2019.non_template.PDS.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+
+G4_2019.template.PDS.Q1_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q2_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q3_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q4_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+
+
+G4_2019.template.PDS.Q1_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q2_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q3_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.template.PDS.Q4_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+
+
+
+
+G4_2019.non_template.PDS.Q1_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q2_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q3_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q4_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+
+
+G4_2019.non_template.PDS.Q1_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q2_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q3_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
+G4_2019.non_template.PDS.Q4_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.bed.list.out.num")
 
 
 
@@ -1825,63 +1942,63 @@ ggplot(G4_2019.template_non_template.PDS.Qs.total)+
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-G4_2019.template.K.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q1_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q2_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q3_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q4_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
-G4_2019.template.K.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-
-
-
-
-G4_2019.non_template.K.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-
-
-G4_2019.non_template.K.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q1_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q2_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q3_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q4_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
 
 
+G4_2019.non_template.K.Q1_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q2_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q3_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q4_up_plus <- read_dist_table("./G4_seq_2019/exon.up_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
-G4_2019.template.K.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-
-
-G4_2019.template.K.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.template.K.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-
+G4_2019.non_template.K.Q1_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q2_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q3_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q4_up_minus <- read_dist_table("./G4_seq_2019/exon.up_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
 
-G4_2019.non_template.K.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
-G4_2019.non_template.K.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
-G4_2019.non_template.K.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+
+G4_2019.template.K.Q1_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q2_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q3_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q4_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+
+
+G4_2019.template.K.Q1_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q2_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q3_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.template.K.Q4_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+
+
+
+
+G4_2019.non_template.K.Q1_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q2_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q3_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q4_down_plus <- read_dist_table("./G4_seq_2019/exon.down_plus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.bed.list.out.num")
+
+
+G4_2019.non_template.K.Q1_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q1.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q2_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q2.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q3_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q3.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
+G4_2019.non_template.K.Q4_down_minus <- read_dist_table("./G4_seq_2019/exon.down_minus.q4.bed.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.bed.list.out.num")
 
 
 
@@ -1970,31 +2087,31 @@ ggplot(G4_2019.template_non_template.K.Qs.total)+
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 #2015
 
-G4_2015.Na_PDS.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q1_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q2_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q3_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q4_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.Na_PDS.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q1_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q2_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q3_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q4_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.Na_PDS.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q1_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q2_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q3_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q4_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.Na_PDS.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_PDS.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q1_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q2_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q3_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_PDS.Q4_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_PDS_plus_minus_hits_intersect.bed.bed.list.out.num")
 
 
 
@@ -2028,29 +2145,29 @@ ggplot(G4_2015.Na_PDS.Qs.total)+
 
 
 
-```{r}
-G4_2015.Na_K.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+G4_2015.Na_K.Q1_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q2_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q3_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q4_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.Na_K.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q1_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q2_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q3_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q4_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.Na_K.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q1_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q2_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q3_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q4_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.Na_K.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.Na_K.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q1_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q2_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q3_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.Na_K.Q4_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_K_plus_minus_hits_intersect.bed.bed.list.out.num")
 
 
 
@@ -2084,62 +2201,62 @@ ggplot(G4_2015.Na_K.Qs.total)+
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-G4_2015.template.Na_PDS.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q1_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q2_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q3_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q4_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.template.Na_PDS.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-
-
-
-G4_2015.non_template.Na_PDS.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-
-
-G4_2015.non_template.Na_PDS.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q1_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q2_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q3_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q4_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
 
 
 
+G4_2015.non_template.Na_PDS.Q1_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q2_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q3_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q4_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+
+
+G4_2015.non_template.Na_PDS.Q1_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q2_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q3_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q4_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
 
 
 
 
-G4_2015.template.Na_PDS.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-
-
-G4_2015.template.Na_PDS.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_PDS.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
 
 
 
-G4_2015.non_template.Na_PDS.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q1_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q2_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q3_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q4_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.non_template.Na_PDS.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_PDS.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q1_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q2_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q3_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_PDS.Q4_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+
+
+
+G4_2015.non_template.Na_PDS.Q1_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q2_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q3_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q4_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_PDS_plus_hits_intersect.bed.bed.list.out.num")
+
+
+G4_2015.non_template.Na_PDS.Q1_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q2_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q3_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_PDS.Q4_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_PDS_minus_hits_intersect.bed.bed.list.out.num")
 
 
 
@@ -2223,60 +2340,60 @@ ggplot(G4_2015.template_non_template.Na_PDS.Qs.total)+
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-G4_2015.template.Na_K.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q1_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q2_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q3_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q4_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.template.Na_K.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-
-
-
-G4_2015.non_template.Na_K.Q1_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q2_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q3_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q4_up_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-
-
-G4_2015.non_template.Na_K.Q1_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q2_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q3_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q4_up_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q1_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q2_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q3_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q4_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
 
 
 
+G4_2015.non_template.Na_K.Q1_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q1.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q2_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q2.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q3_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q3.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q4_up_plus <- read_dist_table("./G4_seq_2015/exon.up_plus.q4.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.template.Na_K.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-
-
-G4_2015.template.Na_K.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.template.Na_K.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q1_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q1.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q2_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q2.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q3_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q3.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q4_up_minus <- read_dist_table("./G4_seq_2015/exon.up_minus.q4.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
 
 
 
-G4_2015.non_template.Na_K.Q1_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q2_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q3_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q4_down_plus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
 
 
-G4_2015.non_template.Na_K.Q1_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q2_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q3_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
-G4_2015.non_template.Na_K.Q4_down_minus <- read_dist_table("/Users/gp7/Google_Drive/Results/Non_B/G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q1_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q2_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q3_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q4_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+
+
+G4_2015.template.Na_K.Q1_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q2_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q3_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.template.Na_K.Q4_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+
+
+
+G4_2015.non_template.Na_K.Q1_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q1.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q2_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q2.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q3_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q3.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q4_down_plus <- read_dist_table("./G4_seq_2015/exon.down_plus.q4.bed.score.GSE63874_Na_K_plus_hits_intersect.bed.bed.list.out.num")
+
+
+G4_2015.non_template.Na_K.Q1_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q1.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q2_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q2.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q3_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q3.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
+G4_2015.non_template.Na_K.Q4_down_minus <- read_dist_table("./G4_seq_2015/exon.down_minus.q4.bed.score.GSE63874_Na_K_minus_hits_intersect.bed.bed.list.out.num")
 
 
 
@@ -2366,10 +2483,10 @@ As K+ is known to stabilize G4, we analized (RNA-seq data)[https://www.ncbi.nlm.
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-KCL_human_upstream <- fread("./KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s"  )
+KCL_human_upstream <- fread("./ KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s"  ) #stop here
 colnames(KCL_human_upstream) <- c("w.chrom", "w.start", "w.end", "w.strand", "chrom", "start", "end", "strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "G4"  )
 
 
@@ -2410,7 +2527,7 @@ alpha.var=0.25
 To highlight NRXN2, SHANK1 and RBM10 we used biomaRt to find the gene name to Ensembl ID correspondence 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 library(biomaRt)
 
 ensembl = useEnsembl(biomart="ensembl", dataset="hsapiens_gene_ensembl")
@@ -2662,7 +2779,7 @@ return(KCL_x_stats)
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 upstream.path = "./KCL/MicroExonator/ESC-derived_neuron_CD1.diff.upstream_100nt.G4s" 
 downstream.path = "./KCL/MicroExonator/ESC-derived_neuron_CD1.diff.downstream_100nt.G4s" 
@@ -2908,7 +3025,7 @@ ggplot(human.exons.upstream.G4s.300.stats[G4_bol=="With G-quadruplex"]) +
 
 
 ```{r}
-human.exons.downstream.G4s <- fread("./Exons_G4s/human.exons.tvs.downstream.G4seq_PDS")
+human.exons.downstream.G4s <- fread("../Exons_G4s/human.exons.tvs.downstream.G4seq_PDS")
 
 colnames(human.exons.downstream.G4s) <- c( "chrom", "sstart", "send", "sstrand", "start", "end", "strand",  "gchrom", "gstart", "gend", "gscore", "exon_dist"  )
 
@@ -3971,7 +4088,7 @@ primary_cortical_neuron_DIV10_CD1.CE.diff <- nrow(KCL_primary_cortical_neuron_DI
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
  plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/SS_enrichment/plus_minus/Control_vs_KCL.diff_upstream_less.bed.plus.score.All_G4.tsv.clean.txt..bed.list.out.num",
@@ -3993,7 +4110,7 @@ human.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/SS_enrichment/plus_minus/ESC-derived_neuron_CD1.diff_upstream_less.bed.plus.score.mm10.txt..bed.list.out.num",
@@ -4013,7 +4130,7 @@ ESC_derived_neuron_CD1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/SS_enrichment/plus_minus/primary_cortical_neuron_DIV10_Tc1.diff_upstream_less.bed.plus.score.mm10.txt..bed.list.out.num",
@@ -4038,7 +4155,7 @@ primary_cortical_neuron_DIV10_Tc1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/SS_enrichment/plus_minus/primary_cortical_neuron_DIV4_CD1.diff_upstream_less.bed.plus.score.mm10.txt..bed.list.out.num",
@@ -4064,7 +4181,7 @@ primary_cortical_neuron_DIV4_CD1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/SS_enrichment/plus_minus/primary_cortical_neuron_DIV10_CD1.diff_upstream_less.bed.plus.score.mm10.txt..bed.list.out.num",
@@ -4092,7 +4209,7 @@ primary_cortical_neuron_DIV10_CD1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 plot_eql_diff(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/Control_vs_KCL.diff_upstream_less.bed.plus.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
@@ -4109,7 +4226,7 @@ plot_eql_diff(
 ```
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 Fig5.C <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/Control_vs_KCL.diff_upstream_less.bed.plus.score.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
@@ -4134,7 +4251,7 @@ Fig5.c
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 
@@ -4160,7 +4277,7 @@ Fig5.D
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 plot_eql_diff_binomial(
@@ -4187,7 +4304,7 @@ ESC_derived_neuron_CD1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 plot_eql_diff_binomial(
@@ -4215,7 +4332,7 @@ ESC_derived_neuron_CD1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_upstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
@@ -4238,7 +4355,7 @@ primary_cortical_neuron_DIV10_CD1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 plot_eql_diff_binomial(
@@ -4264,7 +4381,7 @@ primary_cortical_neuron_DIV10_CD1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 plot_eql_diff_binomial(
@@ -4291,7 +4408,7 @@ primary_cortical_neuron_DIV10_Tc1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 plot_eql_diff_binomial(
@@ -4317,7 +4434,7 @@ primary_cortical_neuron_DIV10_Tc1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 plot_eql_diff_binomial(
@@ -4345,7 +4462,7 @@ primary_cortical_neuron_DIV4_CD1.CE.diff,
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
 plot_eql_diff_binomial(
@@ -5057,7 +5174,7 @@ return(x.TOTAL)
 ```
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 hg19.TOTAL.KCL <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
                        "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
@@ -5218,7 +5335,7 @@ danRer10.TOTAL.PDS <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_se
 ```
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 hg19.TOTAL.KCL[, Treatment:="KCl"] 
 hg19.TOTAL.PDS[, Treatment:="PDS"]
