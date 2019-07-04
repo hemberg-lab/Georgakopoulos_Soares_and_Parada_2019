@@ -8,6 +8,7 @@ output:
 
 
 
+
 # Non-B DNA structures across splice-sites
 
 
@@ -159,10 +160,10 @@ plot_density_binomial <- function(up_plus, up_minus, down_plus, down_minus, obse
 
 ```{r}
 
-G4.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/All_non_Bs/G4.exon.up_plus.list.out.num")
-G4.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/All_non_Bs/G4.exon.down_plus.list.out.num")
-G4.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/All_non_Bs/G4.exon.up_minus.list.out.num")
-G4.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/All_non_Bs/G4.exon.down_minus.list.out.num")
+G4.up_plus <- read_dist_table("./All_non_Bs/G4.exon.up_plus.list.out.num")
+G4.down_plus <- read_dist_table("./All_non_Bs/G4.exon.down_plus.list.out.num")
+G4.up_minus <- read_dist_table("./All_non_Bs/G4.exon.up_minus.list.out.num")
+G4.down_minus <- read_dist_table("./All_non_Bs/G4.exon.down_minus.list.out.num")
 G4.up_minus[,Position:=Position*-1]
 G4.down_minus[,Position:=Position*-1]
 
