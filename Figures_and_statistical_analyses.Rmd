@@ -753,51 +753,49 @@ To investigate if the distribution of non-B DNA motifs is biased by transcriptio
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-G4.template.Q1_up_plus <- read_dist_table("/template_non_template/exon.up_plus.q1.bed.G4s_minus_plus.list.final.num")
-G4.template.Q2_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_plus.q2.bed.G4s_minus_plus.list.final.num")
-G4.template.Q3_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_plus.q3.bed.G4s_minus_plus.list.final.num")
-G4.template.Q4_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_plus.q4.bed.G4s_minus_plus.list.final.num")
+G4.template.Q1_up_plus <- read_dist_table("./template_non_template/exon.up_plus.q1.bed.G4s_minus_plus.list.final.num")
+G4.template.Q2_up_plus <- read_dist_table("./template_non_template/exon.up_plus.q2.bed.G4s_minus_plus.list.final.num")
+G4.template.Q3_up_plus <- read_dist_table("./template_non_template/exon.up_plus.q3.bed.G4s_minus_plus.list.final.num")
+G4.template.Q4_up_plus <- read_dist_table("./template_non_template/exon.up_plus.q4.bed.G4s_minus_plus.list.final.num")
 
-G4.template.Q1_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_minus.q1.bed.G4s_plus_minus.list.final.num")
-G4.template.Q2_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_minus.q2.bed.G4s_plus_minus.list.final.num")
-G4.template.Q3_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_minus.q3.bed.G4s_plus_minus.list.final.num")
-G4.template.Q4_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_minus.q4.bed.G4s_plus_minus.list.final.num")
+G4.template.Q1_up_minus <- read_dist_table("./template_non_template/exon.up_minus.q1.bed.G4s_plus_minus.list.final.num")
+G4.template.Q2_up_minus <- read_dist_table("./template_non_template/exon.up_minus.q2.bed.G4s_plus_minus.list.final.num")
+G4.template.Q3_up_minus <- read_dist_table("./template_non_template/exon.up_minus.q3.bed.G4s_plus_minus.list.final.num")
+G4.template.Q4_up_minus <- read_dist_table("./template_non_template/exon.up_minus.q4.bed.G4s_plus_minus.list.final.num")
 
-G4.template.Q1_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_plus.q1.bed.G4s_minus_plus.list.final.num")
-G4.template.Q2_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_plus.q2.bed.G4s_minus_plus.list.final.num")
-G4.template.Q3_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_plus.q3.bed.G4s_minus_plus.list.final.num")
-G4.template.Q4_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_plus.q4.bed.G4s_minus_plus.list.final.num")
+G4.template.Q1_down_plus <- read_dist_table("./template_non_template/exon.down_plus.q1.bed.G4s_minus_plus.list.final.num")
+G4.template.Q2_down_plus <- read_dist_table("./template_non_template/exon.down_plus.q2.bed.G4s_minus_plus.list.final.num")
+G4.template.Q3_down_plus <- read_dist_table("./template_non_template/exon.down_plus.q3.bed.G4s_minus_plus.list.final.num")
+G4.template.Q4_down_plus <- read_dist_table("./template_non_template/exon.down_plus.q4.bed.G4s_minus_plus.list.final.num")
 
-G4.template.Q1_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_minus.q1.bed.G4s_plus_minus.list.final.num")
-G4.template.Q2_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_minus.q2.bed.G4s_plus_minus.list.final.num")
-G4.template.Q3_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_minus.q3.bed.G4s_plus_minus.list.final.num")
-G4.template.Q4_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_minus.q4.bed.G4s_plus_minus.list.final.num")
-
-
+G4.template.Q1_down_minus <- read_dist_table("./template_non_template/exon.down_minus.q1.bed.G4s_plus_minus.list.final.num")
+G4.template.Q2_down_minus <- read_dist_table("./template_non_template/exon.down_minus.q2.bed.G4s_plus_minus.list.final.num")
+G4.template.Q3_down_minus <- read_dist_table("./template_non_template/exon.down_minus.q3.bed.G4s_plus_minus.list.final.num")
+G4.template.Q4_down_minus <- read_dist_table("./template_non_template/exon.down_minus.q4.bed.G4s_plus_minus.list.final.num")
 
 
-G4.non_template.Q1_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_plus.q1.bed.G4s_plus_plus.list.final.num")
-G4.non_template.Q2_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_plus.q2.bed.G4s_plus_plus.list.final.num")
-G4.non_template.Q3_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_plus.q3.bed.G4s_plus_plus.list.final.num")
-G4.non_template.Q4_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_plus.q4.bed.G4s_plus_plus.list.final.num")
+G4.non_template.Q1_up_plus <- read_dist_table("./template_non_template/exon.up_plus.q1.bed.G4s_plus_plus.list.final.num")
+G4.non_template.Q2_up_plus <- read_dist_table("./template_non_template/exon.up_plus.q2.bed.G4s_plus_plus.list.final.num")
+G4.non_template.Q3_up_plus <- read_dist_table("./template_non_template/exon.up_plus.q3.bed.G4s_plus_plus.list.final.num")
+G4.non_template.Q4_up_plus <- read_dist_table("./template_non_template/exon.up_plus.q4.bed.G4s_plus_plus.list.final.num")
 
-G4.non_template.Q1_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_minus.q1.bed.G4s_minus_minus.list.final.num")
-G4.non_template.Q2_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_minus.q2.bed.G4s_minus_minus.list.final.num")
-G4.non_template.Q3_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_minus.q3.bed.G4s_minus_minus.list.final.num")
-G4.non_template.Q4_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.up_minus.q4.bed.G4s_minus_minus.list.final.num")
+G4.non_template.Q1_up_minus <- read_dist_table("./template_non_template/exon.up_minus.q1.bed.G4s_minus_minus.list.final.num")
+G4.non_template.Q2_up_minus <- read_dist_table("./template_non_template/exon.up_minus.q2.bed.G4s_minus_minus.list.final.num")
+G4.non_template.Q3_up_minus <- read_dist_table("./template_non_template/exon.up_minus.q3.bed.G4s_minus_minus.list.final.num")
+G4.non_template.Q4_up_minus <- read_dist_table("./template_non_template/exon.up_minus.q4.bed.G4s_minus_minus.list.final.num")
 
-G4.non_template.Q1_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_plus.q1.bed.G4s_plus_plus.list.final.num")
-G4.non_template.Q2_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_plus.q2.bed.G4s_plus_plus.list.final.num")
-G4.non_template.Q3_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_plus.q3.bed.G4s_plus_plus.list.final.num")
-G4.non_template.Q4_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_plus.q4.bed.G4s_plus_plus.list.final.num")
+G4.non_template.Q1_down_plus <- read_dist_table("./template_non_template/exon.down_plus.q1.bed.G4s_plus_plus.list.final.num")
+G4.non_template.Q2_down_plus <- read_dist_table("./template_non_template/exon.down_plus.q2.bed.G4s_plus_plus.list.final.num")
+G4.non_template.Q3_down_plus <- read_dist_table("./template_non_template/exon.down_plus.q3.bed.G4s_plus_plus.list.final.num")
+G4.non_template.Q4_down_plus <- read_dist_table("./template_non_template/exon.down_plus.q4.bed.G4s_plus_plus.list.final.num")
 
-G4.non_template.Q1_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_minus.q1.bed.G4s_minus_minus.list.final.num")
-G4.non_template.Q2_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_minus.q2.bed.G4s_minus_minus.list.final.num")
-G4.non_template.Q3_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_minus.q3.bed.G4s_minus_minus.list.final.num")
-G4.non_template.Q4_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/template_non_template/exon.down_minus.q4.bed.G4s_minus_minus.list.final.num")
+G4.non_template.Q1_down_minus <- read_dist_table("./template_non_template/exon.down_minus.q1.bed.G4s_minus_minus.list.final.num")
+G4.non_template.Q2_down_minus <- read_dist_table("./template_non_template/exon.down_minus.q2.bed.G4s_minus_minus.list.final.num")
+G4.non_template.Q3_down_minus <- read_dist_table("./template_non_template/exon.down_minus.q3.bed.G4s_minus_minus.list.final.num")
+G4.non_template.Q4_down_minus <- read_dist_table("./template_non_template/exon.down_minus.q4.bed.G4s_minus_minus.list.final.num")
 
 
 ```
@@ -811,7 +809,7 @@ G4.template.Qs.plus.down.list <- list(G4.template.Q1_down_plus, G4.template.Q2_d
 G4.template.Qs.minus.down.list <- list(G4.template.Q1_down_minus, G4.template.Q2_down_minus, G4.template.Q3_down_minus, G4.template.Q4_down_minus)
 G4.template.window_len = 2000
 
-G4.template.Qs.total <- get_total_Qs(G4.template.Qs.plus.up.list, G4.template.Qs.minus.list, G4.template.Qs.plus.down.list, G4.template.Qs.minus.down.list, window_len)
+G4.template.Qs.total <- get_total_Qs(G4.template.Qs.plus.up.list, G4.template.Qs.minus.list, G4.template.Qs.plus.down.list, G4.template.Qs.minus.down.list, G4.template.window_len)
 ```
 
 
@@ -823,7 +821,7 @@ G4.non_template.Qs.plus.down.list <- list(G4.non_template.Q1_down_plus, G4.non_t
 G4.non_template.Qs.minus.down.list <- list(G4.non_template.Q1_down_minus, G4.non_template.Q2_down_minus, G4.non_template.Q3_down_minus, G4.non_template.Q4_down_minus)
 G4.non_template.window_len = 2000
 
-G4.non_template.Qs.total <- get_total_Qs(G4.non_template.Qs.plus.up.list, G4.non_template.Qs.minus.list, G4.non_template.Qs.plus.down.list, G4.non_template.Qs.minus.down.list, window_len)
+G4.non_template.Qs.total <- get_total_Qs(G4.non_template.Qs.plus.up.list, G4.non_template.Qs.minus.list, G4.non_template.Qs.plus.down.list, G4.non_template.Qs.minus.down.list, G4.template.window_len)
 ```
 
 
@@ -909,7 +907,7 @@ ggplot(G4.template_non_template.total)+
 G4.template_non_template.total_Peak <- G4.template_non_template.total[  , .(Enrrichment_Peak=max(Enrrichment)) , by= c("Strand", "exon_pos")]
 
 
-write.table(G4.template_non_template.total_Peak, file = "G4.template_non_template.total_Peak.txt", append = FALSE, quote = FALSE, sep = "\t",
+write.table(G4.template_non_template.total_Peak, file = "./Tables/G4.template_non_template.total_Peak.txt", append = FALSE, quote = FALSE, sep = "\t",
             eol = "\n", na = "NA", dec = ".", row.names = FALSE,
             col.names = TRUE, qmethod = c("escape", "double"),
             fileEncoding = "")
@@ -922,7 +920,7 @@ write.table(G4.template_non_template.total_Peak, file = "G4.template_non_templat
 
 G4.template_non_template.Qs.total.Enrrichment_Peak <- G4.template_non_template.Qs.total[  , .(Enrrichment_Peak=max(Enrrichment)) , by= c( "exon_pos", "Q", "Strand" )]
 
-write.table(G4.template_non_template.Qs.total.Enrrichment_Peak, file = "G4.template_non_template.Qs.total.Enrrichment_Peak.txt", append = FALSE, quote = FALSE, sep = "\t",
+write.table(G4.template_non_template.Qs.total.Enrrichment_Peak, file = "./Tables/G4.template_non_template.Qs.total.Enrrichment_Peak.txt", append = FALSE, quote = FALSE, sep = "\t",
             eol = "\n", na = "NA", dec = ".", row.names = FALSE,
             col.names = TRUE, qmethod = c("escape", "double"),
             fileEncoding = "")
@@ -937,7 +935,7 @@ Here we explored the enrichment of G-quadruplexes with different G-run length
 
 ```{r}
 
-G1_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Single_G_runs.list.out.num")
+G1_up_plus <- read_dist_table("./G4_runs/exon.up_plus.bed.Single_G_runs.list.out.num")
 G2_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Twice_G_runs.list.out.num")
 G3_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Three_G_runs.list.out.num")
 G4_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Four_G_runs.list.out.num")
