@@ -1856,7 +1856,7 @@ G4_2019.template.PDS.Qs.plus.down.list <- list(G4_2019.template.PDS.Q1_down_plus
 G4_2019.template.PDS.Qs.minus.down.list <- list(G4_2019.template.PDS.Q1_down_minus, G4_2019.template.PDS.Q2_down_minus, G4_2019.template.PDS.Q3_down_minus, G4_2019.template.PDS.Q4_down_minus)
 G4_2019.template.PDS.window_len = 2000
 
-G4_2019.template.PDS.Qs.total <- get_total_Qs(G4_2019.template.PDS.Qs.plus.up.list, G4_2019.template.PDS.Qs.minus.list, G4_2019.template.PDS.Qs.plus.down.list, G4_2019.template.PDS.Qs.minus.down.list, window_len)
+G4_2019.template.PDS.Qs.total <- get_total_Qs(G4_2019.template.PDS.Qs.plus.up.list, G4_2019.template.PDS.Qs.minus.list, G4_2019.template.PDS.Qs.plus.down.list, G4_2019.template.PDS.Qs.minus.down.list, G4_2019.template.PDS.window_len)
 ```
 
 
@@ -1868,7 +1868,7 @@ G4_2019.non_template.PDS.Qs.plus.down.list <- list(G4_2019.non_template.PDS.Q1_d
 G4_2019.non_template.PDS.Qs.minus.down.list <- list(G4_2019.non_template.PDS.Q1_down_minus, G4_2019.non_template.PDS.Q2_down_minus, G4_2019.non_template.PDS.Q3_down_minus, G4_2019.non_template.PDS.Q4_down_minus)
 G4_2019.non_template.PDS.window_len = 2000
 
-G4_2019.non_template.PDS.Qs.total <- get_total_Qs(G4_2019.non_template.PDS.Qs.plus.up.list, G4_2019.non_template.PDS.Qs.minus.list, G4_2019.non_template.PDS.Qs.plus.down.list, G4_2019.non_template.PDS.Qs.minus.down.list, window_len)
+G4_2019.non_template.PDS.Qs.total <- get_total_Qs(G4_2019.non_template.PDS.Qs.plus.up.list, G4_2019.non_template.PDS.Qs.minus.list, G4_2019.non_template.PDS.Qs.plus.down.list, G4_2019.non_template.PDS.Qs.minus.down.list, G4_2019.non_template.PDS.window_len)
 ```
 
 
