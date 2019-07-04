@@ -1,0 +1,5 @@
+Strand	exon_pos	Enrrichment_Peak
+Template	Upstream	2.78495762711864
+Template	Downstream	2.3816067653277
+Non-template	Upstream	3.01087941976428
+Non-template	Downstream	5.56191369606004

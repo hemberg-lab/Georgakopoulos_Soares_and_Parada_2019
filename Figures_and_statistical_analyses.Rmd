@@ -933,35 +933,35 @@ write.table(G4.template_non_template.Qs.total.Enrrichment_Peak, file = "./Tables
 Here we explored the enrichment of G-quadruplexes with different G-run length
 
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
 G1_up_plus <- read_dist_table("./G4_runs/exon.up_plus.bed.Single_G_runs.list.out.num")
-G2_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Twice_G_runs.list.out.num")
-G3_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Three_G_runs.list.out.num")
-G4_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Four_G_runs.list.out.num")
-G5_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Five_G_runs.list.out.num")
-G6_up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_plus.bed.Six_G_runs.list.out.num")
+G2_up_plus <- read_dist_table("./G4_runs/exon.up_plus.bed.Twice_G_runs.list.out.num")
+G3_up_plus <- read_dist_table("./G4_runs/exon.up_plus.bed.Three_G_runs.list.out.num")
+G4_up_plus <- read_dist_table("./G4_runs/exon.up_plus.bed.Four_G_runs.list.out.num")
+G5_up_plus <- read_dist_table("./G4_runs/exon.up_plus.bed.Five_G_runs.list.out.num")
+G6_up_plus <- read_dist_table("./G4_runs/exon.up_plus.bed.Six_G_runs.list.out.num")
 
-G1_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_minus.bed.Single_G_runs.list.out.num")
-G2_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_minus.bed.Twice_G_runs.list.out.num")
-G3_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_minus.bed.Three_G_runs.list.out.num")
-G4_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_minus.bed.Four_G_runs.list.out.num")
-G5_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_minus.bed.Five_G_runs.list.out.num")
-G6_up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.up_minus.bed.Six_G_runs.list.out.num")
+G1_up_minus <- read_dist_table("./G4_runs/exon.up_minus.bed.Single_G_runs.list.out.num")
+G2_up_minus <- read_dist_table("./G4_runs/exon.up_minus.bed.Twice_G_runs.list.out.num")
+G3_up_minus <- read_dist_table("./G4_runs/exon.up_minus.bed.Three_G_runs.list.out.num")
+G4_up_minus <- read_dist_table("./G4_runs/exon.up_minus.bed.Four_G_runs.list.out.num")
+G5_up_minus <- read_dist_table("./G4_runs/exon.up_minus.bed.Five_G_runs.list.out.num")
+G6_up_minus <- read_dist_table("./G4_runs/exon.up_minus.bed.Six_G_runs.list.out.num")
 
-G1_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_plus.bed.Single_G_runs.list.out.num")
-G2_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_plus.bed.Twice_G_runs.list.out.num")
-G3_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_plus.bed.Three_G_runs.list.out.num")
-G4_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_plus.bed.Four_G_runs.list.out.num")
-G5_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_plus.bed.Five_G_runs.list.out.num")
-G6_down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_plus.bed.Six_G_runs.list.out.num")
+G1_down_plus <- read_dist_table("./G4_runs/exon.down_plus.bed.Single_G_runs.list.out.num")
+G2_down_plus <- read_dist_table("./G4_runs/exon.down_plus.bed.Twice_G_runs.list.out.num")
+G3_down_plus <- read_dist_table("./G4_runs/exon.down_plus.bed.Three_G_runs.list.out.num")
+G4_down_plus <- read_dist_table("./G4_runs/exon.down_plus.bed.Four_G_runs.list.out.num")
+G5_down_plus <- read_dist_table("./G4_runs/exon.down_plus.bed.Five_G_runs.list.out.num")
+G6_down_plus <- read_dist_table("./G4_runs/exon.down_plus.bed.Six_G_runs.list.out.num")
 
-G1_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_minus.bed.Single_G_runs.list.out.num")
-G2_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_minus.bed.Twice_G_runs.list.out.num")
-G3_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_minus.bed.Three_G_runs.list.out.num")
-G4_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_minus.bed.Four_G_runs.list.out.num")  #missing
-G5_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_minus.bed.Five_G_runs.list.out.num")
-G6_down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/G4_runs/exon.down_minus.bed.Six_G_runs.list.out.num")
+G1_down_minus <- read_dist_table("./G4_runs/exon.down_minus.bed.Single_G_runs.list.out.num")
+G2_down_minus <- read_dist_table("./G4_runs/exon.down_minus.bed.Twice_G_runs.list.out.num")
+G3_down_minus <- read_dist_table("./G4_runs/exon.down_minus.bed.Three_G_runs.list.out.num")
+G4_down_minus <- read_dist_table("./G4_runs/exon.down_minus.bed.Four_G_runs.list.out.num")  
+G5_down_minus <- read_dist_table("./G4_runs/exon.down_minus.bed.Five_G_runs.list.out.num")
+G6_down_minus <- read_dist_table("./G4_runs/exon.down_minus.bed.Six_G_runs.list.out.num")
 ```
 
 
@@ -993,7 +993,7 @@ Gruns.total.binomial[ , median:=median(PointEst), by=c("exon_pos", "Q" )]
 Gruns.total.binomial[, `:=`(Enrrichment=PointEst/median, Enrrichment_l=Lower/median, Enrrichment_u=Upper/median)]
 
 
-Fig2.B <- ggplot(Gruns.total)+
+Fig2.B <- ggplot(Gruns.total.binomial)+
   geom_line(aes(x=Position,y=Enrrichment, colour=G_run_length)) +
   geom_ribbon(aes(x=Position, fill=Q, ymin=Enrrichment_l, ymax=Enrrichment_u), alpha=0.3) +
   xlim(c(-100,100)) +
@@ -1015,7 +1015,7 @@ Fig2.B
 
 Gruns.total.Enrrichment_Peak <- Gruns.total[  , .(Enrrichment_Peak=max(Enrrichment)) , by= c( "exon_pos", "G_run_length")]
 
-write.table(Gruns.total.Enrrichment_Peak, file = "Gruns.total.Enrrichment_Peak.txt", append = FALSE, quote = FALSE, sep = "\t",
+write.table(Gruns.total.Enrrichment_Peak, file = "./Tables/Gruns.total.Enrrichment_Peak.txt", append = FALSE, quote = FALSE, sep = "\t",
             eol = "\n", na = "NA", dec = ".", row.names = FALSE,
             col.names = TRUE, qmethod = c("escape", "double"),
             fileEncoding = "")
@@ -1036,12 +1036,12 @@ We analyzed the G4 enrichment across splice sites from different species
 
 
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
-susScr11.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/susScr11.exon.up_plus.bed.score.susScr11.txt..list.out.num")
-susScr11.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/susScr11.exon.down_plus.bed.score.susScr11.txt..list.out.num")
-susScr11.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/susScr11.exon.up_minus.bed.score.susScr11.txt..list.out.num")
-susScr11.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/susScr11.exon.down_minus.bed.score.susScr11.txt..list.out.num")
+susScr11.up_plus <- read_dist_table("./Evolution/susScr11.exon.up_plus.bed.score.susScr11.txt..list.out.num")
+susScr11.down_plus <- read_dist_table("./Evolution/susScr11.exon.down_plus.bed.score.susScr11.txt..list.out.num")
+susScr11.up_minus <- read_dist_table("./Evolution/susScr11.exon.up_minus.bed.score.susScr11.txt..list.out.num")
+susScr11.down_minus <- read_dist_table("./Evolution/susScr11.exon.down_minus.bed.score.susScr11.txt..list.out.num")
 susScr11.up_minus[,Position:=Position*-1]
 susScr11.down_minus[,Position:=Position*-1]
 
@@ -1054,12 +1054,12 @@ susScr11.TOTAL <- plot_density(susScr11.up_plus, susScr11.up_minus, susScr11.dow
 
 
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
-TAIR10.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/TAIR10.exon.up_plus.bed.score.TAIR10.txt..list.out.num")
-TAIR10.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/TAIR10.exon.down_plus.bed.score.TAIR10.txt..list.out.num")
-TAIR10.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/TAIR10.exon.up_minus.bed.score.TAIR10.txt..list.out.num")
-TAIR10.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/TAIR10.exon.down_minus.bed.score.TAIR10.txt..list.out.num")
+TAIR10.up_plus <- read_dist_table("./Evolution/TAIR10.exon.up_plus.bed.score.TAIR10.txt..list.out.num")
+TAIR10.down_plus <- read_dist_table("./Evolution/TAIR10.exon.down_plus.bed.score.TAIR10.txt..list.out.num")
+TAIR10.up_minus <- read_dist_table("./Evolution/TAIR10.exon.up_minus.bed.score.TAIR10.txt..list.out.num")
+TAIR10.down_minus <- read_dist_table("./Evolution/TAIR10.exon.down_minus.bed.score.TAIR10.txt..list.out.num")
 TAIR10.up_minus[,Position:=Position*-1]
 TAIR10.down_minus[,Position:=Position*-1]
 
@@ -1073,12 +1073,12 @@ TAIR10.TOTAL <- plot_density(TAIR10.up_plus, TAIR10.up_minus, TAIR10.down_plus, 
 
 
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
-anoCar2.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/anoCar2.exon.up_plus.bed.score.anoCar2.txt..list.out.num")
-anoCar2.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/anoCar2.exon.down_plus.bed.score.anoCar2.txt..list.out.num")
-anoCar2.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/anoCar2.exon.up_minus.bed.score.anoCar2.txt..list.out.num")
-anoCar2.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/anoCar2.exon.down_minus.bed.score.anoCar2.txt..list.out.num")
+anoCar2.up_plus <- read_dist_table("./Evolution/anoCar2.exon.up_plus.bed.score.anoCar2.txt..list.out.num")
+anoCar2.down_plus <- read_dist_table("./Evolution/anoCar2.exon.down_plus.bed.score.anoCar2.txt..list.out.num")
+anoCar2.up_minus <- read_dist_table("./Evolution/anoCar2.exon.up_minus.bed.score.anoCar2.txt..list.out.num")
+anoCar2.down_minus <- read_dist_table("./Evolution/anoCar2.exon.down_minus.bed.score.anoCar2.txt..list.out.num")
 anoCar2.up_minus[,Position:=Position*-1]
 anoCar2.down_minus[,Position:=Position*-1]
 
@@ -1089,12 +1089,12 @@ anoCar2.TOTAL <- plot_density(anoCar2.up_plus, anoCar2.up_minus, anoCar2.down_pl
 
 
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
-xenTro9.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/xenTro9.exon.up_plus.bed.score.xenTro9.txt..list.out.num")
-xenTro9.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/xenTro9.exon.down_plus.bed.score.xenTro9.txt..list.out.num")
-xenTro9.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/xenTro9.exon.up_minus.bed.score.xenTro9.txt..list.out.num")
-xenTro9.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/xenTro9.exon.down_minus.bed.score.xenTro9.txt..list.out.num")
+xenTro9.up_plus <- read_dist_table("./Evolution/xenTro9.exon.up_plus.bed.score.xenTro9.txt..list.out.num")
+xenTro9.down_plus <- read_dist_table("./Evolution/xenTro9.exon.down_plus.bed.score.xenTro9.txt..list.out.num")
+xenTro9.up_minus <- read_dist_table("./Evolution/xenTro9.exon.up_minus.bed.score.xenTro9.txt..list.out.num")
+xenTro9.down_minus <- read_dist_table("./Evolution/xenTro9.exon.down_minus.bed.score.xenTro9.txt..list.out.num")
 xenTro9.up_minus[,Position:=Position*-1]
 xenTro9.down_minus[,Position:=Position*-1]
 
@@ -1106,12 +1106,12 @@ xenTro9.TOTAL <- plot_density(xenTro9.up_plus, xenTro9.up_minus, xenTro9.down_pl
 
 
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
-ce10.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/ce10.exon.up_plus.bed.score.ce10.txt..list.out.num")
-ce10.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/ce10.exon.down_plus.bed.score.ce10.txt..list.out.num")
-ce10.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/ce10.exon.up_minus.bed.score.ce10.txt..list.out.num")
-ce10.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/ce10.exon.down_minus.bed.score.ce10.txt..list.out.num")
+ce10.up_plus <- read_dist_table("./Evolution/ce10.exon.up_plus.bed.score.ce10.txt..list.out.num")
+ce10.down_plus <- read_dist_table("./Evolution/ce10.exon.down_plus.bed.score.ce10.txt..list.out.num")
+ce10.up_minus <- read_dist_table("./Evolution/ce10.exon.up_minus.bed.score.ce10.txt..list.out.num")
+ce10.down_minus <- read_dist_table("./Evolution/ce10.exon.down_minus.bed.score.ce10.txt..list.out.num")
 ce10.up_minus[,Position:=Position*-1]
 ce10.down_minus[,Position:=Position*-1]
 
@@ -1121,12 +1121,12 @@ ce10.TOTAL <- plot_density(ce10.up_plus, ce10.up_minus, ce10.down_plus, ce10.dow
 ```
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
-danRer11.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/danRer11.exon.up_plus.bed.score.danRer11.txt..list.out.num")
-danRer11.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/danRer11.exon.down_plus.bed.score.danRer11.txt..list.out.num")
-danRer11.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/danRer11.exon.up_minus.bed.score.danRer11.txt..list.out.num")
-danRer11.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/danRer11.exon.down_minus.bed.score.danRer11.txt..list.out.num")
+danRer11.up_plus <- read_dist_table("./Evolution/danRer11.exon.up_plus.bed.score.danRer11.txt..list.out.num")
+danRer11.down_plus <- read_dist_table("./Evolution/danRer11.exon.down_plus.bed.score.danRer11.txt..list.out.num")
+danRer11.up_minus <- read_dist_table("./Evolution/danRer11.exon.up_minus.bed.score.danRer11.txt..list.out.num")
+danRer11.down_minus <- read_dist_table("./Evolution/danRer11.exon.down_minus.bed.score.danRer11.txt..list.out.num")
 danRer11.up_minus[,Position:=Position*-1]
 danRer11.down_minus[,Position:=Position*-1]
 
@@ -1135,12 +1135,12 @@ danRer11.TOTAL <- plot_density(danRer11.up_plus, danRer11.up_minus, danRer11.dow
 
 ```
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
-mm10.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/mm10.exon.up_plus.bed.score.mm10.txt..list.out.num")
-mm10.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/mm10.exon.down_plus.bed.score.mm10.txt..list.out.num")
-mm10.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/mm10.exon.up_minus.bed.score.mm10.txt..list.out.num")
-mm10.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/mm10.exon.down_minus.bed.score.mm10.txt..list.out.num")
+mm10.up_plus <- read_dist_table("./Evolution/mm10.exon.up_plus.bed.score.mm10.txt..list.out.num")
+mm10.down_plus <- read_dist_table("./Evolution/mm10.exon.down_plus.bed.score.mm10.txt..list.out.num")
+mm10.up_minus <- read_dist_table("./Evolution/mm10.exon.up_minus.bed.score.mm10.txt..list.out.num")
+mm10.down_minus <- read_dist_table("./Evolution/mm10.exon.down_minus.bed.score.mm10.txt..list.out.num")
 mm10.up_minus[,Position:=Position*-1]
 mm10.down_minus[,Position:=Position*-1]
 
@@ -1150,12 +1150,12 @@ mm10.TOTAL <- plot_density(mm10.up_plus, mm10.up_minus, mm10.down_plus, mm10.dow
 ```
 
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
-hg19.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/hg19.exon.up_plus.bed.score.hg19.txt..list.out.num")
-hg19.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/hg19.exon.down_plus.bed.score.hg19.txt..list.out.num")
-hg19.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/hg19.exon.up_minus.bed.score.hg19.txt..list.out.num")
-hg19.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/hg19.exon.down_minus.bed.score.hg19.txt..list.out.num")
+hg19.up_plus <- read_dist_table("./Evolution/hg19.exon.up_plus.bed.score.hg19.txt..list.out.num")
+hg19.down_plus <- read_dist_table("./Evolution/hg19.exon.down_plus.bed.score.hg19.txt..list.out.num")
+hg19.up_minus <- read_dist_table("./Evolution/hg19.exon.up_minus.bed.score.hg19.txt..list.out.num")
+hg19.down_minus <- read_dist_table("./Evolution/hg19.exon.down_minus.bed.score.hg19.txt..list.out.num")
 hg19.up_minus[,Position:=Position*-1]
 hg19.down_minus[,Position:=Position*-1]
 
@@ -1167,12 +1167,12 @@ hg19.TOTAL <- plot_density(hg19.up_plus, hg19.up_minus, hg19.down_plus, hg19.dow
 
 
 
-```{r}
+```{r,  message=FALSE, error=FALSE, warning=FALSE}
 
-dm6.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/dm6.exon.up_plus.bed.score.dm6.txt..list.out.num")
-dm6.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/dm6.exon.down_plus.bed.score.dm6.txt..list.out.num")
-dm6.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/dm6.exon.up_minus.bed.score.dm6.txt..list.out.num")
-dm6.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/dm6.exon.down_minus.bed.score.dm6.txt..list.out.num")
+dm6.up_plus <- read_dist_table("./Evolution/dm6.exon.up_plus.bed.score.dm6.txt..list.out.num")
+dm6.down_plus <- read_dist_table("./Evolution/dm6.exon.down_plus.bed.score.dm6.txt..list.out.num")
+dm6.up_minus <- read_dist_table("./Evolution/dm6.exon.up_minus.bed.score.dm6.txt..list.out.num")
+dm6.down_minus <- read_dist_table("./Evolution/dm6.exon.down_minus.bed.score.dm6.txt..list.out.num")
 dm6.up_minus[,Position:=Position*-1]
 dm6.down_minus[,Position:=Position*-1]
 
@@ -1183,12 +1183,12 @@ dm6.TOTAL <- plot_density(dm6.up_plus, dm6.up_minus, dm6.down_plus, dm6.down_min
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
-galGal5.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/galGal5.exon.up_plus.bed.score.galGal5.txt..list.out.num")
-galGal5.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/galGal5.exon.down_plus.bed.score.galGal5.txt..list.out.num")
-galGal5.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/galGal5.exon.up_minus.bed.score.galGal5.txt..list.out.num")
-galGal5.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/galGal5.exon.down_minus.bed.score.galGal5.txt..list.out.num")
+galGal5.up_plus <- read_dist_table("./Evolution/galGal5.exon.up_plus.bed.score.galGal5.txt..list.out.num")
+galGal5.down_plus <- read_dist_table("./Evolution/galGal5.exon.down_plus.bed.score.galGal5.txt..list.out.num")
+galGal5.up_minus <- read_dist_table("./Evolution/galGal5.exon.up_minus.bed.score.galGal5.txt..list.out.num")
+galGal5.down_minus <- read_dist_table("./Evolution/galGal5.exon.down_minus.bed.score.galGal5.txt..list.out.num")
 galGal5.up_minus[,Position:=Position*-1]
 galGal5.down_minus[,Position:=Position*-1]
 
@@ -1201,12 +1201,12 @@ galGal5.TOTAL <- plot_density(galGal5.up_plus, galGal5.up_minus, galGal5.down_pl
 
 
 
-```{r}
+```{r, message=FALSE, error=FALSE, warning=FALSE}
 
-sacCer.up_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/sacCer3.exon.up_plus.bed.score.sacCer3.txt..list.out.num")
-sacCer.down_plus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/sacCer3.exon.down_plus.bed.score.sacCer3.txt..list.out.num")
-sacCer.up_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/sacCer3.exon.up_minus.bed.score.sacCer3.txt..list.out.num")
-sacCer.down_minus <- read_dist_table("~/Google_Drive/Results/Non_B/Evolution/Num/sacCer3.exon.down_minus.bed.score.sacCer3.txt..list.out.num")
+sacCer.up_plus <- read_dist_table("./Evolution/sacCer3.exon.up_plus.bed.score.sacCer3.txt..list.out.num")
+sacCer.down_plus <- read_dist_table("./Evolution/sacCer3.exon.down_plus.bed.score.sacCer3.txt..list.out.num")
+sacCer.up_minus <- read_dist_table("./Evolution/sacCer3.exon.up_minus.bed.score.sacCer3.txt..list.out.num")
+sacCer.down_minus <- read_dist_table("./Evolution/sacCer3.exon.down_minus.bed.score.sacCer3.txt..list.out.num")
 sacCer.up_minus[,Position:=Position*-1]
 sacCer.down_minus[,Position:=Position*-1]
 
@@ -1216,28 +1216,6 @@ sacCer.TOTAL <- plot_density(sacCer.up_plus, sacCer.up_minus, sacCer.down_plus, 
 ```
 
 
-```{r}
-
-galGal5.up_plus[, rep(Position, Occurrences)]
-
-
-galGal5.up <- merge(galGal5.down_plus, galGal5.down_minus, by="Position")
-
-galGal5.up[, Occurrences:= Occurrences.x + Occurrences.y]
-
-
-galGal5.up.melt <- galGal5.up[, rep(Position, Occurrences)]
-galGal5.up.melt <- data.table(cbind(galGal5.up.melt, "Up"))
-colnames(galGal5.up.melt) <- c("dist", "pos")
-
-galGal5.up.melt$dist <- as.numeric(as.character(galGal5.up.melt$dist))
-
-ggplot(galGal5.up.melt) + 
-  geom_line(aes(dist), stat="density")
-
-
-
-```
 
 
 
@@ -1283,6 +1261,7 @@ Fig6.B
 
 ```
 
+We plot other species that did not show strong enrichment by separate
 
 ```{r}
 
@@ -1313,7 +1292,7 @@ Here we analized the intron size of distribution of exon which are flanked by G4
 ```{r}
 
 
-intron_size_upstream_non_template  <- rbind(fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_upstream_100nt_window.bed.plus_strand_genome.plus_G4s'),  
+intron_size_upstream_non_template  <- rbind(fread('/Users /gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_upstream_100nt_window.bed.plus_strand_genome.plus_G4s'),  
  fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_upstream_100nt_window.bed.minus_strand_genome.minus_G4s'))
 
 intron_size_downstream_non_template  <- rbind(fread('/Users/gp7/Google_Drive/Results/Non_B/Intron_size/Introns.hg19_downstream_100nt_window.bed.plus_strand_genome.plus_G4s'),  
