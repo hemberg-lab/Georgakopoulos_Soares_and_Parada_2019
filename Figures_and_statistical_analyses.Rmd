@@ -1426,15 +1426,6 @@ chisq.test(long_short.2x2)
 
 
 
-
-
-
-
-
-
-
-
-
 short_introns[, type:="Short"]
 long_introns[, type:="Long"]
 
@@ -1454,6 +1445,171 @@ ggplot(long_short_introns) +
 
                                          
 ```
+
+
+
+```{r}
+long_introns.5ss <- fread("./Intron_size/GC_correction/500/long_introns.same_GC.bed.intron_5ss.bed.closest.G4s")
+short_introns.5ss <- fread("./Intron_size/GC_correction/500/short_introns.same_GC.bed.intron_5ss.bed.closest.G4s")
+long_introns.3ss <- fread("./Intron_size/GC_correction/500/long_introns.same_GC.bed.intron_3ss.bed.closest.G4s")
+short_introns.3ss <- fread("./Intron_size/GC_correction/500/short_introns.same_GC.bed.intron_3ss.bed.closest.G4s")
+
+
+colnames(long_introns.5ss) <- c("i.chrom", "i.start", "i.end", "i.id", "i.GC", "i.strand", "g.chrom", "g.start", "g.end", "dist")
+colnames(short_introns.5ss) <- c("i.chrom", "i.start", "i.end", "i.id", "i.GC", "i.strand", "g.chrom", "g.start", "g.end", "dist")
+colnames(long_introns.3ss) <- c("i.chrom", "i.start", "i.end", "i.id", "i.GC", "i.strand", "g.chrom", "g.start", "g.end", "dist")
+colnames(short_introns.3ss) <- c("i.chrom", "i.start", "i.end", "i.id", "i.GC", "i.strand", "g.chrom", "g.start", "g.end", "dist")
+
+long_introns.bed <- fread("./Intron_size/GC_correction/500/long_introns.same_GC.bed")
+short_introns.bed <- fread("./Intron_size/GC_correction/500/short_introns.same_GC.bed")
+long_short_correspondence <-  cbind(long_introns.bed, short_introns.bed)[ , c(4, 2, 3 , 5,10, 8, 9, 11)]
+
+colnames(long_short_correspondence) <- c("l.id", "l.start", "l.end", "l.GC", "s.id", "s.start", "s.end", "s.GC"  )
+long_short_correspondence[, s.len:=(s.end-s.start)]
+
+long_short_correspondence_35K <- head(long_short_correspondence, 17500)
+
+
+
+
+long_introns.5ss[, G4.5ss:=FALSE ]
+long_introns.5ss[ dist<=100 & i.strand=="+" & i.start<g.end , G4.5ss:=TRUE ]
+long_introns.5ss[ dist<=100 & i.strand=="-" & i.start>g.end , G4.5ss:=TRUE ]
+
+short_introns.5ss[, G4.5ss:=FALSE ]
+short_introns.5ss[ dist<=100 & i.strand=="+" & i.start<g.end , G4.5ss:=TRUE ]
+short_introns.5ss[ dist<=100 & i.strand=="-" & i.start>g.end , G4.5ss:=TRUE ]
+
+long_introns.3ss[, G4.3ss:=FALSE ]
+long_introns.3ss[ dist<=100 & i.strand=="+" & i.start<g.end , G4.3ss:=TRUE ]
+long_introns.3ss[ dist<=100 & i.strand=="-" & i.start>g.end , G4.3ss:=TRUE ]
+
+short_introns.3ss[, G4.3ss:=FALSE ]
+short_introns.3ss[ dist<=100 & i.strand=="+" & i.start<g.end , G4.3ss:=TRUE ]
+short_introns.3ss[ dist<=100 & i.strand=="-" & i.start>g.end , G4.3ss:=TRUE ]
+
+
+long_introns <- merge( long_introns.5ss, long_introns.3ss, by=c("i.id", "i.GC" ))
+short_introns <- merge( short_introns.5ss, short_introns.3ss, by=c("i.id", "i.GC" ))
+
+
+long_introns[, G4:=FALSE]
+long_introns[G4.3ss | G4.5ss , G4:=TRUE]
+short_introns[, G4:=FALSE]
+short_introns[G4.3ss | G4.5ss , G4:=TRUE]
+
+
+
+
+i.mins <- seq(50,450,50)
+i.maxs <- seq(100,500,50)
+
+
+
+i.mins <- seq(50,450,50)
+i.maxs <- seq(100,500,50)
+
+
+i.mins <- seq(0,400,100)
+i.maxs <- seq(100,500,100)
+
+short_long.odd_ratios <- c()
+short_long.pvalues<- c()
+short_long.long.fraq <- c()
+short_long.short.fraq <- c()
+  
+short_long.GCs <- data.table()
+  
+for (i in seq(1, length(i.mins))) {
+    
+  i.min = i.mins[i]
+  i.max = i.maxs[i]
+    
+  long_introns.int <- long_introns[i.id %in% long_short_correspondence_35K[s.len>i.min & s.len<=i.max ,  l.id]]
+  short_introns.int <- short_introns[i.id %in% long_short_correspondence_35K[s.len>i.min & s.len<=i.max, s.id]]
+  
+  
+  long_short.int.2x2 <- matrix(nrow = 2, c(nrow(long_introns.int[(!G4.3ss & !G4.5ss), ]),
+                                           nrow(short_introns.int[(!G4.3ss & !G4.5ss), ]),
+                                           nrow(long_introns.int[(G4.3ss | G4.5ss), ]),
+                                           nrow(short_introns.int[(G4.3ss | G4.5ss), ]) ))
+  
+  
+  odd.ratio <- (long_short.int.2x2[2,2] / long_short.int.2x2[2,1] ) / (long_short.int.2x2[1,2] / long_short.int.2x2[1,1])
+  long.frac <-  (long_short.int.2x2[1,2] / long_short.int.2x2[1,1])
+  short.frac <- (long_short.int.2x2[2,2] / long_short.int.2x2[2,1] )
+  
+  print(odd.ratio)
+  print(chisq.test(long_short.int.2x2))
+  
+  short_long.odd_ratios <- c(short_long.odd_ratios, odd.ratio)
+  short_long.pvalues <- c(short_long.pvalues, chisq.test(long_short.int.2x2)$p.value * length(i.mins))
+  short_long.short.fraq  <- c(short_long.short.fraq, short.frac)
+  short_long.long.fraq  <- c(short_long.long.fraq, long.frac)
+  
+  
+  short_long.GCs <- rbind( short_long.GCs, short_introns.int[ , .(i.id, i.GC, G4, type="Short",  i.min=i.min, i.max=i.max )] )
+  short_long.GCs <- rbind( short_long.GCs, long_introns.int[ , .(i.id, i.GC, G4, type="Long",  i.min=i.min, i.max=i.max )] )  
+  }
+
+
+
+
+short_long.res <- data.table(short_long.odd_ratios, short_long.pvalues, i.mins, i.maxs, short_long.short.fraq, short_long.long.fraq)
+
+short_long.res.melt <- melt(short_long.res, id=c("short_long.odd_ratios","short_long.pvalues", "i.mins", "i.maxs"))
+
+
+
+                                    
+```
+
+
+
+```{r, fig.width=15, fig.height=5}
+
+
+
+short_long.GCs$type <- factor(short_long.GCs$type, levels=c("Short", "Long"))
+
+ggplot(short_long.GCs) +
+  geom_violin(aes(as.factor(i.min), i.GC, fill=type)) +
+    scale_fill_brewer(palette = 'Blues') + 
+  theme(legend.position = "top", legend.direction = "horizontal") 
+```
+
+
+
+
+
+```{r}
+
+
+
+short_long.res.melt[, sig:=""]
+short_long.res.melt[short_long.pvalues <= 0.05 , sig:="*"]
+short_long.res.melt[short_long.pvalues <= 0.005 , sig:="**"]
+short_long.res.melt[short_long.pvalues <= 0.000 , sig:="***"]
+
+sig_rows <- short_long.res.melt[variable=="short_long.short.fraq" & sig!="", which = TRUE]
+sig_anno <- short_long.res.melt[variable=="short_long.short.fraq" & sig!="", sig]
+
+Fig3.C.new <-  ggplot(short_long.res.melt, aes(as.factor(i.mins), value)) +
+  geom_bar(aes( group=variable, fill=variable), position="dodge", stat="identity") +
+  geom_signif( y_position=0.3, xmin=sig_rows-0.15, xmax=sig_rows+0.15, annotation=sig_anno, tip_length=0) +
+  scale_fill_discrete(name = "Intron type", labels = c("Short", "Long")) +
+  scale_fill_brewer(palette = 'Blues') +
+  theme(legend.position = "top", legend.direction = "horizontal") 
+
+
+Fig3.C.new
+
+```
+
+
+
+
+
 
 
 
@@ -1659,9 +1815,464 @@ ggplot(exon_num.TOTAL)+
 
 
 
+## Exon numbers by stratnds ##
 
 
 
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_1.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_1_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_1.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_1_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_1.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_1_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_1.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_1_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_1.up_minus.nt[,Position:=Position*-1]
+exons_1.down_minus.nt[,Position:=Position*-1]
+
+exons_1.TOTAL.nt <- plot_density(exons_1.up_plus.nt, exons_1.up_minus.nt, exons_1.down_plus.nt, exons_1.down_minus.nt) 
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_1.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_1_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_1.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_1_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_1.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_1_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_1.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_1_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_1.up_minus.t[,Position:=Position*-1]
+exons_1.down_minus.t[,Position:=Position*-1]
+
+exons_1.TOTAL.t <- plot_density(exons_1.up_plus.t, exons_1.up_minus.t, exons_1.down_plus.t, exons_1.down_minus.t) 
+
+
+ ggplot(exons_1.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_2.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_2_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_2.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_2_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_2.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_2_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_2.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_2_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_2.up_minus.nt[,Position:=Position*-1]
+exons_2.down_minus.nt[,Position:=Position*-1]
+
+exons_2.TOTAL.nt <- plot_density(exons_2.up_plus.nt, exons_2.up_minus.nt, exons_2.down_plus.nt, exons_2.down_minus.nt) 
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_2.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_2_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_2.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_2_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_2.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_2_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_2.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_2_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_2.up_minus.t[,Position:=Position*-1]
+exons_2.down_minus.t[,Position:=Position*-1]
+
+exons_2.TOTAL.t <- plot_density(exons_2.up_plus.t, exons_2.up_minus.t, exons_2.down_plus.t, exons_2.down_minus.t) 
+
+
+ ggplot(exons_2.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_3.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_3_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_3.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_3_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_3.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_3_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_3.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_3_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_3.up_minus.nt[,Position:=Position*-1]
+exons_3.down_minus.nt[,Position:=Position*-1]
+
+exons_3.TOTAL.nt <- plot_density(exons_3.up_plus.nt, exons_3.up_minus.nt, exons_3.down_plus.nt, exons_3.down_minus.nt) 
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_3.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_3_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_3.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_3_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_3.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_3_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_3.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_3_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_3.up_minus.t[,Position:=Position*-1]
+exons_3.down_minus.t[,Position:=Position*-1]
+
+exons_3.TOTAL.t <- plot_density(exons_3.up_plus.t, exons_3.up_minus.t, exons_3.down_plus.t, exons_3.down_minus.t) 
+
+
+ ggplot(exons_3.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_4.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_4_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_4.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_4_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_4.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_4_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_4.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_4_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_4.up_minus.nt[,Position:=Position*-1]
+exons_4.down_minus.nt[,Position:=Position*-1]
+
+exons_4.TOTAL.nt <- plot_density(exons_4.up_plus.nt, exons_4.up_minus.nt, exons_4.down_plus.nt, exons_4.down_minus.nt) 
+
+```
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_4.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_4_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_4.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_4_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_4.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_4_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_4.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_4_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_4.up_minus.t[,Position:=Position*-1]
+exons_4.down_minus.t[,Position:=Position*-1]
+
+exons_4.TOTAL.t <- plot_density(exons_4.up_plus.t, exons_4.up_minus.t, exons_4.down_plus.t, exons_4.down_minus.t) 
+
+
+ ggplot(exons_4.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_middle.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_middle_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_middle.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_middle_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_middle.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_middle_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_middle.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_middle_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_middle.up_minus.nt[,Position:=Position*-1]
+exons_middle.down_minus.nt[,Position:=Position*-1]
+
+exons_middle.TOTAL.nt <- plot_density(exons_middle.up_plus.nt, exons_middle.up_minus.nt, exons_middle.down_plus.nt, exons_middle.down_minus.nt) 
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_middle.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_middle_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_middle.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_middle_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_middle.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_middle_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_middle.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_middle_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_middle.up_minus.t[,Position:=Position*-1]
+exons_middle.down_minus.t[,Position:=Position*-1]
+
+exons_middle.TOTAL.t <- plot_density(exons_middle.up_plus.t, exons_middle.up_minus.t, exons_middle.down_plus.t, exons_middle.down_minus.t) 
+
+
+ ggplot(exons_middle.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_minus4.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_minus4_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus4.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_minus4_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus4.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_minus4_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus4.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_minus4_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus4.up_minus.nt[,Position:=Position*-1]
+exons_minus4.down_minus.nt[,Position:=Position*-1]
+
+exons_minus4.TOTAL.nt <- plot_density(exons_minus4.up_plus.nt, exons_minus4.up_minus.nt, exons_minus4.down_plus.nt, exons_minus4.down_minus.nt) 
+
+```
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_minus4.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_minus4_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus4.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_minus4_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus4.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_minus4_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus4.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_minus4_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus4.up_minus.t[,Position:=Position*-1]
+exons_minus4.down_minus.t[,Position:=Position*-1]
+
+exons_minus4.TOTAL.t <- plot_density(exons_minus4.up_plus.t, exons_minus4.up_minus.t, exons_minus4.down_plus.t, exons_minus4.down_minus.t) 
+
+
+ ggplot(exons_minus4.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_minus3.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_minus3_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus3.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_minus3_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus3.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_minus3_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus3.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_minus3_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus3.up_minus.nt[,Position:=Position*-1]
+exons_minus3.down_minus.nt[,Position:=Position*-1]
+
+exons_minus3.TOTAL.nt <- plot_density(exons_minus3.up_plus.nt, exons_minus3.up_minus.nt, exons_minus3.down_plus.nt, exons_minus3.down_minus.nt) 
+
+```
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_minus3.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_minus3_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus3.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_minus3_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus3.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_minus3_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus3.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_minus3_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus3.up_minus.t[,Position:=Position*-1]
+exons_minus3.down_minus.t[,Position:=Position*-1]
+
+exons_minus3.TOTAL.t <- plot_density(exons_minus3.up_plus.t, exons_minus3.up_minus.t, exons_minus3.down_plus.t, exons_minus3.down_minus.t) 
+
+
+ ggplot(exons_minus3.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_minus2.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_minus2_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus2.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_minus2_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus2.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_minus2_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus2.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_minus2_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus2.up_minus.nt[,Position:=Position*-1]
+exons_minus2.down_minus.nt[,Position:=Position*-1]
+
+exons_minus2.TOTAL.nt <- plot_density(exons_minus2.up_plus.nt, exons_minus2.up_minus.nt, exons_minus2.down_plus.nt, exons_minus2.down_minus.nt) 
+
+```
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_minus2.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_minus2_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus2.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_minus2_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus2.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_minus2_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus2.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_minus2_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus2.up_minus.t[,Position:=Position*-1]
+exons_minus2.down_minus.t[,Position:=Position*-1]
+
+exons_minus2.TOTAL.t <- plot_density(exons_minus2.up_plus.t, exons_minus2.up_minus.t, exons_minus2.down_plus.t, exons_minus2.down_minus.t) 
+
+
+ ggplot(exons_minus2.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_minus1.up_plus.nt <- read_dist_table("./exon_numbers/strands/exons_minus1_plus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus1.down_plus.nt <- read_dist_table("./exon_numbers/strands/exons_minus1_plus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus1.up_minus.nt <- read_dist_table("./exon_numbers/strands/exons_minus1_minus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus1.down_minus.nt <- read_dist_table("./exon_numbers/strands/exons_minus1_minus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus1.up_minus.nt[,Position:=Position*-1]
+exons_minus1.down_minus.nt[,Position:=Position*-1]
+
+exons_minus1.TOTAL.nt <- plot_density(exons_minus1.up_plus.nt, exons_minus1.up_minus.nt, exons_minus1.down_plus.nt, exons_minus1.down_minus.nt) 
+
+```
+
+
+
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+
+
+exons_minus1.up_plus.t <- read_dist_table("./exon_numbers/strands/exons_minus1_plus_strand_upstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus1.down_plus.t <- read_dist_table("./exon_numbers/strands/exons_minus1_plus_strand_downstream.txt.score.G4_minus.bed.list.out.num")
+exons_minus1.up_minus.t <- read_dist_table("./exon_numbers/strands/exons_minus1_minus_strand_upstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus1.down_minus.t <- read_dist_table("./exon_numbers/strands/exons_minus1_minus_strand_downstream.txt.score.G4_plus.bed.list.out.num")
+exons_minus1.up_minus.t[,Position:=Position*-1]
+exons_minus1.down_minus.t[,Position:=Position*-1]
+
+exons_minus1.TOTAL.t <- plot_density(exons_minus1.up_plus.t, exons_minus1.up_minus.t, exons_minus1.down_plus.t, exons_minus1.down_minus.t) 
+
+
+ ggplot(exons_minus1.TOTAL.t)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    ylim(c(0,6)) +
+    theme_bw()
+
+```
+
+
+
+
+```{r, fig.height=10, fig.width=15}
+exons_1.TOTAL.nt[, exon_num:="1"]
+exons_2.TOTAL.nt[, exon_num:="2"]
+exons_3.TOTAL.nt[, exon_num:="3"]
+exons_4.TOTAL.nt[, exon_num:="4"]
+
+exons_middle.TOTAL.nt[, exon_num:="middle"]
+
+exons_minus4.TOTAL.nt[, exon_num:="-4"]
+exons_minus3.TOTAL.nt[, exon_num:="-3"]
+exons_minus2.TOTAL.nt[, exon_num:="-2"]
+exons_minus1.TOTAL.nt[, exon_num:="-1"]
+
+
+exon_num.TOTAL.nt <- rbind(exons_1.TOTAL.nt, exons_2.TOTAL.nt, exons_3.TOTAL.nt, exons_4.TOTAL.nt, exons_middle.TOTAL.nt, exons_minus4.TOTAL.nt, exons_minus3.TOTAL.nt, exons_minus2.TOTAL.nt, exons_minus1.TOTAL.nt)
+
+
+
+
+exons_1.TOTAL.t[, exon_num:="1"]
+exons_2.TOTAL.t[, exon_num:="2"]
+exons_3.TOTAL.t[, exon_num:="3"]
+exons_4.TOTAL.t[, exon_num:="4"]
+
+exons_middle.TOTAL.t[, exon_num:="middle"]
+
+exons_minus4.TOTAL.t[, exon_num:="-4"]
+exons_minus3.TOTAL.t[, exon_num:="-3"]
+exons_minus2.TOTAL.t[, exon_num:="-2"]
+exons_minus1.TOTAL.t[, exon_num:="-1"]
+
+
+
+
+
+exon_num.TOTAL.t <- rbind(exons_1.TOTAL.t, exons_2.TOTAL.t, exons_3.TOTAL.t, exons_4.TOTAL.t, exons_middle.TOTAL.t, exons_minus4.TOTAL.t, exons_minus3.TOTAL.t, exons_minus2.TOTAL.t, exons_minus1.TOTAL.t)
+
+
+exon_num.TOTAL.nt[, strand:="Non_template"]
+exon_num.TOTAL.t[, strand:="Template"]
+
+
+exon_num.TOTAL.tnt <- rbind(exon_num.TOTAL.nt, exon_num.TOTAL.t)
+exon_num.TOTAL.tnt$exon_num <- factor(exon_num.TOTAL.tnt$exon_num, levels = c("1", "2", "3", "4", "middle", "-4", "-3", "-2", "-1" ))
+
+
+
+exon_num.TOTAL.tnt[exon_num=="middle", Total_exons:=(43925 + 43729) ]
+exon_num.TOTAL.tnt[exon_num!="middle", Total_exons:=(4745 + 4569) ]
+
+
+exon_num.TOTAL.tnt.binomial <- cbind(exon_num.TOTAL.tnt,  exon_num.TOTAL.tnt[, binconf(Occurrences, Total_exons) ])
+
+
+
+exon_num.TOTAL.tnt.binomial[, median:=NULL]
+
+exon_num.TOTAL.tnt.binomial[ , median:=median(PointEst), by=c("exon_pos", "strand", "exon_num" )]
+exon_num.TOTAL.tnt.binomial[, `:=`(Enrrichment=PointEst/median, Enrrichment_l=Lower/median, Enrrichment_u=Upper/median)]
+
+
+Fig3.D.new <-ggplot(exon_num.TOTAL.tnt.binomial)+
+  geom_ribbon(aes(x=Position, fill=strand, ymin=Enrrichment_l, ymax=Enrrichment_u), alpha=0.3) +
+    geom_line(aes(x=Position,y=Enrrichment, colour=strand)) +
+    xlim(c(-300,300)) +
+    facet_grid( exon_pos ~ exon_num   ) +
+    theme_bw() +
+    theme(legend.position = "top", legend.direction = "horizontal") 
+
+
+Fig3.D.new
+
+
+```
 
 
 
@@ -2015,7 +2626,7 @@ G4_2019.template.K.Qs.plus.down.list <- list(G4_2019.template.K.Q1_down_plus, G4
 G4_2019.template.K.Qs.minus.down.list <- list(G4_2019.template.K.Q1_down_minus, G4_2019.template.K.Q2_down_minus, G4_2019.template.K.Q3_down_minus, G4_2019.template.K.Q4_down_minus)
 G4_2019.template.K.window_len = 2000
 
-G4_2019.template.K.Qs.total <- get_total_Qs(G4_2019.template.K.Qs.plus.up.list, G4_2019.template.K.Qs.minus.list, G4_2019.template.K.Qs.plus.down.list, G4_2019.template.K.Qs.minus.down.list, window_len)
+G4_2019.template.K.Qs.total <- get_total_Qs(G4_2019.template.K.Qs.plus.up.list, G4_2019.template.K.Qs.minus.list, G4_2019.template.K.Qs.plus.down.list, G4_2019.template.K.Qs.minus.down.list, G4_2019.template.K.window_len)
 ```
 
 
@@ -2027,7 +2638,7 @@ G4_2019.non_template.K.Qs.plus.down.list <- list(G4_2019.non_template.K.Q1_down_
 G4_2019.non_template.K.Qs.minus.down.list <- list(G4_2019.non_template.K.Q1_down_minus, G4_2019.non_template.K.Q2_down_minus, G4_2019.non_template.K.Q3_down_minus, G4_2019.non_template.K.Q4_down_minus)
 G4_2019.non_template.K.window_len = 2000
 
-G4_2019.non_template.K.Qs.total <- get_total_Qs(G4_2019.non_template.K.Qs.plus.up.list, G4_2019.non_template.K.Qs.minus.list, G4_2019.non_template.K.Qs.plus.down.list, G4_2019.non_template.K.Qs.minus.down.list, window_len)
+G4_2019.non_template.K.Qs.total <- get_total_Qs(G4_2019.non_template.K.Qs.plus.up.list, G4_2019.non_template.K.Qs.minus.list, G4_2019.non_template.K.Qs.plus.down.list, G4_2019.non_template.K.Qs.minus.down.list, G4_2019.non_template.K.window_len)
 ```
 
 
@@ -2273,7 +2884,7 @@ G4_2015.template.Na_PDS.Qs.plus.down.list <- list(G4_2015.template.Na_PDS.Q1_dow
 G4_2015.template.Na_PDS.Qs.minus.down.list <- list(G4_2015.template.Na_PDS.Q1_down_minus, G4_2015.template.Na_PDS.Q2_down_minus, G4_2015.template.Na_PDS.Q3_down_minus, G4_2015.template.Na_PDS.Q4_down_minus)
 G4_2015.template.Na_PDS.window_len = 2000
 
-G4_2015.template.Na_PDS.Qs.total <- get_total_Qs(G4_2015.template.Na_PDS.Qs.plus.up.list, G4_2015.template.Na_PDS.Qs.minus.list, G4_2015.template.Na_PDS.Qs.plus.down.list, G4_2015.template.Na_PDS.Qs.minus.down.list, window_len)
+G4_2015.template.Na_PDS.Qs.total <- get_total_Qs(G4_2015.template.Na_PDS.Qs.plus.up.list, G4_2015.template.Na_PDS.Qs.minus.list, G4_2015.template.Na_PDS.Qs.plus.down.list, G4_2015.template.Na_PDS.Qs.minus.down.list, G4_2015.template.Na_PDS.window_len)
 ```
 
 
@@ -2285,7 +2896,7 @@ G4_2015.non_template.Na_PDS.Qs.plus.down.list <- list(G4_2015.non_template.Na_PD
 G4_2015.non_template.Na_PDS.Qs.minus.down.list <- list(G4_2015.non_template.Na_PDS.Q1_down_minus, G4_2015.non_template.Na_PDS.Q2_down_minus, G4_2015.non_template.Na_PDS.Q3_down_minus, G4_2015.non_template.Na_PDS.Q4_down_minus)
 G4_2015.non_template.Na_PDS.window_len = 2000
 
-G4_2015.non_template.Na_PDS.Qs.total <- get_total_Qs(G4_2015.non_template.Na_PDS.Qs.plus.up.list, G4_2015.non_template.Na_PDS.Qs.minus.list, G4_2015.non_template.Na_PDS.Qs.plus.down.list, G4_2015.non_template.Na_PDS.Qs.minus.down.list, window_len)
+G4_2015.non_template.Na_PDS.Qs.total <- get_total_Qs(G4_2015.non_template.Na_PDS.Qs.plus.up.list, G4_2015.non_template.Na_PDS.Qs.minus.list, G4_2015.non_template.Na_PDS.Qs.plus.down.list, G4_2015.non_template.Na_PDS.Qs.minus.down.list, G4_2015.non_template.Na_PDS.window_len)
 ```
 
 
@@ -2410,7 +3021,7 @@ G4_2015.template.Na_K.Qs.plus.down.list <- list(G4_2015.template.Na_K.Q1_down_pl
 G4_2015.template.Na_K.Qs.minus.down.list <- list(G4_2015.template.Na_K.Q1_down_minus, G4_2015.template.Na_K.Q2_down_minus, G4_2015.template.Na_K.Q3_down_minus, G4_2015.template.Na_K.Q4_down_minus)
 G4_2015.template.Na_K.window_len = 2000
 
-G4_2015.template.Na_K.Qs.total <- get_total_Qs(G4_2015.template.Na_K.Qs.plus.up.list, G4_2015.template.Na_K.Qs.minus.list, G4_2015.template.Na_K.Qs.plus.down.list, G4_2015.template.Na_K.Qs.minus.down.list, window_len)
+G4_2015.template.Na_K.Qs.total <- get_total_Qs(G4_2015.template.Na_K.Qs.plus.up.list, G4_2015.template.Na_K.Qs.minus.list, G4_2015.template.Na_K.Qs.plus.down.list, G4_2015.template.Na_K.Qs.minus.down.list, G4_2015.template.Na_K.window_len)
 ```
 
 
@@ -2422,7 +3033,7 @@ G4_2015.non_template.Na_K.Qs.plus.down.list <- list(G4_2015.non_template.Na_K.Q1
 G4_2015.non_template.Na_K.Qs.minus.down.list <- list(G4_2015.non_template.Na_K.Q1_down_minus, G4_2015.non_template.Na_K.Q2_down_minus, G4_2015.non_template.Na_K.Q3_down_minus, G4_2015.non_template.Na_K.Q4_down_minus)
 G4_2015.non_template.Na_K.window_len = 2000
 
-G4_2015.non_template.Na_K.Qs.total <- get_total_Qs(G4_2015.non_template.Na_K.Qs.plus.up.list, G4_2015.non_template.Na_K.Qs.minus.list, G4_2015.non_template.Na_K.Qs.plus.down.list, G4_2015.non_template.Na_K.Qs.minus.down.list, window_len)
+G4_2015.non_template.Na_K.Qs.total <- get_total_Qs(G4_2015.non_template.Na_K.Qs.plus.up.list, G4_2015.non_template.Na_K.Qs.minus.list, G4_2015.non_template.Na_K.Qs.plus.down.list, G4_2015.non_template.Na_K.Qs.minus.down.list, G4_2015.non_template.Na_K.window_len)
 ```
 
 
@@ -2486,11 +3097,11 @@ As K+ is known to stabilize G4, we analized (RNA-seq data)[https://www.ncbi.nlm.
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-KCL_human_upstream <- fread("./ KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s"  ) #stop here
+KCL_human_upstream <- fread("../KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s"  ) #stop here
 colnames(KCL_human_upstream) <- c("w.chrom", "w.start", "w.end", "w.strand", "chrom", "start", "end", "strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "G4"  )
 
 
-KCL_human_downstream<- fread("./KCL/MicroExonator/Control_vs_KCL.diff.downstream_100nt.G4s"  )
+KCL_human_downstream<- fread("../KCL/MicroExonator/Control_vs_KCL.diff.downstream_100nt.G4s"  )
 colnames(KCL_human_downstream) <-c("w.chrom", "w.start", "w.end", "w.strand", "chrom", "start", "end", "strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "G4"  )
 
 
@@ -2539,7 +3150,7 @@ KCL_human[ Type=="CE"& DeltaPsi>0.1 & Probability>0.9,  ]
 KCL_human[, Coords:=paste(chrom, paste(start, end, sep = "-"), strand, sep=":" )]
 
 
-whippet.jls.exons.hg19 <-  fread("./KCL/whippet.jls.exons.tab")
+whippet.jls.exons.hg19 <-  fread("../KCL/whippet.jls.exons.tab")
 
 KCL_human_CE <- merge(KCL_human[Type=="CE", ], whippet.jls.exons.hg19, by.x="Coords", by.y="Potential_Exon")
 
@@ -2781,8 +3392,8 @@ return(KCL_x_stats)
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
-upstream.path = "./KCL/MicroExonator/ESC-derived_neuron_CD1.diff.upstream_100nt.G4s" 
-downstream.path = "./KCL/MicroExonator/ESC-derived_neuron_CD1.diff.downstream_100nt.G4s" 
+upstream.path = "../KCL/MicroExonator/ESC-derived_neuron_CD1.diff.upstream_100nt.G4s" 
+downstream.path = "../KCL/MicroExonator/ESC-derived_neuron_CD1.diff.downstream_100nt.G4s" 
 
 splice_node_dot_plot2 <- function(upstream.path, downstream.path ) {
 
@@ -2920,8 +3531,8 @@ return(KCL_x)
 
 
 ```{r}
-upstream.path = "./Exons_G4s/human.exons.tvs.upstream.G4seq_K"
-downstream.path = "./Exons_G4s/human.exons.tvs.downstream.G4seq_K"
+upstream.path = "../Exons_G4s/human.exons.tvs.upstream.G4seq_K"
+downstream.path = "../Exons_G4s/human.exons.tvs.downstream.G4seq_K"
 
 G4_ME_table <- function(upstream.path, downstream.path, dist_lim ) {
 
@@ -2970,8 +3581,8 @@ return(KCL_x)
 
 KCL_human_CE <- KCL_human[ , paste(chrom,   start,     end, sep="_" ) ]
 
-human.exons.upstream.G4s <- fread("./Exons_G4s/human.exons.tvs.upstream.G4s")
-human.exons.downstream.G4s <- fread("./Exons_G4s/human.exons.tvs.downstream.G4s")
+human.exons.upstream.G4s <- fread("../Exons_G4s/human.exons.tvs.upstream.G4s")
+human.exons.downstream.G4s <- fread("../Exons_G4s/human.exons.tvs.downstream.G4s")
 
 
 
@@ -3119,10 +3730,6 @@ ggplot(hg19_ME_table_PDS) +
 
 ```
 
-```{r}
-matrix(ncol=2, c( ))
-
-```
 
 
 
@@ -3130,7 +3737,7 @@ matrix(ncol=2, c( ))
 
 human.ME_g4.stats <- data.table()
 
-hg19_ME_table_G4s <- G4_ME_table("./Exons_G4s/human.exons.tvs.upstream.G4s" , "./Exons_G4s/human.exons.tvs.downstream.G4s", 100 )
+hg19_ME_table_G4s <- G4_ME_table("../Exons_G4s/human.exons.tvs.upstream.G4s" , "../Exons_G4s/human.exons.tvs.downstream.G4s", 100 )
 
 
 
@@ -3155,7 +3762,7 @@ human.ME_g4.stats <- rbind(human.ME_g4.stats,
                              ))
 
 
-hg19_ME_table_K <- G4_ME_table("./Exons_G4s/human.exons.tvs.upstream.G4seq_K" , "./Exons_G4s/human.exons.tvs.downstream.G4seq_K", 100 )
+hg19_ME_table_K <- G4_ME_table("../Exons_G4s/human.exons.tvs.upstream.G4seq_K" , "../Exons_G4s/human.exons.tvs.downstream.G4seq_K", 100 )
 
 
 
@@ -3176,7 +3783,7 @@ human.ME_g4.stats <- rbind(human.ME_g4.stats,
                              ))
 
 
-hg19_ME_table_PDS <- G4_ME_table("./Exons_G4s/human.exons.tvs.upstream.G4seq_PDS" , "./Exons_G4s/human.exons.tvs.downstream.G4seq_PDS", 100 )
+hg19_ME_table_PDS <- G4_ME_table("../Exons_G4s/human.exons.tvs.upstream.G4seq_PDS" , "../Exons_G4s/human.exons.tvs.downstream.G4seq_PDS", 100 )
 
 
 hg19_ME_table_PDS.2x2 <- matrix(ncol = 2,
@@ -3216,13 +3823,13 @@ ggplot(human.ME_g4.stats) +
 
 ```{r}
 
-primary_cortical_neuron_DIV4_CD1_K_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_K" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_K", 100 )
+primary_cortical_neuron_DIV4_CD1_K_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_K" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_K", 100 )
 
-ESC_derived_neuron_CD1_K_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4seq_K" , "./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4seq_K", 100 )
+ESC_derived_neuron_CD1_K_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4seq_K" , "../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4seq_K", 100 )
 
-primary_cortical_neuron_DIV10_CD1_K_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4seq_K" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4seq_K", 100 )
+primary_cortical_neuron_DIV10_CD1_K_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4seq_K" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4seq_K", 100 )
 
-primary_cortical_neuron_DIV10_Tc1_K_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4seq_K" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4seq_K", 100 )
+primary_cortical_neuron_DIV10_Tc1_K_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4seq_K" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4seq_K", 100 )
 
 
 
@@ -3245,13 +3852,13 @@ colnames(total_mouse_K_ME_table.2x2) <- c("exon", "microexon")
 rownames(total_mouse_K_ME_table.2x2) <- c("Without G-quadruplex", "With G-quadruplex")
 
 
-primary_cortical_neuron_DIV4_CD1_PDS_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_PDS" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_PDS", 100 )
+primary_cortical_neuron_DIV4_CD1_PDS_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_PDS" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_PDS", 100 )
 
-ESC_derived_neuron_CD1_PDS_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4seq_PDS" , "./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4seq_PDS", 100 )
+ESC_derived_neuron_CD1_PDS_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4seq_PDS" , "../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4seq_PDS", 100 )
 
-primary_cortical_neuron_DIV10_CD1_PDS_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4seq_PDS" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4seq_PDS", 100 )
+primary_cortical_neuron_DIV10_CD1_PDS_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4seq_PDS" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4seq_PDS", 100 )
 
-primary_cortical_neuron_DIV10_Tc1_PDS_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4seq_PDS" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4seq_PDS", 100 )
+primary_cortical_neuron_DIV10_Tc1_PDS_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4seq_PDS" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4seq_PDS", 100 )
 
 
 
@@ -3277,10 +3884,10 @@ KCL_human[, ID:=paste( chrom, strand, start, end  , sep="_")]
 
 
 
-primary_cortical_neuron_DIV4_CD1_motif_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4s.fix" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4s.fix", 100 )
-ESC_derived_neuron_CD1_motif_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4s.fix" , "./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4s.fix", 100 )
-primary_cortical_neuron_DIV10_CD1_motif_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4s.fix" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4s.fix", 100 )
-primary_cortical_neuron_DIV10_Tc1_motif_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4s.fix" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4s.fix", 100 )
+primary_cortical_neuron_DIV4_CD1_motif_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4s.fix" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4s.fix", 100 )
+ESC_derived_neuron_CD1_motif_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4s.fix" , "../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4s.fix", 100 )
+primary_cortical_neuron_DIV10_CD1_motif_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4s.fix" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4s.fix", 100 )
+primary_cortical_neuron_DIV10_Tc1_motif_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4s.fix" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4s.fix", 100 )
 
 
 primary_cortical_neuron_DIV4_CD1_motif_ME_table[, ID:=paste( chrom, strand, start, end  , sep="_")]
@@ -3340,15 +3947,15 @@ All_mouse[ ID %in% primary_cortical_neuron_DIV10_Tc1_PDS_ME_table[abs(DeltaPsi)>
 All_mouse <- cbind(All_mouse, rowSums(is.na(All_mouse)))
 
 
-fwrite(All_mouse[order(V2)], "./potassium_experiments/Total_mouse.txt", na="FALSE", sep = "\t", quote=F)
+fwrite(All_mouse[order(V2)], "../potassium_experiments/Total_mouse.txt", na="FALSE", sep = "\t", quote=F)
 
        
 
        
 
-human_motif_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4s" , "./KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4s", 100 )   
-human_K_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_K" , "./KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_K", 100 )
-human_PDS_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_PDS" , "./KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_PDS", 100 )   
+human_motif_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4s" , "../KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4s", 100 )   
+human_K_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_K" , "../KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_K", 100 )
+human_PDS_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_PDS" , "../KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_PDS", 100 )   
      
 human_motif_ME_table[, ID:=paste( chrom, strand, start, end  , sep="_")]
 human_K_ME_table[, ID:=paste( chrom, strand, start, end  , sep="_")]
@@ -3372,7 +3979,7 @@ All_human[ ID %in% human_PDS_ME_table[abs(DeltaPsi)>=0.1 & Probability>=0.9 & G4
 All_human <- cbind(All_human, rowSums(is.na(All_human)))
 
 
-fwrite(All_human[order(V2)], "./potassium_experiments/Total_human.txt",  na="FALSE", sep = "\t", quote=F)
+fwrite(All_human[order(V2)], "../potassium_experiments/Total_human.txt",  na="FALSE", sep = "\t", quote=F)
 
 
 
@@ -3381,10 +3988,10 @@ fwrite(All_human[order(V2)], "./potassium_experiments/Total_human.txt",  na="FAL
 ```
 
 
-
+## Not working
 
 ```{r}
-human_mouse <- fread("./potassium_experiments/human_mouse.0.2.exons")
+human_mouse <- fread("../potassium_experiments/human_mouse.0.2.exons")
 
 colnames(human_mouse) <- c("hID", "mID", "score_index")
 
@@ -3418,9 +4025,11 @@ View(All_human.mouse.diff.gene[order(V2.y, V2.x  )][, c("ID", "mID", "V2.x", "V2
 
 cat(All_human.mouse.diff.gene[, hgnc_symbol], sep="\n")
 
-fwrite(All_human.mouse.diff.gene[order(V2.y, V2.x  )][, c("ID", "V2.x", "V2.y", "wikigene_description", "hgnc_symbol")], "./potassium_experiments/human.mouse.diff.G4.gene.txt",  na="FALSE", sep = "\t", quote=F)
+fwrite(All_human.mouse.diff.gene[order(V2.y, V2.x  )][, c("ID", "V2.x", "V2.y", "wikigene_description", "hgnc_symbol")], "../potassium_experiments/human.mouse.diff.G4.gene.txt",  na="FALSE", sep = "\t", quote=F)
 
 ```
+
+
 
 ```{r}
 KCL_human[ID=""]
@@ -3444,7 +4053,7 @@ wilcox.test(  exon_len ~ G4_bol, data=total_mouse_PDS_ME_table )
 
 
 ```{r}
-primary_cortical_neuron_DIV4_CD1_K_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_K" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_K", 100 )
+primary_cortical_neuron_DIV4_CD1_K_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_K" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_K", 100 )
 
 
 primary_cortical_neuron_DIV4_CD1_K_ME_table.2x2 <- matrix(ncol = 2,
@@ -3456,7 +4065,7 @@ nrow(primary_cortical_neuron_DIV4_CD1_K_ME_table[ exon_class=="microexon" & G4_b
 chisq.test( primary_cortical_neuron_DIV4_CD1_K_ME_table.2x2)
 
 
-primary_cortical_neuron_DIV4_CD1_PDS_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_PDS" , "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_PDS", 100 )
+primary_cortical_neuron_DIV4_CD1_PDS_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_PDS" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_PDS", 100 )
 
 
 
@@ -3470,7 +4079,7 @@ chisq.test( primary_cortical_neuron_DIV4_CD1_PDS_ME_table.2x2)
 
 
 
-Control_vs_KCL_K_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_K" , "./KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_K", 100 )
+Control_vs_KCL_K_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_K" , "../KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_K", 100 )
 
 
 Control_vs_KCL_K_ME_table.2x2 <- matrix(ncol = 2,
@@ -3482,7 +4091,7 @@ nrow(Control_vs_KCL_K_ME_table[ exon_class=="microexon" & G4_bol=="With G-quadru
 chisq.test( Control_vs_KCL_K_ME_table.2x2)
 
 
-Control_vs_KCL_PDS_ME_table <- diff_G4_ME_table("./KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_PDS" , "./KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_K", 100 )
+Control_vs_KCL_PDS_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_PDS" , "../KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_K", 100 )
 
 
 Control_vs_KCL_PDS_ME_table.2x2 <- matrix(ncol = 2,
@@ -3495,21 +4104,7 @@ chisq.test( Control_vs_KCL_PDS_ME_table.2x2)
 ```
 
 
-
-
-
 ```{r}
-
-#upstream.path = "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_K" 
-#downstream.path = "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_K" 
-
-#dist_lim = 150
-
-
-upstream.path = "./AQ1/Control_vs_1mu.diff.downstream.G4seq_K"
-downstream.path = "./AQ1/Control_vs_1mu.diff.upstream.G4seq_K"
-dist_lim = 100
-
 splice_node_dot_plot3 <- function(upstream.path, downstream.path, dist_lim ) {
 
 KCL_x_upstream <- fread(upstream.path  )
@@ -3555,7 +4150,7 @@ KCL_x_stats[ , OR := W_G4_fraq/WO_G4_fraq]
 
 KCL_x_stats.chi <- data.table()
 
-for ( i in unique(KCL_x_stats[Type!="AL" & Type!="AF"]$Type)){
+for ( i in unique(KCL_x_stats[Type!="AL"]$Type)){
   
 matrix.ex <-  matrix(nrow=2, c(KCL_x_stats[Type==i & diff=="Ex"]$WO_G4_NA, KCL_x_stats[Type==i & diff=="Ex"]$WO_G4, KCL_x_stats[Type==i & diff=="Ex"]$W_G4_NA, KCL_x_stats[Type==i & diff=="Ex"]$W_G4))
 matrix.ex_res <- chisq.test(matrix.ex, correct=TRUE)
@@ -3589,18 +4184,14 @@ return(KCL_x_stats)
 
 
 }
-
 ```
 
 
 
 
 
-
-
-
 ```{r}
-test <- fread("./KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s")
+test <- fread("../KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s")
 ```
 
 # AQ1
@@ -3609,36 +4200,36 @@ test <- fread("./KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s")
 
 
 
-AQ1.1.motif <- splice_node_dot_plot3("./AQ1/Control_vs_1mu.diff.downstream.G4s",
-                                       "./AQ1/Control_vs_1mu.diff.upstream.G4s",
+AQ1.1.motif <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4s",
+                                       "../AQ1/Control_vs_1mu.diff.upstream.G4s",
                                         100)
 
 
-AQ1.1.K <- splice_node_dot_plot3("./AQ1/Control_vs_1mu.diff.downstream.G4seq_K",
-                                       "./AQ1/Control_vs_1mu.diff.upstream.G4seq_K",
+AQ1.1.K <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4seq_K",
+                                       "../AQ1/Control_vs_1mu.diff.upstream.G4seq_K",
                                         100)
 
 
-AQ1.1.PDS <- splice_node_dot_plot3("./AQ1/Control_vs_1mu.diff.downstream.G4seq_PDS",
-                                       "./AQ1/Control_vs_1mu.diff.upstream.G4seq_PDS",
+AQ1.1.PDS <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4seq_PDS",
+                                       "../AQ1/Control_vs_1mu.diff.upstream.G4seq_PDS",
                                         100)
 
 
 
 
 
-AQ1.2.motif <- splice_node_dot_plot3("./AQ1/Control_vs_2mu.diff.downstream.G4s",
-                                       "./AQ1/Control_vs_2mu.diff.upstream.G4s",
+AQ1.2.motif <- splice_node_dot_plot3("../AQ1/Control_vs_2mu.diff.downstream.G4s",
+                                       "../AQ1/Control_vs_2mu.diff.upstream.G4s",
                                         100)
 
 
-AQ1.2.K <- splice_node_dot_plot3("./AQ1/Control_vs_2mu.diff.downstream.G4seq_K",
-                                       "./AQ1/Control_vs_2mu.diff.upstream.G4seq_K",
+AQ1.2.K <- splice_node_dot_plot3("../AQ1/Control_vs_2mu.diff.downstream.G4seq_K",
+                                       "../AQ1/Control_vs_2mu.diff.upstream.G4seq_K",
                                         100)
 
 
-AQ1.2.PDS <- splice_node_dot_plot3("./AQ1/Control_vs_2mu.diff.downstream.G4seq_PDS",
-                                       "./AQ1/Control_vs_2mu.diff.upstream.G4seq_PDS",
+AQ1.2.PDS <- splice_node_dot_plot3("../AQ1/Control_vs_2mu.diff.downstream.G4seq_PDS",
+                                       "../AQ1/Control_vs_2mu.diff.upstream.G4seq_PDS",
                                         100)
 
 
@@ -3651,18 +4242,18 @@ AQ1.2.PDS <- splice_node_dot_plot3("./AQ1/Control_vs_2mu.diff.downstream.G4seq_P
 
 ```{r}
 
-HEK.PDS.motif <- splice_node_dot_plot3("./PDS_cPDS/closest/Control_vs_PDS_HEK.diff.upstream.G4s",
-                                       "./PDS_cPDS/closest/Control_vs_PDS_HEK.diff.downstream.G4s",
+HEK.PDS.motif <- splice_node_dot_plot3("../PDS_cPDS/closest/Control_vs_PDS_HEK.diff.upstream.G4s",
+                                       "../PDS_cPDS/closest/Control_vs_PDS_HEK.diff.downstream.G4s",
                                         100)
 
 
-AQ1.K <- splice_node_dot_plot3("./AQ1/Control_vs_1mu.diff.downstream.G4seq_K",
-                                       "./AQ1/Control_vs_1mu.diff.upstream.G4seq_K",
+AQ1.K <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4seq_K",
+                                       "../AQ1/Control_vs_1mu.diff.upstream.G4seq_K",
                                         100)
 
 
-AQ1.PDS <- splice_node_dot_plot3("./AQ1/Control_vs_1mu.diff.downstream.G4seq_PDS",
-                                       "./AQ1/Control_vs_1mu.diff.upstream.G4seq_PDS",
+AQ1.PDS <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4seq_PDS",
+                                       "../AQ1/Control_vs_1mu.diff.upstream.G4seq_PDS",
                                         100)
 
 ```
@@ -3676,24 +4267,24 @@ AQ1.PDS <- splice_node_dot_plot3("./AQ1/Control_vs_1mu.diff.downstream.G4seq_PDS
 
 ```{r,  fig.height=4, fig.width=10}
 
-human.dotplot <- splice_node_dot_plot2("./KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s",  "./KCL/MicroExonator/Control_vs_KCL.diff.downstream_100nt.G4s"  )
+human.dotplot <- splice_node_dot_plot2("../KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s",  "../KCL/MicroExonator/Control_vs_KCL.diff.downstream_100nt.G4s"  )
 
 
 
-human.motif <- splice_node_dot_plot3("./KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4s",
-                                        "./KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4s",
+human.motif <- splice_node_dot_plot3("../KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4s",
+                                        "../KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4s",
                                         100)
 
 
 
 
-human.K <- splice_node_dot_plot3("./KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_K",
-                                        "./KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_K",
+human.K <- splice_node_dot_plot3("../KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_K",
+                                        "../KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_K",
                                         45)
 
 
-human.PDS <- splice_node_dot_plot3("./KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_PDS",
-                                        "./KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_PDS",
+human.PDS <- splice_node_dot_plot3("../KCL/MicroExonator/closest/Control_vs_KCL.diff.upstream.G4seq_PDS",
+                                        "../KCL/MicroExonator/closest/Control_vs_KCL.diff.downstream.G4seq_PDS",
                                    45)
 
 
@@ -3710,29 +4301,32 @@ Fig5.A1 <- ggplot(human.motif_K_PDS) +
   scale_colour_gradient2(low="blue", high="red", mid = "grey", midpoint = 0) +
   facet_grid(G4_signal ~ .) +
   theme_bw() +
-      theme(legend.position = "top", legend.direction = "horizontal") 
+      theme(legend.position = "top", legend.direction = "horizontal")
+
+
+Fig5.A1
 ```
 
 
 
 ```{r,  fig.height=4, fig.width=10}
 
-supp.dotplot.A <- splice_node_dot_plot2("./KCL/MicroExonator/ESC-derived_neuron_CD1.diff.upstream_100nt.G4s",  "./KCL/MicroExonator/ESC-derived_neuron_CD1.diff.downstream_100nt.G4s"  )
+supp.dotplot.A <- splice_node_dot_plot2("../KCL/MicroExonator/ESC-derived_neuron_CD1.diff.upstream_100nt.G4s",  "../KCL/MicroExonator/ESC-derived_neuron_CD1.diff.downstream_100nt.G4s"  )
 
 
 
-ESC_derived_neuron_CD1.motif <- splice_node_dot_plot3("./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4s.fix",
-                                        "./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4s.fix",
+ESC_derived_neuron_CD1.motif <- splice_node_dot_plot3("../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4s.fix",
+                                        "../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4s.fix",
                                         100)
 
 
-ESC_derived_neuron_CD1.K <- splice_node_dot_plot3("./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4seq_K",
-                                        "./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4seq_K",
+ESC_derived_neuron_CD1.K <- splice_node_dot_plot3("../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4seq_K",
+                                        "../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4seq_K",
                                         45)
 
 
-ESC_derived_neuron_CD1.PDS <- splice_node_dot_plot3("./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4seq_PDS",
-                                        "./KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4seq_PDS",
+ESC_derived_neuron_CD1.PDS <- splice_node_dot_plot3("../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4seq_PDS",
+                                        "../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4seq_PDS",
                                         45)
 
 
@@ -3761,21 +4355,21 @@ ggplot(ESC_derived_neuron_CD1.motif_K_PDS) +
 
 ```{r,  fig.height=4, fig.width=10}
 
-supp.dotplot.C <-  splice_node_dot_plot2("./KCL/MicroExonator/primary_cortical_neuron_DIV10_CD1.diff.upstream_100nt.G4s",  "./KCL/MicroExonator/primary_cortical_neuron_DIV10_CD1.diff.downstream_100nt.G4s"  )
+supp.dotplot.C <-  splice_node_dot_plot2("../KCL/MicroExonator/primary_cortical_neuron_DIV10_CD1.diff.upstream_100nt.G4s",  "../KCL/MicroExonator/primary_cortical_neuron_DIV10_CD1.diff.downstream_100nt.G4s"  )
 
 
-primary_cortical_neuron_DIV10_CD1.motif <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4s.fix",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4s.fix",
+primary_cortical_neuron_DIV10_CD1.motif <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4s.fix",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4s.fix",
                                         100)
 
 
-primary_cortical_neuron_DIV10_CD1.K <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4seq_K",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4seq_K",
+primary_cortical_neuron_DIV10_CD1.K <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4seq_K",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4seq_K",
                                         45)
 
 
-primary_cortical_neuron_DIV10_CD1.PDS <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4seq_PDS",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4seq_PDS",
+primary_cortical_neuron_DIV10_CD1.PDS <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4seq_PDS",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4seq_PDS",
                                         45)
 
 
@@ -3804,21 +4398,21 @@ ggplot(primary_cortical_neuron_DIV10_CD1.motif_K_PDS) +
 
 ```{r,  fig.height=4, fig.width=10}
 
-supp.dotplot.D <- splice_node_dot_plot2("./KCL/MicroExonator/primary_cortical_neuron_DIV10_Tc1.diff.upstream_100nt.G4s",  "./KCL/MicroExonator/primary_cortical_neuron_DIV10_Tc1.diff.downstream_100nt.G4s"  )
+supp.dotplot.D <- splice_node_dot_plot2("../KCL/MicroExonator/primary_cortical_neuron_DIV10_Tc1.diff.upstream_100nt.G4s",  "../KCL/MicroExonator/primary_cortical_neuron_DIV10_Tc1.diff.downstream_100nt.G4s"  )
 
 
 
-primary_cortical_neuron_DIV10_Tc1.motif <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4s.fix",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4s.fix",
+primary_cortical_neuron_DIV10_Tc1.motif <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4s.fix",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4s.fix",
                                         100)
 
-primary_cortical_neuron_DIV10_Tc1.K <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4seq_K",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4seq_K",
+primary_cortical_neuron_DIV10_Tc1.K <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4seq_K",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4seq_K",
                                         45)
 
 
-primary_cortical_neuron_DIV10_Tc1.PDS <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4seq_PDS",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4seq_PDS",
+primary_cortical_neuron_DIV10_Tc1.PDS <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4seq_PDS",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4seq_PDS",
                                         45)
 
 
@@ -3845,25 +4439,27 @@ ggplot(primary_cortical_neuron_DIV10_Tc1.motif_K_PDS) +
 
 
 
+
+
 ```{r,  fig.height=4, fig.width=10}
 
-supp.dotplot.B <- splice_node_dot_plot2("./KCL/MicroExonator/primary_cortical_neuron_DIV4_CD1.diff.upstream_100nt.G4s",  "./KCL/MicroExonator/primary_cortical_neuron_DIV4_CD1.diff.downstream_100nt.G4s"  )
+supp.dotplot.B <- splice_node_dot_plot2("../KCL/MicroExonator/primary_cortical_neuron_DIV4_CD1.diff.upstream_100nt.G4s",  "../KCL/MicroExonator/primary_cortical_neuron_DIV4_CD1.diff.downstream_100nt.G4s"  )
 
 
 
-primary_cortical_neuron_DIV4_CD1.motif <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4s.fix",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4s.fix",
+primary_cortical_neuron_DIV4_CD1.motif <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4s.fix",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4s.fix",
                                         100)
 
 
 
-primary_cortical_neuron_DIV4_CD1.K <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_K",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_K",
+primary_cortical_neuron_DIV4_CD1.K <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_K",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_K",
                                         45)
 
 
-primary_cortical_neuron_DIV4_CD1.PDS <- splice_node_dot_plot3("./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_PDS",
-                                        "./KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_PDS",
+primary_cortical_neuron_DIV4_CD1.PDS <- splice_node_dot_plot3("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4seq_PDS",
+                                        "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4seq_PDS",
                                         45)
 
 
@@ -4046,14 +4642,14 @@ ggplot(diff_eql.TOTAL) +
 
 
 ```{r}
-KCL_human <- fread("./KCL/MicroExonator/Control_vs_KCL.diff", sep="\t")
+KCL_human <- fread("../KCL/MicroExonator/Control_vs_KCL.diff", sep="\t")
 KCL_human <- KCL_human[, 1:11]
 colnames(KCL_human) <- c("Gene","Node", "Coord", "Strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "Complexity", "Entropy")
 human.CE.NA <- nrow(KCL_human[(abs(DeltaPsi)<0.1 | Probability<0.9)  &  Type=="CE"])
 human.CE.diff <- nrow(KCL_human[abs(DeltaPsi)>=0.1 & Probability>=0.9 &  Type=="CE"])
 
 
-KCL_ESC_derived_neuron_CD1 <- fread("./KCL/MicroExonator/ESC-derived_neuron_CD1.diff", sep="\t")
+KCL_ESC_derived_neuron_CD1 <- fread("../KCL/MicroExonator/ESC-derived_neuron_CD1.diff", sep="\t")
 KCL_ESC_derived_neuron_CD1  <- KCL_ESC_derived_neuron_CD1 [, 1:11]
 colnames(KCL_ESC_derived_neuron_CD1 ) <- c("Gene","Node", "Coord", "Strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "Complexity", "Entropy")
 ESC_derived_neuron_CD1.CE.NA <- nrow(KCL_ESC_derived_neuron_CD1 [(abs(DeltaPsi)<0.1 | Probability<0.9)  &  Type=="CE"])
@@ -4062,14 +4658,14 @@ ESC_derived_neuron_CD1.CE.diff <- nrow(KCL_ESC_derived_neuron_CD1[abs(DeltaPsi)>
 
 
 
-KCL_primary_cortical_neuron_DIV10_Tc1  <- fread("./KCL/MicroExonator/primary_cortical_neuron_DIV10_Tc1.diff", sep="\t")
+KCL_primary_cortical_neuron_DIV10_Tc1  <- fread("../KCL/MicroExonator/primary_cortical_neuron_DIV10_Tc1.diff", sep="\t")
 KCL_primary_cortical_neuron_DIV10_Tc1  <- KCL_primary_cortical_neuron_DIV10_Tc1 [, 1:11]
 colnames(KCL_primary_cortical_neuron_DIV10_Tc1 ) <- c("Gene","Node", "Coord", "Strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "Complexity", "Entropy")
 primary_cortical_neuron_DIV10_Tc1.CE.NA <- nrow(KCL_primary_cortical_neuron_DIV10_Tc1 [(abs(DeltaPsi)<0.1 | Probability<0.9)  &  Type=="CE"])
 primary_cortical_neuron_DIV10_Tc1.CE.diff <- nrow(KCL_primary_cortical_neuron_DIV10_Tc1 [abs(DeltaPsi)>=0.1 & Probability>=0.9 &  Type=="CE"])
 
 
-KCL_primary_cortical_neuron_DIV4_CD1  <- fread("./KCL/MicroExonator/primary_cortical_neuron_DIV4_CD1.diff", sep="\t")
+KCL_primary_cortical_neuron_DIV4_CD1  <- fread("../KCL/MicroExonator/primary_cortical_neuron_DIV4_CD1.diff", sep="\t")
 KCL_primary_cortical_neuron_DIV4_CD1  <- KCL_primary_cortical_neuron_DIV4_CD1 [, 1:11]
 colnames(KCL_primary_cortical_neuron_DIV4_CD1 ) <- c("Gene","Node", "Coord", "Strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "Complexity", "Entropy")
 primary_cortical_neuron_DIV4_CD1.CE.NA <- nrow(KCL_primary_cortical_neuron_DIV4_CD1 [(abs(DeltaPsi)<0.1 | Probability<0.9)  &  Type=="CE"])
@@ -4077,7 +4673,7 @@ primary_cortical_neuron_DIV4_CD1.CE.diff <- nrow(KCL_primary_cortical_neuron_DIV
 
 
 
-KCL_primary_cortical_neuron_DIV10_CD1  <- fread("./KCL/MicroExonator/primary_cortical_neuron_DIV10_CD1.diff", sep="\t")
+KCL_primary_cortical_neuron_DIV10_CD1  <- fread("../KCL/MicroExonator/primary_cortical_neuron_DIV10_CD1.diff", sep="\t")
 KCL_primary_cortical_neuron_DIV10_CD1  <- KCL_primary_cortical_neuron_DIV10_CD1 [, 1:11]
 colnames(KCL_primary_cortical_neuron_DIV10_CD1 ) <- c("Gene","Node", "Coord", "Strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "Complexity", "Entropy")
 primary_cortical_neuron_DIV10_CD1.CE.NA <- nrow(KCL_primary_cortical_neuron_DIV10_CD1 [(abs(DeltaPsi)<0.1 | Probability<0.9)  &  Type=="CE"])
@@ -4514,8 +5110,8 @@ ggplot(diff_eql.TOTAL) +
 
 
 ```{r}
-intron_upstream <- fread("./Figures/Figure3/Introns.hg19_upstream_100nt_window.bed.intersect_c.G4s")
-intron_downstream <- fread("./Figures/Figure3/Introns.hg19_downstream_100nt_window.bed.intersect_c.G4s")
+intron_upstream <- fread("../Figures/Figure3/Introns.hg19_upstream_100nt_window.bed.intersect_c.G4s")
+intron_downstream <- fread("../Figures/Figure3/Introns.hg19_downstream_100nt_window.bed.intersect_c.G4s")
 
 colnames(intron_upstream) <- c("chrom", "start", "end", "strand", "ID", "intron_size", "transcript", "G4")
 colnames(intron_downstream) <- c("chrom", "start", "end", "strand", "ID", "intron_size", "transcript", "G4")
@@ -4610,8 +5206,8 @@ intron_size_ints_total[ relative_frac %in% intron_size_ints_total[, max(relative
 
 
 ```{r}
- Upstream_U2_score_len <- fread("./Figures/Figure3/Upstream_U2_score_len_matrix.txt2.old")
- Downstream_U2_score_len <- fread("./Figures/Figure3/Downstream_U2_score_len_matrix.txt2.old")
+ Upstream_U2_score_len <- fread("../Figures/Figure3/Upstream_U2_score_len_matrix.txt2.old")
+ Downstream_U2_score_len <- fread("../Figures/Figure3/Downstream_U2_score_len_matrix.txt2.old")
  
  
  Upstream_U2_score_len <-data.table::melt(Upstream_U2_score_len, id.vars='IL')
@@ -4694,7 +5290,7 @@ return(dist.exon)
 
 
 ```{r}
-exon.up.motif <- fread("./Figures/Figure1/exons.up.closest_G4_clean")
+exon.up.motif <- fread("../Figures/Figure1/exons.up.closest_G4_clean")
 colnames(exon.up.motif) <- c("echrom", "estart", "eend", "exon", "cero", "strand", "gchrom", "gstart", "gend")
 
 exon.up.motif[ , gmid:= gstart + (gend-gstart)/2]
@@ -4702,7 +5298,7 @@ exon.up.motif[  strand=="+"  ,  dist:=gmid - estart]
 exon.up.motif[  strand=="-"  ,  dist:= estart - gmid]
 
 
-exon.down.motif <- fread("./Figures/Figure1/exons.down.closest_G4_clean")
+exon.down.motif <- fread("../Figures/Figure1/exons.down.closest_G4_clean")
 colnames(exon.down.motif) <- c("echrom", "estart", "eend", "exon", "cero", "strand", "gchrom", "gstart", "gend")
 
 exon.down.motif[ , gmid:= gstart + (gend-gstart)/2]
@@ -4729,14 +5325,14 @@ ggplot(exon.dist.motif) +
 
 ```{r, fig.height=7, fig.width=7}
 
-closest_g4_KCL <- closest_g4("./Figures/Figure1/exon_up_plus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
+closest_g4_KCL <- closest_g4("../Figures/Figure1/exon_up_plus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_up_minus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_plus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_minus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed")
 
 
 
-closest_g4_PDS <- closest_g4("./Figures/Figure1/exon_up_plus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_PDS <- closest_g4("../Figures/Figure1/exon_up_plus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_plus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_minus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed")
@@ -4872,14 +5468,14 @@ return(dist.exon)
 
 ```{r, fig.height=7, fig.width=7}
 
-closest_g4_KCL_2015 <- closest_g4_2015("./Figures/Figure1/exon_up_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
+closest_g4_KCL_2015 <- closest_g4_2015("../Figures/Figure1/exon_up_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Figure1/exon_up_minus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Figure1/exon_down_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Figure1/exon_down_minus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed")
 
 
 
-closest_g4_PDS_2015 <- closest_g4_2015("./Figures/Figure1/exon_up_plus.hg19.closest.GSE63874_Na_PDS_plus_minus_hits_intersect.bed",
+closest_g4_PDS_2015 <- closest_g4_2015("../Figures/Figure1/exon_up_plus.hg19.closest.GSE63874_Na_PDS_plus_minus_hits_intersect.bed",
                              "Figures/Figure1/exon_up_minus.hg19.closest.GSE63874_Na_PDS_plus_minus_hits_intersect.bed",
                              "Figures/Figure1/exon_down_plus.hg19.closest.GSE63874_Na_PDS_plus_minus_hits_intersect.bed",
                              "Figures/Figure1/exon_down_minus.hg19.closest.GSE63874_Na_PDS_plus_minus_hits_intersect.bed")
@@ -4916,82 +5512,82 @@ ggplot(closest_g4_KCL_PDS_2015) +
 
 
 ```{r, fig.height=5, fig.width=7}
-closest_g4_KCL.sacCer3 <- closest_g4("./Figures/Figure1/exon_up_plus.bed.sacCer3.closest.GSM3003553_Saccaromyces_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
+closest_g4_KCL.sacCer3 <- closest_g4("../Figures/Figure1/exon_up_plus.bed.sacCer3.closest.GSM3003553_Saccaromyces_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_up_minus.bed.sacCer3.closest.GSM3003553_Saccaromyces_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_plus.bed.sacCer3.closest.GSM3003553_Saccaromyces_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_minus.bed.sacCer3.closest.GSM3003553_Saccaromyces_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed")
 
-closest_g4_PDS.sacCer3 <- closest_g4("./Figures/Figure1/exon_up_plus.bed.sacCer3.closest.GSM3003554_Saccaromyces_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_PDS.sacCer3 <- closest_g4("../Figures/Figure1/exon_up_plus.bed.sacCer3.closest.GSM3003554_Saccaromyces_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.bed.sacCer3.closest.GSM3003554_Saccaromyces_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_plus.bed.sacCer3.closest.GSM3003554_Saccaromyces_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_minus.bed.sacCer3.closest.GSM3003554_Saccaromyces_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed")
 
 
-closest_g4_KCL.tair10 <- closest_g4("./Figures/Figure1/exon_up_plus.bed.tair10.closest.GSM3003535_Arabidopsis_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
+closest_g4_KCL.tair10 <- closest_g4("../Figures/Figure1/exon_up_plus.bed.tair10.closest.GSM3003535_Arabidopsis_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_up_minus.bed.tair10.closest.GSM3003535_Arabidopsis_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_plus.bed.tair10.closest.GSM3003535_Arabidopsis_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_minus.bed.tair10.closest.GSM3003535_Arabidopsis_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed")
 
-closest_g4_PDS.tair10 <- closest_g4("./Figures/Figure1/exon_up_plus.bed.tair10.closest.GSM3003536_Arabidopsis_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_PDS.tair10 <- closest_g4("../Figures/Figure1/exon_up_plus.bed.tair10.closest.GSM3003536_Arabidopsis_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.bed.tair10.closest.GSM3003536_Arabidopsis_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_plus.bed.tair10.closest.GSM3003536_Arabidopsis_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_minus.bed.tair10.closest.GSM3003536_Arabidopsis_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed")
 
 
-closest_g4_KCL.danRer10 <- closest_g4("./Figures/Figure1/exon_up_plus.danRer10.closest.GSM3003557_Zebrafish_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
+closest_g4_KCL.danRer10 <- closest_g4("../Figures/Figure1/exon_up_plus.danRer10.closest.GSM3003557_Zebrafish_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_up_minus.danRer10.closest.GSM3003557_Zebrafish_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_plus.danRer10.closest.GSM3003557_Zebrafish_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_minus.danRer10.closest.GSM3003557_Zebrafish_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed")
 
 
-closest_g4_PDS.danRer10 <- closest_g4("./Figures/Figure1/exon_up_plus.danRer10.closest.GSM3003558_Zebrafish_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_PDS.danRer10 <- closest_g4("../Figures/Figure1/exon_up_plus.danRer10.closest.GSM3003558_Zebrafish_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.danRer10.closest.GSM3003558_Zebrafish_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_plus.danRer10.closest.GSM3003558_Zebrafish_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_minus.danRer10.closest.GSM3003558_Zebrafish_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed")
 
 
-closest_g4_KCL.dm6 <- closest_g4("./Figures/Figure1/exon_up_plus.dm6.closest.GSM3003541_Drosophila_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
+closest_g4_KCL.dm6 <- closest_g4("../Figures/Figure1/exon_up_plus.dm6.closest.GSM3003541_Drosophila_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_up_minus.dm6.closest.GSM3003541_Drosophila_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_plus.dm6.closest.GSM3003541_Drosophila_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_minus.dm6.closest.GSM3003541_Drosophila_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed")
 
 
-closest_g4_PDS.dm6 <- closest_g4("./Figures/Figure1/exon_up_plus.dm6.closest.GSM3003542_Drosophila_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_PDS.dm6 <- closest_g4("../Figures/Figure1/exon_up_plus.dm6.closest.GSM3003542_Drosophila_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.dm6.closest.GSM3003542_Drosophila_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_plus.dm6.closest.GSM3003542_Drosophila_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_minus.dm6.closest.GSM3003542_Drosophila_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed")
 
 
-closest_g4_KCL.mm10 <- closest_g4("./Figures/Figure1/exon_up_plus.mm10.closest.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
+closest_g4_KCL.mm10 <- closest_g4("../Figures/Figure1/exon_up_plus.mm10.closest.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_up_minus.mm10.closest.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_plus.mm10.closest.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_minus.mm10.closest.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed")
 
-closest_g4_PDS.mm10 <- closest_g4("./Figures/Figure1/exon_up_plus.mm10.closest.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_PDS.mm10 <- closest_g4("../Figures/Figure1/exon_up_plus.mm10.closest.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.mm10.closest.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_plus.mm10.closest.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_minus.mm10.closest.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed")
 
 
-closest_g4_KCL.hg19 <- closest_g4("./Figures/Figure1/exon_up_plus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
+closest_g4_KCL.hg19 <- closest_g4("../Figures/Figure1/exon_up_plus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_up_minus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_plus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_minus.hg19.closest.GSM3003539_Homo_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed")
 
-closest_g4_PDS.hg19 <- closest_g4("./Figures/Figure1/exon_up_plus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_PDS.hg19 <- closest_g4("../Figures/Figure1/exon_up_plus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_plus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_minus.hg19.closest.GSM3003540_Homo_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed")
 
 
 
-closest_g4_KCL.ce10 <- closest_g4("./Figures/Figure1/exon_up_plus.ce10.closest.GSM3003538_Celegans_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_KCL.ce10 <- closest_g4("../Figures/Figure1/exon_up_plus.ce10.closest.GSM3003538_Celegans_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.ce10.closest.GSM3003537_Celegans_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_plus.ce10.closest.GSM3003537_Celegans_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed",
                              "Figures/Figure1/exon_down_minus.ce10.closest.GSM3003537_Celegans_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed")
 
 
-closest_g4_PDS.ce10 <- closest_g4("./Figures/Figure1/exon_up_plus.ce10.closest.GSM3003538_Celegans_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
+closest_g4_PDS.ce10 <- closest_g4("../Figures/Figure1/exon_up_plus.ce10.closest.GSM3003538_Celegans_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_up_minus.ce10.closest.GSM3003538_Celegans_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_plus.ce10.closest.GSM3003538_Celegans_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed",
                              "Figures/Figure1/exon_down_minus.ce10.closest.GSM3003538_Celegans_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed")
@@ -5176,161 +5772,161 @@ return(x.TOTAL)
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
-hg19.TOTAL.KCL <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
+hg19.TOTAL.KCL <- enrichment_G4_seq_plot("../G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.hg19.score.GSM3003539_Homo_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.hg19.score.GSM3003539_Homo_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
 
 
-hg19.TOTAL.PDS <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.hg19.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.hg19.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.hg19.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.hg19.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.hg19.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.hg19.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
+hg19.TOTAL.PDS <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.hg19.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.hg19.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.hg19.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.hg19.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.hg19.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.hg19.score.GSM3003540_Homo_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.hg19.score.GSM3003540_Homo_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
 
 
 
-sacCer3.TOTAL.KCL <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+sacCer3.TOTAL.KCL <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
+                       "./G4_seq_2019/Evolution/exon_down_minus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.bed.sacCer3.score.GSM3003553_Saccaromyces_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
 
 
-sacCer3.TOTAL.PDS <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+sacCer3.TOTAL.PDS <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
+                       "./G4_seq_2019/Evolution/exon_down_minus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.bed.sacCer3.score.GSM3003554_Saccaromyces_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
 
 
-mouse.TOTAL.KCL <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.mm10.score.GSM3003547_Mouse_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.mm10.score.GSM3003547_Mouse_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+mouse.TOTAL.KCL <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.mm10.score.GSM3003547_Mouse_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.mm10.score.GSM3003547_Mouse_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.mm10.score.GSM3003547_Mouse_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.mm10.score.GSM3003547_Mouse_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.mm10.score.GSM3003547_Mouse_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.mm10.score.GSM3003547_Mouse_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.mm10.score.GSM3003547_Mouse_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.mm10.score.GSM3003547_Mouse_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.mm10.score.GSM3003547_Mouse_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.mm10.score.GSM3003547_Mouse_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.mm10.score.GSM3003547_Mouse_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.mm10.score.GSM3003547_Mouse_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
+                       "./G4_seq_2019/Evolution/exon_down_minus.mm10.score.GSM3003547_Mouse_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.mm10.score.GSM3003547_Mouse_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
 
 
-mouse.TOTAL.PDS <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.mm10.score.GSM3003548_Mouse_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.mm10.score.GSM3003548_Mouse_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+mouse.TOTAL.PDS <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.mm10.score.GSM3003548_Mouse_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.mm10.score.GSM3003548_Mouse_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.mm10.score.GSM3003548_Mouse_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.mm10.score.GSM3003548_Mouse_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.mm10.score.GSM3003548_Mouse_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.mm10.score.GSM3003548_Mouse_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.mm10.score.GSM3003548_Mouse_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.mm10.score.GSM3003548_Mouse_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.mm10.score.GSM3003548_Mouse_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.mm10.score.GSM3003548_Mouse_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.mm10.score.GSM3003548_Mouse_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.mm10.score.GSM3003548_Mouse_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
+                       "./G4_seq_2019/Evolution/exon_down_minus.mm10.score.GSM3003548_Mouse_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.mm10.score.GSM3003548_Mouse_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
 
  
 
 
-dm6.TOTAL.KCL <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+dm6.TOTAL.KCL <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
+                       "./G4_seq_2019/Evolution/exon_down_minus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.dm6.score.GSM3003541_Drosophila_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
 
 
-dm6.TOTAL.PDS <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+dm6.TOTAL.PDS <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
-
-
-
-
-tair10.TOTAL.KCL <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
-                       
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.bed_tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.bed_tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
-                       
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
-                       
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
-
-
-tair10.TOTAL.PDS <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
-                       
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.bed_tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.bed_tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
-                       
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
-                       
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
+                       "./G4_seq_2019/Evolution/exon_down_minus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.dm6.score.GSM3003542_Drosophila_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
 
 
 
-danRer10.TOTAL.KCL <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+
+tair10.TOTAL.KCL <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.bed_tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.bed_tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
+                       "./G4_seq_2019/Evolution/exon_down_minus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.bed.tair10.score.GSM3003535_Arabidopsis_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
+
+
+tair10.TOTAL.PDS <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       
+                       "./G4_seq_2019/Evolution/exon_down_plus.bed_tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.bed_tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       
+                       "./G4_seq_2019/Evolution/exon_up_minus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       
+                       "./G4_seq_2019/Evolution/exon_down_minus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.bed.tair10.score.GSM3003536_Arabidopsis_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
 
 
 
-danRer10.TOTAL.PDS <- enrichment_G4_seq_plot("~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_plus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+danRer10.TOTAL.KCL <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_plus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_up_minus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num",
                        
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
-                       "~/Google_Drive/Results/Non_B/G4_seq_2019/Evolution/exon_down_minus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
+                       "./G4_seq_2019/Evolution/exon_down_minus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_plus.hits.max.K.w50.25.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.danRer10.score.GSM3003557_Zebrafish_all_w15_th-1_minus.hits.max.K.w50.25.bed.txt..num")
+
+
+
+danRer10.TOTAL.PDS <- enrichment_G4_seq_plot("./G4_seq_2019/Evolution/exon_up_plus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_plus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       
+                       "./G4_seq_2019/Evolution/exon_down_plus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_plus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       
+                       "./G4_seq_2019/Evolution/exon_up_minus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_up_minus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num",
+                       
+                       "./G4_seq_2019/Evolution/exon_down_minus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_plus.hits.max.PDS.w50.35.bed.txt..num",
+                       "./G4_seq_2019/Evolution/exon_down_minus.danRer10.score.GSM3003558_Zebrafish_all_w15_th-1_minus.hits.max.PDS.w50.35.bed.txt..num")
 
 ```
 
@@ -5391,13 +5987,13 @@ ggplot(TOTAL.KCL_PDS) +
 
 
 ```{r}
-closest_g4_KCL.hg19.2015 <- closest_g4("./Figures/Supplementary/exon_up_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
+closest_g4_KCL.hg19.2015 <- closest_g4("../Figures/Supplementary/exon_up_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Supplementary/exon_up_minus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Supplementary/exon_down_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Supplementary/exon_down_minus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed")
 
 
-closest_g4_KCL.hg19.2015 <- closest_g4("./Figures/Supplementary/exon_up_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
+closest_g4_KCL.hg19.2015 <- closest_g4("../Figures/Supplementary/exon_up_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Supplementary/exon_up_minus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Supplementary/exon_down_plus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed",
                              "Figures/Supplementary/exon_down_minus.hg19.closest.GSE63874_Na_K_plus_minus_hits_intersect.bed")
@@ -5494,7 +6090,7 @@ plot_grid(venn_supp.up, venn_supp.down, labels = c("3' Splice site", "5' Splice 
 
 
 ```{r}
-dataframe_G4_consensus_motif_enrichment_species <- fread("./Figures/Figure1/dataframe_G4_consensus_motif_enrichment_species")
+dataframe_G4_consensus_motif_enrichment_species <- fread("../Figures/Figure1/dataframe_G4_consensus_motif_enrichment_species")
 
 dataframe_G4_consensus_motif_enrichment_species_matrix <- t(dataframe_G4_consensus_motif_enrichment_species)
 
@@ -5536,7 +6132,7 @@ Fig6.A
 
 ```{r}
 
-dataframe_evo_PDS_K <- fread("./Figures/Figure1/dataframe_evo_PDS_K")
+dataframe_evo_PDS_K <- fread("../Figures/Figure1/dataframe_evo_PDS_K")
 
 
 
@@ -5618,9 +6214,17 @@ Fig2
 ```
 
 
-```{r, fig.height=7, fig.width=14}
-Fig3 <- plot_grid(Fig3.A, Fig3.B, Fig3.C, Fig3.D, labels = "AUTO", ncol=2)
-Fig3
+```{r, fig.height=10, fig.width=14}
+Fig3.old <- plot_grid(Fig3.A, Fig3.B, Fig3.C, Fig3.D, labels = "AUTO", ncol=2)
+
+
+plot_grid( plot_grid(Fig3.C, Fig3.D), Fig3.C.new, Fig3.D.new, ncol = 1)
+
+
+Fig3.top <-  plot_grid( Fig3.A ,Fig3.B,  Fig3.C, Fig3.C.new, labels = "AUTO", ncol=2)
+
+Fig3 <-plot_grid(Fig3.top, Fig3.D.new, labels = c("", "E"), ncol = 1, rel_heights = c(1.5, 1) )
+
 ```
 
 
