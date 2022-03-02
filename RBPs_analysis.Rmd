@@ -1,0 +1,1553 @@
+---
+title: "R Notebook"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+
+
+
+```{r}
+library(data.table)
+library(readxl)
+library(ggrepel)
+library(ggplot2)
+library(cowplot)
+```
+
+
+
+
+```{r}
+library(DescTools)
+library(stringr)
+library(ggplot2)
+library(data.table)
+library(readr)
+library(Hmisc)
+library(cowplot)
+
+```
+
+
+
+```{r}
+func_annotation <- data.table(read_excel("/Users/gp7/Google_Drive/Results/Non_B/potassium_experiments/DGA/13059_2020_1982_MOESM2_ESM.xlsx"))
+```
+
+
+```{r}
+human_diff <- fread('/Users/gp7/Google_Drive/Results/Non_B/potassium_experiments/DGA/control-vs-KCl.diffexp.tsv')
+
+human_diff[ , ID:=gsub("\\..*","", V1)]
+
+human_diff <- merge(human_diff, func_annotation, by="ID", all.x = T)
+
+
+human_diff[!is.na(Gene)]
+```
+
+```{r, fig.width=30, fig.height=10}
+
+human_diff[ Spliceosome==1 , class:='Spliceosome']
+human_diff[ (`Splicing regulation`==1 & Spliceosome==0) , class:='Splicing regulation']
+human_diff[ Helicase==1 , class:='Helicases']
+
+human_diff$class <- factor(human_diff$class, levels=c('Spliceosome', 'Splicing regulation', 'Helicases') )
+
+
+
+
+
+ggplot() +
+geom_point(data = human_diff[!is.na(Gene) & !is.na(class) , ], aes( -log2FoldChange, -log10(padj)  ), colour="grey", alpha=0.5  )+
+geom_point(data = human_diff[!is.na(Gene)  & padj<0.05 & !is.na(class) , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="red", alpha=0.8   ) +
+geom_text_repel(data = human_diff[!is.na(Gene) & padj<0.05 & !is.na(class) , ],
+                colour="black", aes( -log2FoldChange, -log10(padj),
+                label=human_diff[padj<0.05 & !is.na(class)  , Gene]),
+                force = 1.5
+                )   +  
+  facet_grid(. ~ class) +
+xlim(c(-1,1)) +
+xlab(expression(log[2]~Fold~Change))+
+ylab(expression (log[10]~"Adjusted p-value"))+
+theme_bw()
+```
+
+
+```{r}
+
+vulcano.spliceosome <- ggplot() +
+geom_point(data = human_diff[!is.na(Gene)], aes( -log2FoldChange, -log10(padj)  ), colour="grey", alpha=0.5  )+
+  geom_point(data = human_diff[padj<0.05 &  Spliceosome==1 , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="orange", alpha=0.8   ) +
+geom_point(data = human_diff[padj<0.05 & abs(log2FoldChange)>=0.5 &  Spliceosome==1 , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="red", alpha=0.8   ) +
+geom_text_repel(data = human_diff[padj<0.05 & Spliceosome==1 , ],
+                colour="black", aes( -log2FoldChange, -log10(padj),
+                label=human_diff[padj<0.05 &  Spliceosome==1 , Gene]),
+                force = 1.5
+                #nudge_x      = 0.3
+                #direction    = "x",
+                #angle        = 90,
+                #vjust        = 1,
+                #segment.size = 1,
+                #label.size = 0.05,
+                )   +  
+xlim(c(-1,1)) +
+xlab(expression(log[2]~Fold~Change))+
+ylab(expression (-log[10]~"Adjusted p-value"))+
+theme_bw()
+
+
+vulcano.factors <- ggplot() +
+geom_point(data = human_diff[!is.na(Gene)], aes( -log2FoldChange, -log10(padj)  ), colour="grey", alpha=0.5  )+
+geom_point(data = human_diff[padj<0.05 & (`Splicing regulation`==1 & Spliceosome==0)  , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="orange", alpha=0.8   ) +  
+geom_point(data = human_diff[padj<0.05 & abs(log2FoldChange)>=0.5 & (`Splicing regulation`==1 & Spliceosome==0) , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="red", alpha=0.8   ) +
+geom_text_repel(data = human_diff[padj<0.05 & (`Splicing regulation`==1 & Spliceosome==0)  , ],
+                colour="black", aes( -log2FoldChange, -log10(padj),
+                label=human_diff[padj<0.05 & (`Splicing regulation`==1 & Spliceosome==0)   , Gene]),
+                force = 1.5,
+                max.overlaps = Inf,
+                #nudge_x      = 0.3
+                #direction    = "x",
+                #angle        = 90,
+                #vjust        = 1,
+                #segment.size = 1,
+                #label.size = 0.05,
+                )   +  
+xlim(c(-1,1)) +
+xlab(expression(log[2]~Fold~Change))+
+ylab(expression (-log[10]~"Adjusted p-value"))+
+theme_bw()
+
+vulcano.helicase <- ggplot() +
+geom_point(data = human_diff[!is.na(Gene)], aes( -log2FoldChange, -log10(padj)  ), colour="grey", alpha=0.5  )+
+  geom_point(data = human_diff[padj<0.05  &  (Helicase==1) , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="orange", alpha=0.8   ) +
+geom_point(data = human_diff[padj<0.05 &  abs(log2FoldChange)>=0.5 &  (Helicase==1) , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="red", alpha=0.8   ) +
+geom_text_repel(data = human_diff[padj<0.05 & (Helicase==1) , ],
+                colour="black", aes( -log2FoldChange, -log10(padj),
+                label=human_diff[padj<0.05 & (Helicase==1)  , Gene]),
+                force = 1.5
+                #nudge_x      = 0.3
+                #direction    = "x",
+                #angle        = 90,
+                #vjust        = 1,
+                #segment.size = 1,
+                #label.size = 0.05,
+                )   +  
+xlim(c(-1,1)) +
+xlab(expression(log[2]~Fold~Change))+
+ylab(expressiolog[10]~"Adjusted p-value"))+
+theme_bw()
+```
+
+
+
+```{r}
+vulcano.factors <- ggplot() +
+geom_point(data = human_diff[!is.na(Gene)], aes( -log2FoldChange, -log10(padj)  ), colour="grey", alpha=0.5  )+
+geom_point(data = human_diff[padj<0.05 & (`Splicing regulation`==1 & Spliceosome==0)  , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="orange", alpha=0.8   ) +  
+geom_point(data = human_diff[padj<0.05 & abs(log2FoldChange)>=0.5 & (`Splicing regulation`==1 & Spliceosome==0) , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="red", alpha=0.8   ) +
+geom_text_repel(data = human_diff[padj<0.05 & (`Splicing regulation`==1 & Spliceosome==0) & abs(log2FoldChange)>=0.5  , ],
+                colour="black", aes( -log2FoldChange, -log10(padj),
+                label=human_diff[padj<0.05 & (`Splicing regulation`==1 & Spliceosome==0) & abs(log2FoldChange)>=0.5 &  , Gene]),
+                force = 1.5
+                #nudge_x      = 0.3
+                #direction    = "x",
+                #angle        = 90,
+                #vjust        = 1,
+                #segment.size = 1,
+                #label.size = 0.05,
+                )   +  
+xlim(c(-1,1)) +
+xlab(expression(log[2]~Fold~Change))+
+ylab(expression (log[10]~"Adjusted p-value"))+
+theme_bw()
+```
+
+
+```{r}
+vulcano.factors
+
+```
+
+
+```{r}
+ggplot() +
+geom_point(data = human_diff, aes( -log2FoldChange, -log10(padj)  ), colour="grey", alpha=0.5  )+
+geom_point(data = human_diff[  padj<0.05 & abs(log2FoldChange)>=0.5 , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="red", alpha=0.8   ) +
+
+xlab(expression(log[2]~Fold~Change))+
+ylab(expression (log[10]~"Adjusted p-value"))+
+theme_bw()
+```
+
+
+```{r}
+ggplot() +
+geom_point(data = human_diff[!is.na(Gene)], aes( -log2FoldChange, -log10(padj)  ), colour="grey", alpha=0.5  )+
+geom_point(data = human_diff[(Gene %in% filtered_factors.KCL) & padj<0.05 & abs(log2FoldChange)>=0.5 , ], aes( -log2FoldChange, -log10(padj) ) ,  colour="red", alpha=0.8   ) +
+geom_text_repel(data = human_diff[(Gene %in% filtered_factors.KCL) & padj<0.05 & abs(log2FoldChange)>=0.5 , ],
+                colour="black", aes( -log2FoldChange, -log10(padj),
+                label=human_diff[(Gene %in% filtered_factors.KCL) & padj<0.05 & abs(log2FoldChange)>=0.5  , Gene]),
+                force = 1.5
+                #nudge_x      = 0.3
+                #direction    = "x",
+                #angle        = 90,
+                #vjust        = 1,
+                #segment.size = 1,
+                #label.size = 0.05,
+                )   +  
+xlim(c(-1,1)) +
+xlab(expression(log[2]~Fold~Change))+
+ylab(expression (log[10]~"Adjusted p-value"))+
+theme_bw()
+```
+
+
+
+```{r, fig.width=10, fig.height=5}
+
+plot_grid(vulcano.spliceosome, vulcano.factors, labels = "AUTO", rows = 1)
+
+```
+
+
+
+```{r}
+human_diff[padj<0.05 & !is.na(Gene),][order(-abs(log2FoldChange) )]
+human_diff[padj<0.05 & abs(log2FoldChange)>=0.5 & !is.na(Gene),][order(-abs(log2FoldChange) )]
+```
+
+
+
+#######
+
+Experimental transition figure
+
+
+```{r}
+matrix.total.delta_sums <- as.data.frame(cbind(rowSums(matrix.non_template), rowSums(matrix.template)))
+
+matrix.total.delta_sums$ID <-  rownames(matrix.total.delta_sums)
+
+colnames(matrix.total.delta_sums) <- c("Non_template", "Template", "ID")
+
+
+
+matrix.total.delta_sums <- data.table(matrix.total.delta_sums)
+
+
+setDT(matrix.total.delta_sums)[, c("Factor_ID", "Cell", "File") := tstrsplit(ID, "_")]
+
+setDT(matrix.total.delta_sums)[, c("Gene", "Specie") := tstrsplit(Factor_ID, "")]
+
+
+
+
+matrix.total.delta_sums.collapsed <- matrix.total.delta_sums[ , .(Non_template.mean=mean(Non_template), Template.mean=mean(Template)) , by=c("Gene", "Cell")]
+
+matrix.total.delta_sums.kcl <- merge(matrix.total.delta_sums.collapsed, human_diff[!is.na(Gene)], by="Gene")
+```
+
+
+
+```{r, fig.height=10, fig.width=6}
+ggplot() +
+geom_point(data = matrix.total.delta_sums.kcl[!is.na(Gene)], aes( Non_template.mean, Template.mean  ), colour="grey", alpha=0.5  )+
+geom_point(data = matrix.total.delta_sums.kcl[padj<0.05 & log2FoldChange<0 & (`Splicing regulation`==1 & Spliceosome==0) , ], aes( Non_template.mean, Template.mean  ) ,  colour="red", alpha=0.8   ) +
+geom_point(data = matrix.total.delta_sums.kcl[padj<0.05 & log2FoldChange>0 &  (`Splicing regulation`==1 & Spliceosome==0) , ], aes( Non_template.mean, Template.mean ) ,  colour="blue", alpha=0.8   ) +  
+  
+geom_text_repel(data = matrix.total.delta_sums.kcl[padj<0.05 & (`Splicing regulation`==1 & Spliceosome==0) , ],
+                colour="black", aes( Non_template.mean, Template.mean,
+                label=matrix.total.delta_sums.kcl[padj<0.05 & (`Splicing regulation`==1 & Spliceosome==0)  , Gene]),
+                force = 1.5
+                #nudge_x      = 0.3
+                #direction    = "x",
+                #angle        = 90,
+                #vjust        = 1,
+                #segment.size = 1,
+                #label.size = 0.05,
+                )   +
+  
+facet_grid(Cell ~ .) +
+#xlim(c(-1,1)) +
+#xlab(expression(log[2]~Fold~Change))+
+#ylab(expression (log[10]~"Adjusted p-value"))+
+theme_bw()
+```
+
+
+
+
+```{r, fig.height=10, fig.width=6}
+ggplot() +
+geom_point(data = matrix.total.delta_sums.kcl[!is.na(Gene)], aes( Non_template.mean, Template.mean  ), colour="grey", alpha=0.5  )+
+geom_point(data = matrix.total.delta_sums.kcl[padj<0.05 & log2FoldChange<0 & (`Helicase`==1) , ], aes( Non_template.mean, Template.mean  ) ,  colour="red", alpha=0.8   ) +
+geom_point(data = matrix.total.delta_sums.kcl[padj<0.05 & log2FoldChange>0 &  (`Helicase`==1 ) , ], aes( Non_template.mean, Template.mean ) ,  colour="blue", alpha=0.8   ) +  
+  
+geom_text_repel(data = matrix.total.delta_sums.kcl[padj<0.05 & (`Helicase`==1 ) , ],
+                colour="black", aes( Non_template.mean, Template.mean,
+                label=matrix.total.delta_sums.kcl[padj<0.05 & (`Helicase`==1 )  , Gene]),
+                force = 1.5
+                #nudge_x      = 0.3
+                #direction    = "x",
+                #angle        = 90,
+                #vjust        = 1,
+                #segment.size = 1,
+                #label.size = 0.05,
+                )   +
+  
+facet_grid(Cell ~ .) +
+#xlim(c(-1,1)) +
+xlab(expression(log[2]~Fold~Change))+
+ylab(expression (log[10]~"Adjusted p-value"))+
+theme_bw()
+
+```
+#####
+
+
+
+
+
+
+
+
+```{r}
+
+
+
+read_dist_table <- function(path){
+  
+dist_table <- data.table(read_delim(path, 
+    "\t", escape_double = FALSE, col_names = FALSE, 
+    trim_ws = TRUE))
+
+dist_table <- dist_table[, 2:2001]
+dist_table <- data.table(as.data.frame(t(dist_table)))
+colnames(dist_table) <- c("Position", "Occurrences")
+
+dist_table[,median:=median(Occurrences)]
+dist_table[, Enrrichment:=Occurrences/median]
+dist_table[, Position:=Position-1]
+
+return(dist_table)  
+}
+
+
+```
+
+
+
+```{r}
+
+
+plot_density_binomial_RBP <- function(up_plus, up_minus, down_plus, down_minus, observations_up, observations_down, sig){
+
+  
+  up_TOTAL <-  merge(up_plus, up_minus, by="Position")
+  up_TOTAL[,Occurrences:=Occurrences.x+Occurrences.y]
+  up_TOTAL[,Occurrences:=Occurrences.x+Occurrences.y]
+  
+
+  
+  
+  up_TOTAL <- cbind(up_TOTAL, up_TOTAL[, binconf(Occurrences, observations_up, alpha=sig) ])
+
+  up_TOTAL[,median:=median(PointEst)]
+  up_TOTAL[, Enrrichment:=PointEst/median]
+  up_TOTAL[, Enrrichment_l:=Lower/median]
+  up_TOTAL[, Enrrichment_u:=Upper/median]
+  up_TOTAL[, Position:=Position-1]
+
+  
+  
+  down_TOTAL <-  merge(down_plus, down_minus, by="Position")
+  down_TOTAL[,Occurrences:=Occurrences.x+Occurrences.y]
+
+  
+  down_TOTAL <- cbind(down_TOTAL, down_TOTAL[, binconf(Occurrences, observations_down, alpha=sig) ])
+
+  down_TOTAL[,median:=median(PointEst)]
+  down_TOTAL[, Enrrichment:=PointEst/median]
+  down_TOTAL[, Enrrichment_l:=Lower/median]
+  down_TOTAL[, Enrrichment_u:=Upper/median]
+  down_TOTAL[, Position:=Position-1]  
+  
+  
+  up_TOTAL[ ,exon_pos:="Upstream"]
+  down_TOTAL[ ,exon_pos:="Downstream"]
+  
+  TOTAL <- rbind(up_TOTAL, down_TOTAL)
+  
+  TOTAL$exon_pos <-  factor(TOTAL$exon_pos, levels=c("Upstream", "Downstream" )) 
+  
+  p <- ggplot(TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    geom_ribbon(aes(ymin=Enrrichment_l, ymax=Enrrichment_u, x=Position), alpha=0.3 )+
+    facet_grid( . ~ exon_pos ) +
+    theme_bw()
+  
+  #show(p)
+  
+  return(TOTAL) 
+  
+}
+```
+
+
+
+```{r}
+plot_eql_diff_binomial_table <- function(eql_up_plus, eql_up_minus, eql_down_plus, eql_down_minus, diff_up_plus, diff_up_minus, diff_down_plus, diff_down_minus, TOTAL.eql_up, TOTAL.eql_down, TOTAL.diff_up, TOTAL.diff_down, sig   ){ 
+
+
+diff.up_plus <- read_dist_table(diff_up_plus)
+diff.up_minus <- read_dist_table(diff_up_minus)
+diff.down_plus <- read_dist_table(diff_down_plus)
+diff.down_minus <- read_dist_table(diff_down_minus)
+diff.up_minus[,Position:=Position*-1]
+diff.down_minus[,Position:=Position*-1]
+
+
+diff.TOTAL <- plot_density_binomial_RBP(diff.up_plus, diff.up_minus, diff.down_plus, diff.down_minus, TOTAL.diff_up, TOTAL.diff_down, sig)
+
+
+eql.up_plus <- read_dist_table(eql_up_plus)
+eql.up_minus <- read_dist_table(eql_up_minus)
+eql.down_plus <- read_dist_table(eql_down_plus)
+eql.down_minus <- read_dist_table(eql_down_minus)
+eql.up_minus[,Position:=Position*-1]
+eql.down_minus[,Position:=Position*-1]
+
+
+eql.TOTAL <- plot_density_binomial_RBP(eql.up_plus, eql.up_minus, eql.down_plus, eql.down_minus, TOTAL.eql_up, TOTAL.eql_down, sig)
+
+diff.TOTAL[, type:="wG4"]
+eql.TOTAL[, type:="woG4"]
+
+diff_eql.TOTAL <- rbind(diff.TOTAL, eql.TOTAL)
+
+return(diff_eql.TOTAL)
+
+}
+```
+
+
+```{r}
+
+
+
+files <- list.files("./RBPs/", pattern ="exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.")
+
+samples <- str_replace(str_replace(files,  "exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", "" ), ".bed.list.out.num", "")
+
+metadata <- fread("./RBPs/metadata.tsv")
+#sample = 'ENCFF786JAM'
+
+
+```
+
+
+```{r}
+figure6_samples <- c("ENCFF465QKS", "ENCFF404OSK", "ENCFF877KBJ", "ENCFF014BXV", "ENCFF639MYI")
+```
+
+
+```{r}
+figure6_samples
+```
+
+```{r}
+unique(figure6_table$ID)
+```
+
+
+```{r}
+figure6_samples %in% unique(figure6_table$ID)
+```
+
+
+##### Rebuttal
+
+```{r, fig.width= 10 , fig.height=5}
+
+
+figure6_table <- data.table()
+
+for (sample in figure6_samples){
+  
+  if (length( list.files("./RBPs/", pattern = sample))>=16){
+
+  RBP_binomial_table_non_template <- plot_eql_diff_binomial_table(
+  paste("./RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  110870 + 109467,
+  108638 + 107433,
+  3587 + 3431,
+  5819 + 5465,
+  0.05
+  )
+  
+  RBP_binomial_table_non_template$pos_int <- cut(RBP_binomial_table_non_template$Position, breaks = 40, labels = seq(-999,1000,50)-1)
+  RBP_binomial_table_non_template_stats <- RBP_binomial_table_non_template[ , .(Enrrichment=mean(Enrrichment), Enrrichment_l=mean(Enrrichment_l), Enrrichment_u=mean(Enrrichment_u))  , by=c( "exon_pos", "type",  "pos_int"  ) ]
+  
+  
+  Total.Overlaps.non_template <- c()
+  
+  for (i in seq(-200, 200, 50)){
+  
+  O.Upstream <- Overlap(
+  RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="wG4", c("Enrrichment_l", "Enrrichment_u")],
+  RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="woG4", c("Enrrichment_l", "Enrrichment_u")]
+  )
+  
+  O.Downstream <- Overlap(
+  RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="wG4", c("Enrrichment_l", "Enrrichment_u")],
+  RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="woG4", c("Enrrichment_l", "Enrrichment_u")]
+  )
+  
+  Total.Overlaps.non_template <- rbind(Total.Overlaps.non_template, c(O.Upstream, O.Downstream))
+  
+  }
+  
+  
+  RBP_binomial_table_template <- plot_eql_diff_binomial_table(
+  paste("./RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  110841 + 109504,
+  111508 + 110025,
+  3616 + 3394,
+  2949 + 2873,
+  0.05
+  )
+  
+  
+  
+  RBP_binomial_table_template$pos_int <- cut(RBP_binomial_table_template$Position, breaks = 40, labels = seq(-999,1000,50)-1)
+  RBP_binomial_table_template_stats <- RBP_binomial_table_template[ , .(Enrrichment=mean(Enrrichment), Enrrichment_l=mean(Enrrichment_l), Enrrichment_u=mean(Enrrichment_u))  , by=c( "exon_pos", "type",  "pos_int"  ) ]
+  
+  
+  Total.Overlaps.template <- c()
+  
+  for (i in seq(-200, 200, 50)){
+  
+  O.Upstream <- Overlap(
+  RBP_binomial_table_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="wG4", c("Enrrichment_l", "Enrrichment_u")],
+  RBP_binomial_table_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="woG4", c("Enrrichment_l", "Enrrichment_u")]
+  )
+  
+  O.Downstream <- Overlap(
+  RBP_binomial_table_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="wG4", c("Enrrichment_l", "Enrrichment_u")],
+  RBP_binomial_table_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="woG4", c("Enrrichment_l", "Enrrichment_u")]
+  )
+  
+  Total.Overlaps.template <- rbind(Total.Overlaps.template, c(O.Upstream, O.Downstream))
+  
+  }
+  
+  
+  
+  
+  if (0 %in% rbind(Total.Overlaps.non_template,  Total.Overlaps.template) ){
+    
+    
+    head(RBP_binomial_table_non_template)
+    
+    RBP_binomial_table_non_template[, DNA_sense:="non_template"]
+    RBP_binomial_table_template[, DNA_sense:="template"]
+    
+    RBP_binomial_table_non_template[, ID:=sample]
+    RBP_binomial_table_template[, ID:=sample]
+    
+    figure6_table <- rbind(figure6_table, RBP_binomial_table_non_template)
+    figure6_table <- rbind(figure6_table, RBP_binomial_table_template)
+    
+       
+#    RBP_plot.non_template <- ggplot(RBP_binomial_table_non_template) +
+#    geom_line(aes(x=Position, y=Enrrichment, color=type)) +
+#     geom_ribbon(aes(ymin=Enrrichment_l, ymax=Enrrichment_u, x=Position, fill=type), alpha=0.3 )+
+#    xlim(c(-250,250)) +
+#    facet_grid(. ~ exon_pos  ) +
+#    labs(colour = "100nt flanking intronic window", fill="100nt flanking intronic window") +
+#    theme_bw() +
+#    ggtitle(paste(metadata[`File accession`==sample, `Experiment target`], metadata[`File accession`==sample, `Biosample term name`], sample, "non-template")) +
+#    theme(legend.position = "top", legend.direction = "horizontal") +
+#    scale_fill_manual(values=c("#669900", "grey")) +  
+#    scale_color_manual(values=c("#669900", "darkgrey"))
+    
+    
+#    RBP_plot.template <-  ggplot(RBP_binomial_table_template) +
+#    geom_line(aes(x=Position, y=Enrrichment, color=type)) +
+#     geom_ribbon(aes(ymin=Enrrichment_l, ymax=Enrrichment_u, x=Position, fill=type), alpha=0.3 )+
+#    xlim(c(-250,250)) +
+#    facet_grid(. ~ exon_pos  ) +
+#    labs(colour = "100nt flanking intronic window", fill="100nt flanking intronic window") +
+#    theme_bw() +
+#    ggtitle(paste(metadata[`File accession`==sample, `Experiment target` ], metadata[`File accession`==sample, `Biosample term name`],  sample, "template")) +
+#    theme(legend.position = "top", legend.direction = "horizontal") +
+#    scale_fill_manual(values=c("#669900", "grey")) +  
+#    scale_color_manual(values=c("#669900", "darkgrey"))
+    
+    
+#    pdf(paste0("./RBPs/plots/", sample , ".pdf")) 
+#    plot_grid(RBP_plot.non_template, RBP_plot.template,  nrow =1)
+#    dev.off() 
+    
+  }
+  
+  }
+
+
+}
+```
+
+```{r}
+figure6_table[ , .(exon_pos, DNA_sense)]
+```
+
+
+```{r, fig.height=10, fig.width=6.5}
+
+
+    
+figure6_table[ , col_pos:=paste(exon_pos, DNA_sense)]
+
+figure6_table$col_pos <- factor(figure6_table$col_pos, levels = c('Upstream non_template' , 'Downstream non_template',  'Upstream template', 'Downstream template'))
+
+figure6_table$ID <- factor(figure6_table$ID, levels = figure6_samples)
+
+ ggplot(figure6_table) +
+    geom_line(aes(x=Position, y=Enrrichment, color=type)) +
+     geom_ribbon(aes(ymin=Enrrichment_l, ymax=Enrrichment_u, x=Position, fill=type), alpha=0.3 )+
+    xlim(c(-250,250)) +
+    facet_grid(ID ~ col_pos, scales="free_y"  ) +
+    labs(colour = "100nt flanking intronic window", fill="100nt flanking intronic window") +
+    theme_bw() +
+    theme(legend.position = "top", legend.direction = "horizontal") +
+    scale_fill_manual(values=c("#669900", "grey")) +  
+    scale_color_manual(values=c("#669900", "darkgrey")) +
+   #theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+   theme(axis.text.x = element_text(angle = 45))
+```
+
+
+
+```{r}
+
+delta.non_template.rows <- c()
+matrix.non_template.row_names <- c()
+matrix.non_template <- c()
+
+sample ="ENCFF639MYI"
+#for (sample in samples){
+  
+#  if (length( list.files("./RBPs/", pattern = sample))==16 & (metadata[`File accession`==sample, Assembly]=="hg19" ) ){
+
+  RBP_binomial_table_non_template <- plot_eql_diff_binomial_table(
+  paste("./RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  paste("./RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+  110870 + 109467,
+  108638 + 107433,
+  3587 + 3431,
+  5819 + 5465,
+  0.05
+  )
+
+  RBP_binomial_table_non_template$pos_int <- cut(RBP_binomial_table_non_template$Position, breaks = 200, labels = seq(-999,1000,10)-1)
+  RBP_binomial_table_non_template_stats <- RBP_binomial_table_non_template[ , .(Enrrichment=mean(Enrrichment), Enrrichment_l=mean(Enrrichment_l),   Enrrichment_u=mean(Enrrichment_u))  , by=c( "exon_pos", "type",  "pos_int"  ) ]
+  
+  
+  Total.deltas.non_template.up <- c()
+  Total.deltas.non_template.down <- c()
+  
+    for (i in seq(-200, 190, 10)){
+    
+    O.Upstream <- Overlap(
+    RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="wG4", c("Enrrichment_l", "Enrrichment_u")],
+    RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="woG4", c("Enrrichment_l", "Enrrichment_u")]
+    )
+    
+    if (is.na(O.Upstream)){
+      
+      O.Upstream <- 1
+    }
+    
+    O.Downstream <- Overlap(
+    RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="wG4", c("Enrrichment_l", "Enrrichment_u")],
+    RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="woG4", c("Enrrichment_l", "Enrrichment_u")]
+    )
+    
+    if (is.na(O.Downstream)){
+      
+      O.Downstream <- 1
+   }    
+    
+    delta.up <- 0
+    
+    if (O.Upstream==0 ) {
+      
+      delta.up <- RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="wG4", "Enrrichment"] - RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="woG4", "Enrrichment"]
+      
+      
+    }
+      
+      
+    delta.down <- 0
+    
+    if (O.Downstream==0 ) {
+      
+      delta.down <- RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="wG4", "Enrrichment"] - RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="woG4", "Enrrichment"]
+      
+      
+    }
+        
+    Total.deltas.non_template.up <- c(Total.deltas.non_template.up, as.numeric(delta.up))
+    Total.deltas.non_template.down <- c(Total.deltas.non_template.down, as.numeric(delta.down))
+    
+    }
+  
+  protein = metadata[`File accession`==sample, `Experiment target` ]
+  cell_line = metadata[`File accession`==sample, `Biosample term name`]
+  name = paste(protein, cell_line, sample, sep="_")
+  
+  
+  matrix.non_template <- rbind(matrix.non_template, c(Total.deltas.non_template.up, Total.deltas.non_template.down))
+  
+  matrix.non_template.row_names <- c(matrix.non_template.row_names, name)
+
+
+#  }
+  
+#}
+```
+
+
+
+
+
+### Farm
+
+```{r}
+
+delta.non_template.rows <- c()
+matrix.non_template.row_names <- c()
+matrix.non_template <- c()
+
+for (sample in samples){
+  
+  if ( (length( list.files("./scores/", pattern = sample))==192 ) & (metadata[`File accession`==sample, Assembly]=="hg19" ) ) {
+
+    RBP_binomial_table_non_template <- plot_eql_diff_binomial_table(
+      paste("./scores/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+      paste("./scores/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+      paste("./scores/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+      paste("./scores/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.", sample, ".bed.list.out.num", sep=""),
+      paste("./scores/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+      paste("./scores/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+      paste("./scores/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+      paste("./scores/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.", sample, ".bed.list.out.num", sep=""),
+      110870 + 109467,
+      108638 + 107433,
+      3587 + 3431,
+      5819 + 5465,
+      0.05
+    )
+
+  RBP_binomial_table_non_template$pos_int <- cut(RBP_binomial_table_non_template$Position, breaks = 200, labels = seq(-999,1000,10)-1)
+  RBP_binomial_table_non_template_stats <- RBP_binomial_table_non_template[ , .(Enrrichment=mean(Enrrichment), Enrrichment_l=mean(Enrrichment_l),   Enrrichment_u=mean(Enrrichment_u))  , by=c( "exon_pos", "type",  "pos_int"  ) ]
+  
+  
+  Total.deltas.non_template.up <- c()
+  Total.deltas.non_template.down <- c()
+  
+      for (i in seq(-200, 190, 10)){
+    
+    O.Upstream <- Overlap(
+    RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="wG4", c("Enrrichment_l", "Enrrichment_u")],
+    RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="woG4", c("Enrrichment_l", "Enrrichment_u")]
+    )
+    
+    if (is.na(O.Upstream)){
+      
+      O.Upstream <- 1
+    }
+    
+    O.Downstream <- Overlap(
+    RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="wG4", c("Enrrichment_l", "Enrrichment_u")],
+    RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="woG4", c("Enrrichment_l", "Enrrichment_u")]
+    )
+    
+    if (is.na(O.Downstream)){
+      
+      O.Downstream <- 1
+   }    
+    
+    delta.up <- 0
+    
+    if (O.Upstream==0 ) {
+      
+      delta.up <- RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="wG4", "Enrrichment"] - RBP_binomial_table_non_template_stats[ exon_pos=="Upstream" & pos_int==i & type=="woG4", "Enrrichment"]
+      
+      
+    }
+      
+      
+    delta.down <- 0
+    
+    if (O.Downstream==0 ) {
+      
+      delta.down <- RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="wG4", "Enrrichment"] - RBP_binomial_table_non_template_stats[ exon_pos=="Downstream" & pos_int==i & type=="woG4", "Enrrichment"]
+      
+      
+    }
+        
+    Total.deltas.non_template.up <- c(Total.deltas.non_template.up, as.numeric(delta.up))
+    Total.deltas.non_template.down <- c(Total.deltas.non_template.down, as.numeric(delta.down))
+    
+    }
+  
+  protein = metadata[`File accession`==sample, `Experiment target` ]
+  cell_line = metadata[`File accession`==sample, `Biosample term name`]
+  name = paste(protein, cell_line, sample, sep="_")
+  
+  
+  matrix.non_template <- rbind(matrix.non_template, c(Total.deltas.non_template.up, Total.deltas.non_template.down))
+  
+  matrix.non_template.row_names <- c(matrix.non_template.row_names, name)
+
+
+  }
+  
+}
+
+
+
+```
+
+
+```{r}
+figure6_table
+```
+
+
+```{r}
+rownames(matrix.non_template) <- matrix.non_template.row_names
+colnames(matrix.non_template)  <- c(paste0("UP",  as.character(seq(-200,190, 10)) ), paste0("DOWN",  as.character(seq(-200,190, 10)) ))
+write.table(DT.non_template, file = "./non_template.RBP.matrix", row.names=T, col.names=T, quote=F)
+```
+
+
+
+```{r}
+data_table.non_template <- fread("./RBPs/tables/non_template.RBP.matrix")
+
+matrix.non_template <- as.matrix(data_table.non_template[, c(paste0("UP",  as.character(seq(-200,190, 10)) ), paste0("DOWN",  as.character(seq(-200,190, 10)) ))])
+rownames(matrix.non_template) <- data_table.non_template$V1
+```
+
+
+
+```{r}
+
+matrix.non_template[which(!is.finite(matrix.non_template))] <- 0
+
+matrix.non_template.filter <- matrix.non_template[ rowSums(abs(matrix.non_template))>30, ]
+
+dim(matrix.non_template)
+dim(matrix.non_template.filter)
+
+```
+
+
+
+
+
+```{r}
+test = matrix(rnorm(200), 20, 10)
+test[1:10, seq(1, 10, 2)] = test[1:10, seq(1, 10, 2)] + 3
+test[11:20, seq(2, 10, 2)] = test[11:20, seq(2, 10, 2)] + 2
+test[15:20, seq(2, 10, 2)] = test[15:20, seq(2, 10, 2)] + 4
+colnames(test) = paste("Test", 1:10, sep = "")
+rownames(test) = paste("Name", 1:20, sep = "")
+
+paletteLength <- 50
+myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
+# length(breaks) == length(paletteLength) + 1
+# use floor and ceiling to deal with even/odd length pallettelengths
+myBreaks <- c(seq(min(test), 0, length.out=ceiling(paletteLength/2) + 1), 
+              seq(max(test)/paletteLength, max(test), length.out=floor(paletteLength/2)))
+
+```
+
+```{r}
+bk1 <- c(seq(-6,0.9,by=0.001),0.999)
+bk2 <- c(1.001,seq(1.1,6,by=0.1))
+bk <- c(bk1,bk2)  #combine the break limits for purpose of graphing
+
+my_palette <- c(colorRampPalette(colors = c("darkblue", "lightblue"))(n = length(bk1)-1),
+              "gray38", "gray38",
+              c(colorRampPalette(colors = c("darkred", "tomato1"))(n = length(bk2)-1)))
+
+```
+
+
+```{r, fig.width=10, fig.height=10}
+
+my.breaks <- c(seq(-6, -0.001, by=0.001),
+               seq(0.001, 6, by=0.001)) 
+my.colors <- c(colorRampPalette(colors = c("darkblue", "lightblue", "antiquewhite"))(length(my.breaks)/2),
+               colorRampPalette(colors = c("bisque", "red", "firebrick"))(length(my.breaks)/2))
+
+
+RBP_heatmap.non_template <- pheatmap::pheatmap(matrix.non_template, fontsize = 4,   cutree_rows = 8, clustering_method = "ward.D", cluster_cols=F, 
+                                               color = my.colors, breaks = my.breaks, scale = "none",
+                                               show_rownames=F, show_colnames = F)
+```
+
+
+```{r}
+matrix.non_template["ZC3H8−human_K562_ENCFF207UUG",]
+View(matrix.non_template)
+View(data_table.non_template)
+
+data_table.non_template[V1=="ZC3H8−human_K562_ENCFF207UUG", ]
+```
+
+
+
+
+```{r}
+data_table.template <- fread("./RBPs/tables/template.RBP.matrix")
+
+matrix.template <- as.matrix(data_table.template[, c(paste0("UP",  as.character(seq(-200,190, 10)) ), paste0("DOWN",  as.character(seq(-200,190, 10)) ))])
+rownames(matrix.template) <- data_table.template$V1
+```
+
+
+
+```{r}
+
+matrix.template[which(!is.finite(matrix.template))] <- 0
+
+matrix.template.filter <- matrix.template[ rowSums(abs(matrix.template))>1, ]
+
+
+
+
+dim(matrix.template.filter)
+#View(matrix.template.filter)
+```
+
+```{r}
+
+c(c(81:110 ), (131:160))
+
+matrix.total[, c( c(1:30), c(51:110), (131:160) )    ]
+```
+
+
+```{r, fig.width=10, fig.height=10}
+
+
+RBP_heatmap.template <- pheatmap::pheatmap(matrix.template, fontsize = 4,   cutree_rows = 8, clustering_method = "ward.D", cluster_cols=F,
+                                           color = my.colors, breaks = my.breaks, scale = "none",
+                                           show_rownames=F, show_colnames = F)
+```
+
+
+
+
+```{r, fig.height=10, fig.width=10}
+library(ggalluvial)
+library(plyr)
+
+clustering.non_template <- hclust(dist(matrix.non_template), method = "ward.D")
+clusters.non_template <- cutree(clustering.non_template, k=8)
+
+
+
+
+clustering.template <- hclust(dist(matrix.template), method = "ward.D")
+clusters.template <- cutree(clustering.template, k=8)
+
+
+clustering.total <-  as.data.frame(cbind(clusters.non_template, clusters.template = clusters.template[names(clusters.non_template)]))
+
+
+clustering.total$clusters.non_template <- mapvalues(clustering.total$clusters.non_template , 
+          from =1:8,
+          to = c("ns2", "iB2", "iB1", "iBsU", "ns1", "ieB2", "ieB1", "iBsD"))
+
+
+clustering.total$clusters.template <- mapvalues(clustering.total$clusters.template , 
+          from =1:8,
+          to = c("ns1", "ns2", "ieB2", "iB1", "iB2", "iBsU", "iBsD", "ieB1"))
+
+
+clustering.total$sample <- rownames(clustering.total)
+
+clustering.total <- data.table(clustering.total)
+
+
+clustering.total.stats <- clustering.total[ , .N , by =c("clusters.non_template", "clusters.template")]
+
+ggplot(clustering.total.stats, aes(y=N, axis1=clusters.non_template, axis2=clusters.template)) +
+  geom_alluvium( width = 1/12) +
+  geom_stratum(width = 1/12, fill = "black", color = "grey") +
+  geom_label(stat = "stratum", label.strata = TRUE) +
+  scale_x_discrete(limits = c("clusters.non_template", "clusters.template"), expand = c(.05, .05))
+
+```
+
+
+```{r,  fig.height=10, fig.width=10}
+ggplot(clustering.total.stats, aes(y=N, axis1=clusters.non_template, axis2=clusters.template)) +
+  geom_alluvium(aes(fill=clusters.non_template=="ieB1"), width = 1/12) +
+  geom_stratum(width = 1/12, fill = "black", color = "grey") +
+  geom_label(stat = "stratum", label.strata = TRUE) +
+  scale_x_discrete(limits = c("clusters.non_template", "clusters.template"), expand = c(.05, .05)) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values=c("grey", "firebrick"))
+```
+
+
+
+```{r}
+ggplot(as.data.frame(UCBAdmissions),
+       aes(y = Freq, axis1 = Gender, axis2 = Dept)) +
+  geom_alluvium(aes(fill = Admit), width = 1/12) +
+  geom_stratum(width = 1/12, fill = "black", color = "grey") +
+  geom_label(stat = "stratum", label.strata = TRUE) +
+  scale_x_discrete(limits = c("Gender", "Dept"), expand = c(.05, .05)) +
+  scale_fill_brewer(type = "qual", palette = "Set1") 
+```
+
+
+
+```{r, fig.width=7, fig.height=20}
+
+matrix.total <- cbind(matrix.non_template, matrix.template)
+
+matrix.total.trim <- matrix.total[, c( c(1:30), c(51:110), (131:160) )    ]
+
+
+nt_t.colnames <-  c(paste0("ntUP",  as.character(seq(-200,190, 10)) ), paste0("ntDOWN",  as.character(seq(-200,190, 10)) ),  c(paste0("tUP",  as.character(seq(-200,190, 10)) ), paste0("tDOWN",  as.character(seq(-200,190, 10)) )) )
+
+
+
+colnames(matrix.total) <- nt_t.colnames
+
+New_fig.1 <- pheatmap::pheatmap(matrix.total.trim, fontsize = 4,   cutree_rows = 10, clustering_method = "ward.D", cluster_cols=F,
+                                        color = my.colors, breaks = my.breaks, scale = "none",
+                                        show_rownames=F, show_colnames = F, legend = T)
+
+```
+
+
+
+```{r}
+
+hc_rows <- hclust(dist(matrix.total.trim), method = "ward.D")
+
+RBP_clusters <-  cutree(hc_rows, k=10)
+
+
+RBP_clusters.table <- data.table(cbind(names(RBP_clusters), as.numeric(RBP_clusters)))
+
+colnames(RBP_clusters.table) <- c("ID", "cluster")
+
+RBP_clusters.table <- data.table(RBP_clusters.table)
+
+
+
+
+
+
+RBP_clusters.table <- cbind(RBP_clusters.table, str_split_fixed(RBP_clusters.table$ID, "_", 3))
+
+
+RBP_clusters.table <- cbind(RBP_clusters.table, str_split_fixed(RBP_clusters.table$V1, "-", 2))
+
+RBP_clusters.table <- RBP_clusters.table[, c(1,2,4,5,6,7)]
+
+colnames(RBP_clusters.table) <- c("ID", "cluster", "Cell", "File", "Gene", "Organism")
+
+
+
+```
+
+
+#########
+
+
+
+```{r}
+
+
+
+RBP_heatmap.total <- pheatmap::pheatmap(matrix.total.trim, fontsize = 4,   cutree_rows = 10, clustering_method = "ward.D", cluster_cols=F,
+                                        color = my.colors, breaks = my.breaks, scale = "none",
+                                        show_rownames=T, show_colnames = F)
+
+```
+
+
+
+
+
+```{r}
+ha = HeatmapAnnotation(df = anno1, anno_fun = anno2, ...)
+Heatmap(matrix.total.trim, top_annotation = ha)
+```
+
+
+######
+
+
+
+
+
+#######
+
+# RNA-seq analysis
+
+#######
+
+
+
+
+
+
+```{r}
+
+replace_p_value <- function(chisq_table){
+  
+  
+  nrows <- nrow(chisq_table)
+  print(chisq_table)
+  
+  for (i in 1:nrows) {
+  
+
+  
+  conTable <- matrix(nrow = 2, c(chisq_table[i, eql_notG4] ,
+                                 chisq_table[i, diff_notG4],
+                                 chisq_table[i ,eql_G4],
+                                 chisq_table[i, diff_G4] ))
+  
+  
+  res <- chisq.test(conTable)
+  chisq_table[i, p :=  res$p.value]
+  chisq_table[i, chisq :=  as.numeric(res$statistic)]
+  chisq_table[i, p.adj :=  res$p.value*nrows]
+  
+  i = i + 1
+  
+  }
+}
+
+
+
+```
+
+
+
+```{r, fig.height=6, fig.width=10}
+
+library("ggrepel")
+
+binomial_vulcano <- function(chisq_table){
+
+  p <- ggplot() +
+    geom_point(data = chisq_table, aes( logOR, -log(p.adj)  ), colour="grey", alpha=0.5  ) +
+    geom_point(data = chisq_table[p.adj<0.05], aes( logOR, -log(p.adj) ) ,  colour="red", alpha=0.8   ) +
+  
+    geom_text_repel(data = chisq_table[p.adj<0.05 , ],
+                    colour="black", aes( logOR, -log(p.adj),
+                    #nudge_y      = 3,
+                    #direction    = "x",
+                    #angle        = 90,
+                    #vjust        = 1,
+                    #segment.size = 0.2,
+                    #label.size = 0.05,
+                    label=chisq_table[p.adj<0.05 , mut]))   +
+    
+    theme_bw()
+  
+  return(p)
+
+
+}
+
+
+
+```
+
+
+
+```{r}
+template_non_template.chisq <-  fread("./shRNA_RBP/TOTAL.chisquared.txt")
+
+non_template.chisq <-  fread("./shRNA_RBP/Non_template.chisquared.txt")
+template.chisq <-  fread("./shRNA_RBP/Template.chisquared.txt")
+
+non_template_upstream.chisq <-  fread("./shRNA_RBP/Non_template_upstream.chisquared.txt")
+non_template_downstream.chisq <-  fread("./shRNA_RBP/Non_template_downstream.chisquared.txt")
+template_upstream.chisq <-  fread("./shRNA_RBP/Template_upstream.chisquared.txt")
+template_downstream.chisq <-  fread("./shRNA_RBP/Template_downstream.chisquared.txt")
+
+
+replace_p_value(template_non_template.chisq)
+replace_p_value(non_template.chisq)
+replace_p_value(template.chisq)
+
+replace_p_value(non_template_upstream.chisq)
+replace_p_value(non_template_downstream.chisq)
+replace_p_value(template_upstream.chisq)
+replace_p_value(template_downstream.chisq)
+```
+
+
+
+
+```{r}
+template_non_template.chisq <- cbind(template_non_template.chisq,  str_split_fixed(template_non_template.chisq$mut, "_", 2))
+colnames(template_non_template.chisq) <- c("mut", "control", "eql_notG4", "eql_G4", "diff_notG4", "diff_G4", "logOR", "chisq", "p", "p.adj", "Cell", "Gene" ) 
+
+non_template.chisq <- cbind(non_template.chisq,  str_split_fixed(non_template.chisq$mut, "_", 2))
+colnames(non_template.chisq) <- c("mut", "control", "eql_notG4", "eql_G4", "diff_notG4", "diff_G4", "logOR", "chisq", "p", "p.adj", "Cell", "Gene" ) 
+
+template.chisq <- cbind(template.chisq,  str_split_fixed(template.chisq$mut, "_", 2))
+colnames(template.chisq) <- c("mut", "control", "eql_notG4", "eql_G4", "diff_notG4", "diff_G4", "logOR", "chisq", "p", "p.adj", "Cell", "Gene" ) 
+
+
+
+
+RBP_clusters_total.chsq <-merge(RBP_clusters.table, template_non_template.chisq, by=c("Cell", "Gene"), all.x=TRUE)
+
+RBP_clusters_non_template.chsq <-merge(RBP_clusters.table, non_template.chisq, by=c("Cell", "Gene"), all.x=TRUE)
+
+RBP_clusters_template.chsq <-merge(RBP_clusters.table, template.chisq, by=c("Cell", "Gene"), all.x=TRUE)
+
+
+RBP_clusters_total.chsq[ ,orientation:="Both"]
+RBP_clusters_non_template.chsq[ ,orientation:="Non_template"]
+RBP_clusters_template.chsq[ ,orientation:="Template"]
+
+RBP_clusters_ALL.chsq <- rbind(RBP_clusters_total.chsq, RBP_clusters_non_template.chsq, RBP_clusters_template.chsq)
+
+
+row.order <- RBP_heatmap.total$tree_row$order 
+
+RBP_clusters_ALL.chsq$ID <- factor(RBP_clusters_ALL.chsq$ID, levels=rev(RBP_clusters.table[row.order, ]$ID) )
+
+
+ 
+
+
+
+```
+
+
+
+```{r, fig.width=5, fig.height=50}
+
+pos <- position_jitter(width = 0.3, seed = 2)
+
+
+RBP_clusters_ALL.chsq[  p.adj>0.05 ,colour:="non significant" ]
+RBP_clusters_ALL.chsq[  p.adj<=0.05 &  Cell=="HepG2", colour:="HepG2" ]
+RBP_clusters_ALL.chsq[  p.adj<=0.05  & Cell=="K562", colour:="K562" ]
+
+filtered_factors <- RBP_clusters_ALL.chsq[ p.adj<=0.05 , .(.N) , by=c("Gene", "Cell", "cluster", "orientation" )][N>=2, paste0(Gene, Cell, cluster, orientation ) ]
+
+  
+New_fig.2 <-    ggplot(RBP_clusters_ALL.chsq) +
+  geom_jitter(aes(x=ID, y=logOR, colour=colour ) ) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position = "top") +
+  scale_x_discrete(labels= rev(RBP_clusters.table[row.order, ]$cluster)) +
+  facet_grid( . ~ orientation ) +
+  scale_color_manual(values=c("forestgreen", "purple", "grey")) +
+  geom_label_repel(data=RBP_clusters_ALL.chsq[ p.adj<=0.05 & paste0(Gene, Cell, cluster, orientation ) %in% filtered_factors , ], aes(x=ID, y=logOR, label=Gene, ), 
+                   label.size = 0.01,
+                   position = pos,
+                   alpha = 0.6, 
+                   label.padding=.1 )
+  
+
+New_fig.2
+```
+
+
+
+```{r}
+
+
+
+non_template_upstream.chisq <- cbind(non_template_upstream.chisq,  str_split_fixed(non_template_upstream.chisq$mut, "_", 2))
+colnames(non_template_upstream.chisq) <- c("mut", "control", "eql_notG4", "eql_G4", "diff_notG4", "diff_G4", "logOR", "chisq", "p", "p.adj", "Cell", "Gene" ) 
+
+non_template_downstream.chisq <- cbind(non_template_downstream.chisq,  str_split_fixed(non_template_downstream.chisq$mut, "_", 2))
+colnames(non_template_downstream.chisq) <- c("mut", "control", "eql_notG4", "eql_G4", "diff_notG4", "diff_G4", "logOR", "chisq", "p", "p.adj", "Cell", "Gene" ) 
+
+template_upstream.chisq <- cbind(template_upstream.chisq,  str_split_fixed(template_upstream.chisq$mut, "_", 2))
+colnames(template_upstream.chisq) <- c("mut", "control", "eql_notG4", "eql_G4", "diff_notG4", "diff_G4", "logOR", "chisq", "p", "p.adj", "Cell", "Gene" ) 
+
+template_downstream.chisq <- cbind(template_downstream.chisq,  str_split_fixed(template_downstream.chisq$mut, "_", 2))
+colnames(template_downstream.chisq) <- c("mut", "control", "eql_notG4", "eql_G4", "diff_notG4", "diff_G4", "logOR", "chisq", "p", "p.adj", "Cell", "Gene" )
+
+
+
+#RBP_clusters_total.chsq <-merge(RBP_clusters.table, template_non_template.chisq, by=c("Cell", "Gene"), all.x=TRUE)
+
+RBP_clusters_non_template_upstream.chsq <-merge(RBP_clusters.table, non_template_upstream.chisq, by=c("Cell", "Gene"), all.x=TRUE)
+RBP_clusters_non_template_downstream.chsq <-merge(RBP_clusters.table, non_template_downstream.chisq, by=c("Cell", "Gene"), all.x=TRUE)
+
+RBP_clusters_template_upstream.chsq <-merge(RBP_clusters.table, template_upstream.chisq, by=c("Cell", "Gene"), all.x=TRUE)
+RBP_clusters_template_downstream.chsq <-merge(RBP_clusters.table, template_downstream.chisq, by=c("Cell", "Gene"), all.x=TRUE)
+
+
+RBP_clusters_total.chsq[ ,orientation:="Total"]
+RBP_clusters_non_template_upstream.chsq[ ,orientation:="Non_template_upstream"]
+RBP_clusters_non_template_downstream.chsq[ ,orientation:="Non_template_downstream"]
+RBP_clusters_template_upstream.chsq[ ,orientation:="Template_upstream"]
+RBP_clusters_template_downstream.chsq[ ,orientation:="Template_downstream"]
+
+RBP_clusters_ALL.chsq <- rbind(RBP_clusters_total.chsq, 
+                               RBP_clusters_non_template_upstream.chsq,
+                               RBP_clusters_non_template_downstream.chsq,
+                               RBP_clusters_template_upstream.chsq,
+                               RBP_clusters_template_downstream.chsq)
+
+
+row.order <- RBP_heatmap.total$tree_row$order 
+
+RBP_clusters_ALL.chsq$ID <- factor(RBP_clusters_ALL.chsq$ID, levels=rev(RBP_clusters.table[row.order, ]$ID) )
+
+
+ 
+
+
+```
+
+
+```{r}
+human_diff[ !is.na(Gene), .(Gene, log2FoldChange=-log2FoldChange, padj) ]
+
+
+pos <- position_jitter(width = 0.3, seed = 2)
+
+
+RBP_clusters_ALL.chsq[  p.adj>0.05 ,colour:="non significant" ]
+RBP_clusters_ALL.chsq[  p.adj<=0.05 &  Cell=="HepG2", colour:="HepG2" ]
+RBP_clusters_ALL.chsq[  p.adj<=0.05  & Cell=="K562", colour:="K562" ]
+
+
+RBP_clusters_ALL.chsq[ , sig_KCl:=(Gene %in% human_diff[padj<0.05 & !is.na(Gene), Gene])]
+
+filtered_factors <- RBP_clusters_ALL.chsq[ p.adj<=0.05  , .(.N) , by=c("Gene", "Cell", "cluster", "orientation" )][N>=2, paste0(Gene, Cell, cluster, orientation ) ]
+RBP_clusters_ALL.chsq$orientation <- factor(RBP_clusters_ALL.chsq$orientation, levels = c("Total", "Non_template_upstream", "Non_template_downstream", "Template_upstream", "Template_downstream"   ))
+
+
+```
+
+
+```{r,  fig.width=3, fig.height=12}
+RBP_clusters_ALL.chsq.KCl <- merge(RBP_clusters_ALL.chsq, human_diff[ !is.na(Gene), .(Gene, log2FoldChange=-log2FoldChange, padj.KCl=padj) ], by="Gene")
+
+filtered_factors.KCL <- unique(RBP_clusters_ALL.chsq.KCl[  , .(.N) , by=c("Gene", "Cell", "cluster", "orientation" )][N>=2, Gene ])
+RBP_clusters_ALL.chsq.KCl$orientation <- factor(RBP_clusters_ALL.chsq.KCl$orientation, levels = c("Total", "Non_template_upstream", "Non_template_downstream", "Template_upstream", "Template_downstream"   ))
+
+ggplot(RBP_clusters_ALL.chsq.KCl) +
+  geom_jitter(aes(x=ID, y=log2FoldChange, colour=colour ) ) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position = "top") +
+  scale_x_discrete(labels= rev(RBP_clusters.table[row.order, ]$cluster)) +
+  scale_color_manual(values=c("forestgreen", "purple", "grey")) +
+  geom_label_repel(data=RBP_clusters_ALL.chsq.KCl[  paste0(Gene, Cell, cluster, orientation ) %in% filtered_factors.KCL , ], aes(x=ID, y=log2FoldChange, label=Gene, ), 
+                   label.size = 0.01,
+                   position = pos,
+                   alpha = 0.6, 
+                   label.padding=.1 )
+```
+
+
+```{r}
+RBP_clusters_ALL.chsq[File=="ENCFF241SUC",]
+```
+
+
+
+```{r}
+ ggplot(RBP_clusters_ALL.chsq) +
+  geom_jitter(aes(x=ID, y=logOR, colour=colour ) ) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position = "top") +
+  scale_x_discrete(labels= rev(RBP_clusters.table[row.order, ]$cluster)) +
+  facet_grid( . ~ orientation ) +
+  scale_color_manual(values=c("forestgreen", "purple", "grey")) +
+  geom_label_repel(data=RBP_clusters_ALL.chsq[ p.adj<=0.05 & paste0(Gene, Cell, cluster, orientation ) %in% filtered_factors , ], aes(x=ID, y=logOR, label=Gene, ), 
+                   label.size = 0.01,
+                   position = pos,
+                   alpha = 0.6, 
+                   label.padding=.1 )
+```
+
+
+```{r, fig.width=10, fig.height=20}
+
+RBP_clusters_ALL.chsq$cluster <- factor(RBP_clusters_ALL.chsq$cluster, levels=c(4,8,5,9,3,6,10,1,2,7))
+
+New_fig.2 <- ggplot(RBP_clusters_ALL.chsq) +
+  geom_jitter(aes(x=ID, y=logOR, colour=colour ) ) +
+  coord_flip() +
+
+  scale_x_discrete(labels= rev(RBP_clusters.table[row.order, ]$cluster)) +
+  facet_grid( cluster ~ orientation, scales = "free_y", space = "free_y", switch = "y" ) +
+  scale_color_manual(values=c("forestgreen", "purple", "grey")) +
+  geom_label_repel(data=RBP_clusters_ALL.chsq[p.adj<=0.05 &   paste0(Gene, Cell, cluster, orientation ) %in% filtered_factors , ], aes(x=ID, y=logOR, label=Gene, ), 
+
+                    #force = 0.5,
+                    nudge_x = 1,
+                    #direction = "y",
+                    #hjust = 0,
+                    segment.size = 0.5,
+                    #segment.curvature = -0.1,
+                   label.size = 0.01,
+                   size = 2.5,
+                   #position = pos,
+                   alpha = 0.6, 
+                   label.padding=0.001,
+                   max.iter=10000) +
+  theme_bw() +
+  theme(legend.position = "top",
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),)
+  
+
+New_fig.2
+```
+
+
+
+
+```{r, fig.width=13, fig.height=17}
+library(cowplot)
+library("ggplotify")
+
+plot_grid( as.grob(New_fig.1), New_fig.2,  rel_widths = c(1,4) )
+
+```
+
+
+
+```{r, fig.width=2, fig.height=20}
+
+
+
+ggplot(RBP_clusters_ALL.chsq) +
+  geom_jitter(aes(x=ID, y=logOR, colour=p.adj <= 0.05) ) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position = "none") +
+  scale_x_discrete(labels= rev(RBP_clusters.table[row.order, ]$cluster)) +
+  facet_grid( ~ orientation ) +
+  scale_color_manual(values=c("grey", "red")) +
+  
+
+  geom_text_repel(data = chisq_table[p.adj<0.05 , ],
+                    colour="black", aes( logOR, -log(p.adj),
+                    label=chisq_table[p.adj<0.05 , mut]))   +
+
+```
+
+
+
+
+
+
+
+```{r}
+library(dplyr)
+library( tidyr )
+library(ggplot2)
+
+df <- data.frame(cluster = c(rep("aaa", 8), rep("bbb", 3), rep("ccc", 4)), 
+                 both = runif(15, min = -1, max = 1),
+                 template = runif(15, min = -1, max = 1),
+                 nontemplate = runif(15, min = -1, max = 1))             
+df
+
+# here I order the entries within each cluster 
+# by increasing order for the "both" column
+# but you would order it based on the rows in the heatmap
+df <- df[order(df$cluster, df$both), ]  
+df
+
+# numbers the reordered rows as the ycoord
+# "as.character", so the coordinates are not treated as floats in facet grid
+df <- df %>% group_by(cluster) %>% mutate(ycoord = as.character(row_number()))
+df
+
+# now I need to gather rnaseq values in the both, template and nontemplate columns
+df <- gather(df, "strand", "rnaseq", both, template, nontemplate)
+
+ggplot(df, aes(rnaseq, ycoord)) +
+  geom_point() +
+  facet_grid(cluster ~ strand, scales = "free_y", space = "free_y")
+```
+
+
+
+
+
+
+
+```{r, fig.height=6, fig.width=10}
+binomial_vulcano(non_template.chisq)
+```
+
+
+
+
+```{r, fig.height=6, fig.width=10}
+binomial_vulcano(template.chisq)
+```
+
+
+
+```{r, fig.height=6, fig.width=10}
+
+binomial_vulcano(Non_template_downstream.chisq)
+
+
+```
+
+```{r}
+template_non_template.chisq[p.adj<0.05]
+```
+

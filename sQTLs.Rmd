@@ -1,0 +1,110 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(data.table)
+library(ggplot2)
+library(cowplot)
+library(Hmisc)
+```
+
+
+```{r}
+
+sQTLs_upstream <- fread("./sQTL/upstream_eqtl_results.txt")
+sQTLs_downstream <- fread("./sQTL/downstream_eqtl_results.txt")
+```
+
+
+
+#####
+
+
+```{r}
+
+sQTL_up <- sQTLs_upstream[source=="All_sqtls.bed.hg19" , ]
+sQTL_down <- sQTLs_downstream[source=="All_sqtls.bed.hg19" , ]
+
+SNP_up <- sQTLs_upstream[source=="All_SNPs.bed.hg19" , ]
+SNP_down <- sQTLs_downstream[source=="All_SNPs.bed.hg19", ]
+
+sQTL_up[, pos:="upstream"]
+sQTL_down[, pos:="downstream"]
+
+SNP_up[, pos:="upstream"]
+SNP_down[, pos:="downstream"]
+
+
+sQTL_SNP_up <- merge(sQTL_up, SNP_up, by="bin")
+sQTL_SNP_down <- merge(sQTL_down, SNP_down, by="bin")
+
+sQTL_SNP_up[, adj_enchiment:=(enrichment.x/enrichment.y)]
+sQTL_SNP_down[, adj_enchiment:=(enrichment.x/enrichment.y)]
+```
+
+
+```{r}
+sQTL_SNP_down[, `eQTLs in bin overlapping G4s.x`/`eQTLs in bin.x`]
+```
+
+
+```{r}
+#sQTL_SNP_up_bin <- sQTL_SNP_up[, binconf(`enrichment.x`,   `enrichment.y`)]
+#sQTL_SNP_down_bin <- sQTL_SNP_down[, binconf(`eQTLs in bin overlapping G4s.x`/`eQTLs in bin.x`,   `G4 bps in window.x`/`bps in bin.x`)]
+
+
+#sQTL_SNP_up <- cbind(sQTL_SNP_up, sQTL_SNP_up_bin)
+#sQTL_SNP_down <- cbind(sQTL_SNP_down, sQTL_SNP_down_bin)
+```
+
+
+
+
+
+
+```{r}
+head(sQTLs_upstream[source=="All_sqtls.bed.hg19", ])
+```
+
+```{r}
+
+```
+
+
+
+```{r}
+norm_sQTL_up <- ggplot(sQTL_SNP_up, aes(bin, adj_enchiment)) +
+  geom_point( ) +
+  geom_smooth(method="loess") +
+  xlim(c(-500,50)) +
+  ylim(c(0.75,2)) +
+  xlab("Window position (25-nt)") +
+  ylab("Adjusted sQTL enrichment over G4s")+
+  geom_hline(yintercept=1, linetype="dashed", color = "red") +
+  theme_bw() 
+
+
+norm_sQTL_down <- ggplot(sQTL_SNP_down, aes(bin, adj_enchiment) ) +
+  geom_point( ) +
+  geom_smooth() +
+  xlim(c(-50,500)) +
+  ylim(c(0.75,2)) +
+  xlab("Window position (25-nt)") +
+  ylab("Adjusted sQTL enrichment over G4s")+
+  geom_hline(yintercept=1, linetype="dashed", color = "red") +
+  theme_bw()
+
+```
+
+
+
+```{r, fig.height=4, fig.width=7}
+plot_grid(norm_sQTL_up, norm_sQTL_down, nrow=1)
+```
+
+
+
+ 
+

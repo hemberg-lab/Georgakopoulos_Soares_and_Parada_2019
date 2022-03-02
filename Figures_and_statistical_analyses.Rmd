@@ -87,7 +87,7 @@ plot_density <- function(up_plus, up_minus, down_plus, down_minus){
     facet_grid( . ~ exon_pos ) +
     theme_bw()
   
-  #show(p)
+  show(p)
   
   TOTAL
   
@@ -1265,20 +1265,35 @@ We plot other species that did not show strong enrichment by separate
 
 ```{r}
 
+
+
+All.species.TOTAL <- rbind(hg19.TOTAL, mm10.TOTAL, galGal5.TOTAL, danRer11.TOTAL, anoCar2.TOTAL, xenTro9.TOTAL,  susScr11.TOTAL  )
+Sup6.A <- ggplot(All.species.TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment, color=species)) +
+    #   geom_ribbon(aes(x=Position, fill=species, ymin=Enrrichment_l, ymax=Enrrichment_u), alpha=0.3) +
+    xlim(c(-300,300)) +
+    ggtitle( "Vertebrates") +
+    facet_grid( . ~ exon_pos ) +
+      labs(color="Specie") +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    theme(legend.position = "top", legend.direction = "horizontal") 
+
 All.species.TOTAL <- rbind(ce10.TOTAL, dm6.TOTAL, TAIR10.TOTAL  )
-
-
-
-ggplot(All.species.TOTAL)+
+Sup6.B <- ggplot(All.species.TOTAL)+
     geom_line(aes(x=Position,y=Enrrichment, color=species)) +
     xlim(c(-300,300)) +
     ggtitle( "Non-vertebrates") +
+      labs(color="Specie") +
     facet_grid( . ~ exon_pos ) +
   theme(plot.title = element_text(hjust = 0.5)) +
-  theme_bw()
+    theme(legend.position = "top", legend.direction = "horizontal") 
 ```
 
 
+
+```{r, fig.height=10, fig.width=10}
+plot_grid(Sup6.A,Sup6.B, labels = "AUTO", ncol = 1 )
+```
 
 # G4 and gene structure
 
@@ -1570,12 +1585,14 @@ short_long.res.melt <- melt(short_long.res, id=c("short_long.odd_ratios","short_
 
 
 
-short_long.GCs$type <- factor(short_long.GCs$type, levels=c("Short", "Long"))
+short_long.GCs$`Intron type` <- factor(short_long.GCs$type, levels=c("Short", "Long"))
 
-ggplot(short_long.GCs) +
-  geom_violin(aes(as.factor(i.min), i.GC, fill=type)) +
-    scale_fill_brewer(palette = 'Blues') + 
-  theme(legend.position = "top", legend.direction = "horizontal") 
+Fig3.sup.B <- ggplot(short_long.GCs) +
+  geom_violin(aes(as.factor(i.min), i.GC, fill=`Intron type`)) +
+  xlab("Intron size interval (nt)") +
+  ylab("GC content percentage after correction") +
+  scale_fill_brewer(palette = 'Blues') 
+
 ```
 
 
@@ -1803,11 +1820,13 @@ exon_num.TOTAL <- rbind(exons_1.TOTAL, exons_2.TOTAL, exons_3.TOTAL, exons_4.TOT
 
 exon_num.TOTAL$exon_num <- factor(exon_num.TOTAL$exon_num, levels = c("1", "2", "3", "4", "middle", "-4", "-3", "-2", "-1" ))
 
-ggplot(exon_num.TOTAL)+
+Fig3.sup.C <- ggplot(exon_num.TOTAL)+
     geom_line(aes(x=Position,y=Enrrichment)) +
     xlim(c(-300,300)) +
     facet_grid( exon_pos ~ exon_num   ) +
   theme_bw()
+
+Fig3.sup.C
 
 ```
 
@@ -3096,6 +3115,7 @@ As K+ is known to stabilize G4, we analized (RNA-seq data)[https://www.ncbi.nlm.
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
+KCL_human_upstream <- fread("../KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s"  ) 
 
 KCL_human_upstream <- fread("../KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s"  ) #stop here
 colnames(KCL_human_upstream) <- c("w.chrom", "w.start", "w.end", "w.strand", "chrom", "start", "end", "strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "G4"  )
@@ -3105,9 +3125,9 @@ KCL_human_downstream<- fread("../KCL/MicroExonator/Control_vs_KCL.diff.downstrea
 colnames(KCL_human_downstream) <-c("w.chrom", "w.start", "w.end", "w.strand", "chrom", "start", "end", "strand", "Type", "Psi_A", "Psi_B", "DeltaPsi", "Probability", "G4"  )
 
 
-KCL_human <-  merge(KCL_human_upstream[, c("chrom",  "start", "end", "strand",  "Type" ,  "DeltaPsi", "Probability", "G4") ],
-                    KCL_human_downstream[, c("chrom",  "start", "end", "strand",  "Type" ,  "DeltaPsi", "Probability", "G4") ], 
-                    by=c("chrom",  "start", "end", "strand",  "Type" ,  "DeltaPsi", "Probability") )
+KCL_human <-  merge(KCL_human_upstream[, c("chrom",  "start", "end", "strand",  "Type" , "Psi_A", "Psi_B",  "DeltaPsi", "Probability", "G4") ],
+                    KCL_human_downstream[, c("chrom",  "start", "end", "strand",  "Type" , "Psi_A", "Psi_B",  "DeltaPsi", "Probability", "G4") ], 
+                    by=c("chrom",  "start", "end", "strand",  "Type" , "Psi_A", "Psi_B",  "DeltaPsi", "Probability") )
 
 KCL_human[(G4.x>0 | G4.y>0 ), G4_bol:="With G-quadruplex"]
 KCL_human[(G4.x==0 & G4.y==0 ), G4_bol:="Without G-quadruplex"]
@@ -3142,6 +3162,11 @@ To highlight NRXN2, SHANK1 and RBM10 we used biomaRt to find the gene name to En
 library(biomaRt)
 
 ensembl = useEnsembl(biomart="ensembl", dataset="hsapiens_gene_ensembl")
+
+
+
+
+
 
 
 KCL_human[ Type=="CE"& DeltaPsi>0.1 & Probability>0.9,  ]
@@ -3187,6 +3212,145 @@ KCL_human_CE[ hgnc_symbol=="RBM10",  ][ Type=="CE"& DeltaPsi>0.1 & Probability>0
 
 
 ```
+
+
+```{r}
+KCL_human_CE[ Type=="CE"& DeltaPsi>0.1 & Probability>0.9,  ]
+```
+
+
+
+### Microexons
+```{r}
+library(tidyr)
+
+
+TOTAL_ME_stats <- function(KCL_human){
+
+KCL_human[  , diff:="NA"]
+KCL_human[ (DeltaPsi<=-0.1 & Probability>=0.9) , diff:="In"]
+KCL_human[ (DeltaPsi>0.1 & Probability>=0.9) , diff:="Ex"]
+  
+  
+KCL_human.TOTAL_and_ME <- separate(KCL_human,col = "Coord",into = c("chrom", "start_end"), sep = ":")
+KCL_human.TOTAL_and_ME <- separate(KCL_human.TOTAL_and_ME,col = "start_end", into = c("start", "end"), sep = "-")
+
+
+KCL_human.TOTAL_and_ME <- KCL_human.TOTAL_and_ME[Type=="CE", ]
+
+KCL_human.TOTAL_and_ME[ ,  exon_type:="Exon"]
+KCL_human.TOTAL_and_ME[((as.numeric(end)-as.numeric(start))<=30), exon_type:="Microexon" ]
+
+table(KCL_human.TOTAL_and_ME[  exon_type=="Microexon", diff])
+
+
+KCL_human.TOTAL_and_ME_stats <- KCL_human.TOTAL_and_ME[, .N, by=c("diff", "exon_type")]
+KCL_human.TOTAL_and_ME_stats[, total:=sum(N), by=exon_type]
+KCL_human.TOTAL_and_ME_stats[, Percent:=(N/total)*100]
+
+return(KCL_human.TOTAL_and_ME_stats)
+
+}
+
+
+KCL_human.TOTAL_and_ME_stats <- TOTAL_ME_stats(KCL_human) 
+
+ggplot(KCL_human.TOTAL_and_ME_stats2[diff!="NA"] ) +
+  geom_bar( aes( exon_type, Percent, fill=diff), stat="identity", position="dodge"  )
+```
+
+
+
+```{r}
+
+
+
+ME_TOTAL_chi_squared <- function(KCL_human.TOTAL_and_ME_stats){
+
+
+KCL_human.TOTAL_and_ME_stats.matrix <-
+
+matrix(cbind(
+KCL_human.TOTAL_and_ME_stats[ diff!="NA", sum(N), by="exon_type" ][ exon_type=="Microexon", V1 ],
+KCL_human.TOTAL_and_ME_stats[ diff!="NA", sum(N), by="exon_type" ][ exon_type=="Exon", V1 ],
+
+KCL_human.TOTAL_and_ME_stats[ diff=="NA", sum(N), by="exon_type" ][ exon_type=="Microexon", V1 ],
+KCL_human.TOTAL_and_ME_stats[ diff=="NA", sum(N), by="exon_type" ][ exon_type=="Exon", V1 ] ), nrow=2)
+
+chi <- chisq.test(KCL_human.TOTAL_and_ME_stats.matrix)
+return(chi)
+
+}
+
+
+
+matrix.in <-  matrix(nrow=2, c(KCL_human_stats[Type==i & diff=="In"]$WO_G4_NA, KCL_human_stats[Type==i & diff=="In"]$WO_G4, KCL_human_stats[Type==i & diff=="In"]$W_G4_NA, KCL_human_stats[Type==i & diff=="In"]$W_G4))
+chisq.test(matrix.in)
+```
+
+
+
+```{r}
+KCL_human.TOTAL_and_ME_stats <- TOTAL_ME_stats(KCL_human)
+
+KCL_DIV10_Tc1.TOTAL_and_ME_stats <-  TOTAL_ME_stats(KCL_primary_cortical_neuron_DIV10_Tc1)
+KCL_ESC_CD1.TOTAL_and_ME_stats <-  TOTAL_ME_stats(KCL_ESC_derived_neuron_CD1)
+KCL_DIV4_CD1.TOTAL_and_ME_stats <- TOTAL_ME_stats(KCL_primary_cortical_neuron_DIV4_CD1)
+KCL_DIV10_CD1.TOTAL_and_ME_stats <- TOTAL_ME_stats(KCL_primary_cortical_neuron_DIV10_CD1)
+
+
+ME_TOTAL_chi_squared(KCL_human.TOTAL_and_ME_stats)
+ME_TOTAL_chi_squared(KCL_DIV10_Tc1.TOTAL_and_ME_stats)
+ME_TOTAL_chi_squared(KCL_ESC_CD1.TOTAL_and_ME_stats)
+ME_TOTAL_chi_squared(KCL_DIV4_CD1.TOTAL_and_ME_stats)
+ME_TOTAL_chi_squared(KCL_DIV10_CD1.TOTAL_and_ME_stats)
+
+
+```
+
+
+```{r}
+
+KCL_human.TOTAL_and_ME_stats[, Experiment:="Human"]
+KCL_DIV10_Tc1.TOTAL_and_ME_stats[, Experiment:="DIV10_Tc1"]
+KCL_ESC_CD1.TOTAL_and_ME_stats[, Experiment:="ESC_CD1"]
+KCL_DIV4_CD1.TOTAL_and_ME_stats[, Experiment:="DIV4_CD1"]
+KCL_DIV10_CD1.TOTAL_and_ME_stats[, Experiment:="DIV10_CD1"]
+
+
+KCL_TOTAL.TOTAL_and_ME_stats <- rbind(KCL_human.TOTAL_and_ME_stats,
+                                      KCL_DIV10_Tc1.TOTAL_and_ME_stats,
+                                      KCL_ESC_CD1.TOTAL_and_ME_stats,
+                                      KCL_DIV4_CD1.TOTAL_and_ME_stats,
+                                      KCL_DIV10_CD1.TOTAL_and_ME_stats)
+
+
+
+KCL_TOTAL.TOTAL_and_ME_stats$Experiment <- factor(KCL_TOTAL.TOTAL_and_ME_stats$Experiment, levels=c("Human", "ESC_CD1", "DIV4_CD1", "DIV10_CD1", "DIV10_Tc1"))
+
+
+
+ggplot(KCL_TOTAL.TOTAL_and_ME_stats[diff!="NA"] ) +
+  geom_bar( aes( exon_type, Percent, fill=diff), stat="identity"  ) +
+  facet_grid( . ~ Experiment) +
+    theme(legend.position = "top", legend.direction = "horizontal", axis.text.x = element_text(angle = 30)) +
+    scale_fill_brewer(palette = 'Blues') 
+```
+
+
+
+
+```{r}
+table(KCL_human.TOTAL_and_ME[  exon_type=="Exon", diff])
+```
+
+
+```{r}
+install.packages("epiR")
+```
+
+
+
 
 ```{r, fig.width=5, fig.height=4}
 library("ggrepel")
@@ -3820,6 +3984,98 @@ ggplot(human.ME_g4.stats) +
 
 
 
+```{r}
+primary_cortical_neuron_DIV4_CD1_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.upstream.G4s.fix" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV4_CD1.diff.downstream.G4s.fix", 100 )
+
+
+ESC_derived_neuron_CD1_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.upstream.G4s.fix" , "../KCL/MicroExonator/closest/ESC-derived_neuron_CD1.diff.downstream.G4s.fix", 100 )
+
+primary_cortical_neuron_DIV10_CD1_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.upstream.G4s.fix" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_CD1.diff.downstream.G4s.fix", 100 )
+
+primary_cortical_neuron_DIV10_Tc1_ME_table <- diff_G4_ME_table("../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.upstream.G4s.fix" , "../KCL/MicroExonator/closest/primary_cortical_neuron_DIV10_Tc1.diff.downstream.G4s.fix", 100 )
+
+
+
+
+ ggplot(data=primary_cortical_neuron_DIV4_CD1_ME_table[ Type=="CE",]) +
+  geom_point( aes(x=-DeltaPsi, y=Probability), colour="grey", alpha=alpha.var, size=size.var) +
+  geom_point(data=KCL_human[Type=="CE" & DeltaPsi>0.1 & Probability>0.9, ], aes(x=-DeltaPsi, y=Probability), colour="skyblue", alpha=alpha.var, size=size.var) +
+   geom_point(data=KCL_human[Type=="CE" & DeltaPsi<(-0.1) & Probability>0.9, ], aes(x=-DeltaPsi, y=Probability), colour="red", alpha=alpha.var, size=size.var) +
+  xlim(c(-0.8, 0.8)) +
+  xlab("DeltaPSI (Control - KCl)") +
+  theme_bw()
+
+```
+
+
+
+```{r}
+
+
+ ggplot(data=KCL_human[ Type=="CE",]) +
+  geom_point( aes(x=-DeltaPsi, y=Probability), colour="grey", alpha=alpha.var, size=size.var) +
+  geom_point(data=KCL_human[Type=="CE" & DeltaPsi>0.1 & Probability>0.9, ], aes(x=-DeltaPsi, y=Probability), colour="skyblue", alpha=alpha.var, size=size.var) +
+   geom_point(data=KCL_human[Type=="CE" & DeltaPsi<(-0.1) & Probability>0.9, ], aes(x=-DeltaPsi, y=Probability), colour="red", alpha=alpha.var, size=size.var) +
+  xlim(c(-0.8, 0.8)) +
+  xlab("DeltaPSI (Control - KCl)") +
+  theme_bw()
+
+
+
+ ggplot(data=primary_cortical_neuron_DIV4_CD1_K_ME_table[ Type=="CE",]) +
+  geom_point( aes(x=-DeltaPsi, y=Probability), colour="grey", alpha=alpha.var, size=size.var) +
+  geom_point(data=KCL_human[Type=="CE" & DeltaPsi>0.1 & Probability>0.9, ], aes(x=-DeltaPsi, y=Probability), colour="skyblue", alpha=alpha.var, size=size.var) +
+   geom_point(data=KCL_human[Type=="CE" & DeltaPsi<(-0.1) & Probability>0.9, ], aes(x=-DeltaPsi, y=Probability), colour="red", alpha=alpha.var, size=size.var) +
+  xlim(c(-0.8, 0.8)) +
+  xlab("DeltaPSI (Control - KCl)") +
+  theme_bw()
+
+ 
+ 
+ 
+ 
+KCL_human[, Experiment:="Human"] 
+primary_cortical_neuron_DIV4_CD1_ME_table[, Experiment:="DIV4_CD1"]
+ESC_derived_neuron_CD1_ME_table[, Experiment:="ESC_CD1"]
+primary_cortical_neuron_DIV10_CD1_ME_table[, Experiment:="DIV10_CD1"]
+primary_cortical_neuron_DIV10_Tc1_ME_table[, Experiment:="DIV10_Tc1"]
+
+
+
+TOTAL.KCL_diff <- rbind(KCL_human[, c("Type", "DeltaPsi", "Probability", "Experiment")],
+                        primary_cortical_neuron_DIV4_CD1_ME_table[, c("Type", "DeltaPsi", "Probability", "Experiment")],
+                        ESC_derived_neuron_CD1_ME_table[, c("Type", "DeltaPsi", "Probability", "Experiment")],
+                        primary_cortical_neuron_DIV10_CD1_ME_table[, c("Type" , "DeltaPsi", "Probability", "Experiment")],
+                        primary_cortical_neuron_DIV10_Tc1_ME_table[, c("Type", "DeltaPsi", "Probability", "Experiment")] )
+
+
+
+
+TOTAL.KCL_diff$Experiment <- factor(TOTAL.KCL_diff$Experiment, levels=c("Human", "ESC_CD1", "DIV4_CD1", "DIV10_CD1", "DIV10_Tc1"))
+
+
+
+ ggplot(data=TOTAL.KCL_diff[ Type=="CE",]) +
+  geom_point( aes(x=-DeltaPsi, y=Probability), colour="grey", alpha=alpha.var, size=size.var) +
+  geom_point(data=TOTAL.KCL_diff[Type=="CE" & DeltaPsi>0.1 & Probability>0.9, ], aes(x=-DeltaPsi, y=Probability), colour="skyblue", alpha=alpha.var, size=size.var) +
+   geom_point(data=TOTAL.KCL_diff[Type=="CE" & DeltaPsi<(-0.1) & Probability>0.9, ], aes(x=-DeltaPsi, y=Probability), colour="red", alpha=alpha.var, size=size.var) + 
+   facet_grid(. ~ Experiment ) +
+  xlim(c(-0.8, 0.8)) +
+  xlab("DeltaPSI (Control - KCl)") +
+  theme_bw()
+
+
+KCL_human.TOTAL_and_ME_stats[, Experiment:="Human"]
+KCL_DIV10_Tc1.TOTAL_and_ME_stats[, Experiment:="DIV10_Tc1"]
+KCL_ESC_CD1.TOTAL_and_ME_stats[, Experiment:="ESC_CD1"]
+KCL_DIV4_CD1.TOTAL_and_ME_stats[, Experiment:="DIV4_CD1"]
+KCL_DIV10_CD1.TOTAL_and_ME_stats[, Experiment:="DIV10_CD1"]
+
+```
+
+
+
+
 
 ```{r}
 
@@ -4184,78 +4440,6 @@ return(KCL_x_stats)
 
 
 }
-```
-
-
-
-
-
-```{r}
-test <- fread("../KCL/MicroExonator/Control_vs_KCL.diff.upstream_100nt.G4s")
-```
-
-# AQ1
-
-```{r}
-
-
-
-AQ1.1.motif <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4s",
-                                       "../AQ1/Control_vs_1mu.diff.upstream.G4s",
-                                        100)
-
-
-AQ1.1.K <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4seq_K",
-                                       "../AQ1/Control_vs_1mu.diff.upstream.G4seq_K",
-                                        100)
-
-
-AQ1.1.PDS <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4seq_PDS",
-                                       "../AQ1/Control_vs_1mu.diff.upstream.G4seq_PDS",
-                                        100)
-
-
-
-
-
-AQ1.2.motif <- splice_node_dot_plot3("../AQ1/Control_vs_2mu.diff.downstream.G4s",
-                                       "../AQ1/Control_vs_2mu.diff.upstream.G4s",
-                                        100)
-
-
-AQ1.2.K <- splice_node_dot_plot3("../AQ1/Control_vs_2mu.diff.downstream.G4seq_K",
-                                       "../AQ1/Control_vs_2mu.diff.upstream.G4seq_K",
-                                        100)
-
-
-AQ1.2.PDS <- splice_node_dot_plot3("../AQ1/Control_vs_2mu.diff.downstream.G4seq_PDS",
-                                       "../AQ1/Control_vs_2mu.diff.upstream.G4seq_PDS",
-                                        100)
-
-
-```
-
-
-
-
-# PDS
-
-```{r}
-
-HEK.PDS.motif <- splice_node_dot_plot3("../PDS_cPDS/closest/Control_vs_PDS_HEK.diff.upstream.G4s",
-                                       "../PDS_cPDS/closest/Control_vs_PDS_HEK.diff.downstream.G4s",
-                                        100)
-
-
-AQ1.K <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4seq_K",
-                                       "../AQ1/Control_vs_1mu.diff.upstream.G4seq_K",
-                                        100)
-
-
-AQ1.PDS <- splice_node_dot_plot3("../AQ1/Control_vs_1mu.diff.downstream.G4seq_PDS",
-                                       "../AQ1/Control_vs_1mu.diff.upstream.G4seq_PDS",
-                                        100)
-
 ```
 
 
@@ -4876,13 +5060,11 @@ Fig5.D
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-plot_eql_diff_binomial(
+sup.mus.ss_enrichment.ESC.K <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_upstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_upstream_less.bed.minus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_downstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_downstream_less.bed.minus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
-
-
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_upstream_prob_0_9.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_upstream_prob_0_9.bed.minus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_downstream_prob_0_9.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
@@ -4903,7 +5085,7 @@ ESC_derived_neuron_CD1.CE.diff,
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-plot_eql_diff_binomial(
+sup.mus.ss_enrichment.ESC.PDS  <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_upstream_less.bed.plus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_upstream_less.bed.minus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/ESC-derived_neuron_CD1.diff_downstream_less.bed.plus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
@@ -4930,13 +5112,11 @@ ESC_derived_neuron_CD1.CE.diff,
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
-plot_eql_diff_binomial(
+sup.mus.ss_enrichment.DIV10_CD1.K <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_upstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_upstream_less.bed.minus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_downstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_downstream_less.bed.minus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
-
-
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_upstream_prob_0_9.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_upstream_prob_0_9.bed.minus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_downstream_prob_0_9.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
@@ -4954,7 +5134,7 @@ primary_cortical_neuron_DIV10_CD1.CE.diff,
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-plot_eql_diff_binomial(
+sup.mus.ss_enrichment.DIV10_CD1.PDS <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_upstream_less.bed.plus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_upstream_less.bed.minus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_CD1.diff_downstream_less.bed.plus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
@@ -4980,7 +5160,7 @@ primary_cortical_neuron_DIV10_CD1.CE.diff,
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-plot_eql_diff_binomial(
+sup.mus.ss_enrichment.DIV10_Tc1.K <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_Tc1.diff_upstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_Tc1.diff_upstream_less.bed.minus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_Tc1.diff_downstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
@@ -5007,7 +5187,7 @@ primary_cortical_neuron_DIV10_Tc1.CE.diff,
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-plot_eql_diff_binomial(
+sup.mus.ss_enrichment.DIV10_Tc1.PDS <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_Tc1.diff_upstream_less.bed.plus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_Tc1.diff_upstream_less.bed.minus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV10_Tc1.diff_downstream_less.bed.plus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
@@ -5033,7 +5213,7 @@ primary_cortical_neuron_DIV10_Tc1.CE.diff,
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-plot_eql_diff_binomial(
+sup.mus.ss_enrichment.DIV4_CD1.K <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV4_CD1.diff_upstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV4_CD1.diff_upstream_less.bed.minus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV4_CD1.diff_downstream_less.bed.plus.score.GSM3003547_Mouse_all_w15_th-1_plus_minus.hits.max.K.w50.25.bed.txt..bed.list.out.num",
@@ -5061,7 +5241,7 @@ primary_cortical_neuron_DIV4_CD1.CE.diff,
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 
 
-plot_eql_diff_binomial(
+sup.mus.ss_enrichment.DIV4_CD1.PDS <- plot_eql_diff_binomial(
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV4_CD1.diff_upstream_less.bed.plus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV4_CD1.diff_upstream_less.bed.minus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
 "~/Google_Drive/Results/Non_B/KCL/G4seq_enrichment/primary_cortical_neuron_DIV4_CD1.diff_downstream_less.bed.plus.score.GSM3003548_Mouse_all_w15_th-1_plus_minus.hits.max.PDS.w50.35.bed.txt..bed.list.out.num",
@@ -5124,9 +5304,9 @@ intron_size$pos <- factor(intron_size$pos, level=c("Upstream intron", "Downstrea
 
 
 Fig3.B <- ggplot(intron_size) +
-  geom_density(aes(intron_size, colour=G4>0)) +
+  geom_line(aes(intron_size, colour=G4>0), stat="density") +
   facet_grid(. ~ pos) +
-  xlim(c(50,5000)) +
+  xlim(c(0,5000)) +
   theme(legend.position = "top", legend.direction = "horizontal")
 
 Fig3.B
@@ -6089,6 +6269,8 @@ plot_grid(venn_supp.up, venn_supp.down, labels = c("3' Splice site", "5' Splice 
 
 
 
+
+
 ```{r}
 dataframe_G4_consensus_motif_enrichment_species <- fread("../Figures/Figure1/dataframe_G4_consensus_motif_enrichment_species")
 
@@ -6221,12 +6403,20 @@ Fig3.old <- plot_grid(Fig3.A, Fig3.B, Fig3.C, Fig3.D, labels = "AUTO", ncol=2)
 plot_grid( plot_grid(Fig3.C, Fig3.D), Fig3.C.new, Fig3.D.new, ncol = 1)
 
 
-Fig3.top <-  plot_grid( Fig3.A ,Fig3.B,  Fig3.C, Fig3.C.new, labels = "AUTO", ncol=2)
+Fig3.top <-  plot_grid( Fig3.B,  Fig3.C, Fig3.D, Fig3.C.new, labels = "AUTO", ncol=2)
 
 Fig3 <-plot_grid(Fig3.top, Fig3.D.new, labels = c("", "E"), ncol = 1, rel_heights = c(1.5, 1) )
 
+
+
+
 ```
 
+```{r, fig.height=8, fig.width=14}
+Fig3.sup.top <-  plot_grid(Fig3.A, Fig3.sup.B, labels="AUTO", rel_widths = c(1, 3) )
+Fig3.sup <- plot_grid(Fig3.sup.top, Fig3.sup.C, ncol=1, labels=c("", "C"))
+Fig3.sup
+```
 
 
 
