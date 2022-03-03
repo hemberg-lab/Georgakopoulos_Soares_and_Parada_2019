@@ -1,0 +1,393 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+Int_up_plus <- read_dist_table("Rebuttal/num/INT_up.bed.plus.score.All_G4.tsv.clean.txt..num")
+Int_up_minus <- read_dist_table("Rebuttal/num/INT_up.bed.minus.score.All_G4.tsv.clean.txt..num")
+Int_down_plus <- read_dist_table("Rebuttal/num/Int_down.bed.plus.score.All_G4.tsv.clean.txt..num")
+Int_down_minus <- read_dist_table("Rebuttal/num/Int_down.bed.minus.score.All_G4.tsv.clean.txt..num")
+Int_up_minus[,Position:=Position*-1]
+Int_down_minus[,Position:=Position*-1]
+Int.TOTAL <- plot_density(Int_up_plus, Int_up_minus, Int_down_plus, Int_down_minus) 
+```
+
+
+
+```{r}
+Ex_up_plus <- read_dist_table("num/Ex_up.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_up_minus <- read_dist_table("num/Ex_up.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_down_plus <- read_dist_table("num/Ex_down.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_down_minus <- read_dist_table("num/Ex_down.bed.minus.score.All_G4.tsv.clean.txt..num")
+```
+
+
+```{r, fig.height=5, fig.width=8}
+
+Ex_up_plus <- read_dist_table("num/Ex_up.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_up_minus <- read_dist_table("num/Ex_up.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_down_plus <- read_dist_table("num/Ex_down.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_down_minus <- read_dist_table("num/Ex_down.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_up_minus[,Position:=Position*-1]
+Ex_down_minus[,Position:=Position*-1]
+Ex.TOTAL <- plot_density(Ex_up_plus, Ex_up_minus, Ex_down_plus, Ex_down_minus) 
+```
+
+
+
+
+```{r}
+
+Ex_up_HC_plus <- read_dist_table("num/Ex_up_HC.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_up_HC_minus <- read_dist_table("num/Ex_up_HC.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_down_HC_plus <- read_dist_table("num/Ex_down_HC.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_down_HC_minus <- read_dist_table("num/Ex_down_HC.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_up_HC_minus[,Position:=Position*-1]
+Ex_down_HC_minus[,Position:=Position*-1]
+Ex_HC.TOTAL <- plot_density(Ex_up_HC_plus, Ex_up_HC_minus, Ex_down_HC_plus, Ex_down_HC_minus) 
+```
+
+
+
+
+
+```{r}
+
+Ex_up_IC_plus <- read_dist_table("num/Ex_up_IC.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_up_IC_minus <- read_dist_table("num/Ex_up_IC.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_down_IC_plus <- read_dist_table("num/Ex_down_IC.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_down_IC_minus <- read_dist_table("num/Ex_down_IC.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_up_IC_minus[,Position:=Position*-1]
+Ex_down_IC_minus[,Position:=Position*-1]
+Ex_IC.TOTAL <- plot_density(Ex_up_IC_plus, Ex_up_IC_minus, Ex_down_IC_plus, Ex_down_IC_minus) 
+```
+
+
+
+
+
+
+
+```{r}
+
+Ex_up_LC_plus <- read_dist_table("num/Ex_up_LC.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_up_LC_minus <- read_dist_table("num/Ex_up_LC.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_down_LC_plus <- read_dist_table("num/Ex_down_LC.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_down_LC_minus <- read_dist_table("num/Ex_down_LC.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_up_LC_minus[,Position:=Position*-1]
+Ex_down_LC_minus[,Position:=Position*-1]
+Ex_LC.TOTAL <- plot_density(Ex_up_LC_plus, Ex_up_LC_minus, Ex_down_LC_plus, Ex_down_LC_minus) 
+```
+
+
+
+
+
+```{r}
+
+ALTA_1_plus <- read_dist_table("num/ALTA_1.bed.plus.score.All_G4.tsv.clean.txt..num")
+ALTA_1_minus <- read_dist_table("num/ALTA_1.bed.minus.score.All_G4.tsv.clean.txt..num")
+ALTA_2_plus <- read_dist_table("num/ALTA_2.bed.plus.score.All_G4.tsv.clean.txt..num")
+ALTA_2_minus <- read_dist_table("num/ALTA_2.bed.minus.score.All_G4.tsv.clean.txt..num")
+ALTA_1_minus[,Position:=Position*-1]
+ALTA_2_minus[,Position:=Position*-1]
+ALTA.TOTAL <- plot_density(ALTA_1_plus, ALTA_1_minus, ALTA_2_plus, ALTA_2_minus) 
+```
+
+
+
+
+```{r}
+
+ALTD_1_plus <- read_dist_table("num/ALTD_1.bed.plus.score.All_G4.tsv.clean.txt..num")
+ALTD_1_minus <- read_dist_table("num/ALTD_1.bed.minus.score.All_G4.tsv.clean.txt..num")
+ALTD_2_plus <- read_dist_table("num/ALTD_2.bed.plus.score.All_G4.tsv.clean.txt..num")
+ALTD_2_minus <- read_dist_table("num/ALTD_2.bed.minus.score.All_G4.tsv.clean.txt..num")
+ALTD_1_minus[,Position:=Position*-1]
+ALTD_2_minus[,Position:=Position*-1]
+ALTD.TOTAL <- plot_density(ALTD_1_plus, ALTD_1_minus, ALTD_2_plus, ALTD_2_minus) 
+```
+
+
+
+
+
+
+ALTD_1_plus <- read_dist_table("num/ALTD_1.bed.plus.score.All_G4.tsv.clean.txt..num")
+
+
+```{r}
+
+ALTD_1_plus <- read_dist_table("num/MULTI1_down.bed.minus.score.All_G4.tsv.clean.txt..num")
+ALTD_1_minus <- read_dist_table("num/MU")
+ALTD_2_plus <- read_dist_table("num/ALTD_2.bed.plus.score.All_G4.tsv.clean.txt..num")
+ALTD_2_minus <- read_dist_table("num/ALTD_2.bed.minus.score.All_G4.tsv.clean.txt..num")
+ALTD_1_minus[,Position:=Position*-1]
+ALTD_2_minus[,Position:=Position*-1]
+ALTD.TOTAL <- plot_density(ALTD_1_plus, ALTD_1_minus, ALTD_2_plus, ALTD_2_minus) 
+```
+
+
+
+
+
+```{r}
+
+MULTI1_up_plus <- read_dist_table("num/MULTI1_up.bed.plus.score.All_G4.tsv.clean.txt..num")
+MULTI1_up_minus <- read_dist_table("num/MULTI1_up.bed.minus.score.All_G4.tsv.clean.txt..num")
+MULTI1_down_plus <- read_dist_table("num/MULTI1_down.bed.plus.score.All_G4.tsv.clean.txt..num")
+MULTI1_down_minus <- read_dist_table("num/MULTI1_down.bed.minus.score.All_G4.tsv.clean.txt..num")
+MULTI1_up_minus[,Position:=Position*-1]
+MULTI1_down_minus[,Position:=Position*-1]
+MULTI1.TOTAL <- plot_density(MULTI1_up_plus, MULTI1_up_minus, MULTI1_down_plus, MULTI1_down_minus) 
+```
+
+
+MULTI2
+
+```{r}
+
+MULTI1_up_plus <- read_dist_table("Rebuttal/num/MULTI1_up.bed.plus.score.All_G4.tsv.clean.txt..num")
+MULTI1_up_minus <- read_dist_table("Rebuttal/num/MULTI1_up.bed.minus.score.All_G4.tsv.clean.txt..num")
+MULTI1_down_plus <- read_dist_table("Rebuttal/num/MULTI1_down.bed.plus.score.All_G4.tsv.clean.txt..num")
+MULTI1_down_minus <- read_dist_table("Rebuttal/num/MULTI1_down.bed.minus.score.All_G4.tsv.clean.txt..num")
+MULTI1_up_minus[,Position:=Position*-1]
+MULTI1_down_minus[,Position:=Position*-1]
+MULTI1.TOTAL <- plot_density(MULTI1_up_plus, MULTI1_up_minus, MULTI1_down_plus, MULTI1_down_minus) 
+
+MULTI2_up_plus <- read_dist_table("Rebuttal/num/MULTI2_up.bed.plus.score.All_G4.tsv.clean.txt..num")
+MULTI2_up_minus <- read_dist_table("Rebuttal/num/MULTI2_up.bed.minus.score.All_G4.tsv.clean.txt..num")
+MULTI2_down_plus <- read_dist_table("Rebuttal/num/MULTI2_down.bed.plus.score.All_G4.tsv.clean.txt..num")
+MULTI2_down_minus <- read_dist_table("Rebuttal/num/MULTI2_down.bed.minus.score.All_G4.tsv.clean.txt..num")
+MULTI2_up_minus[,Position:=Position*-1]
+MULTI2_down_minus[,Position:=Position*-1]
+MULTI2.TOTAL <- plot_density(MULTI2_up_plus, MULTI2_up_minus, MULTI2_down_plus, MULTI2_down_minus) 
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+Ex_up_10_plus <- read_dist_table("MAD_events/num/Ex_up_10.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_up_10_minus <- read_dist_table("MAD_events/num/Ex_up_10.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_down_10_plus <- read_dist_table("MAD_events/num/Ex_down_10.bed.plus.score.All_G4.tsv.clean.txt..num")
+Ex_down_10_minus <- read_dist_table("MAD_events/num/Ex_down_10.bed.minus.score.All_G4.tsv.clean.txt..num")
+Ex_down_10_plus[,Position:=Position*-1]
+Ex_down_10_plus[,Position:=Position*-1]
+Ex_10.TOTAL <- plot_density(Ex_up_10_plus, Ex_up_10_minus, Ex_down_10_plus, Ex_down_10_minus) 
+```
+
+
+
+
+### Figure
+
+
+
+
+```{r}
+
+
+ggplot(Ex.TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    theme_bw()
+```
+
+#### Final plot ###
+
+
+
+```{r}
+fig1.D1  <- ggplot(Ex.TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    theme_bw() +
+        xlim(c(-300, 300))
+
+fig1.D1
+```
+
+```{r}
+ALTA.TOTAL[exon_pos=="Upstream", exon_pos:="Distal"]
+ALTA.TOTAL[exon_pos=="Downstream", exon_pos:="Proximal"]
+
+ALTA.TOTAL$exon_pos <- factor(ALTA.TOTAL$exon_pos,  levels=c( "Distal", "Proximal"))
+
+fig1.D2 <- ggplot(ALTA.TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    theme_bw() +
+    xlim(c(-300, 300))
+
+
+fig1.D2
+```
+
+
+```{r}
+ALTD.TOTAL[exon_pos=="Upstream", exon_pos:="Distal"]
+ALTD.TOTAL[exon_pos=="Downstream", exon_pos:="Proximal"]
+
+ALTD.TOTAL$exon_pos <- factor(ALTD.TOTAL$exon_pos,  levels=c(  "Proximal", "Distal"))
+
+fig1.D3 <-  ggplot(ALTD.TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    theme_bw() +
+    xlim(c(-300, 300))
+
+fig1.D3
+```
+
+
+
+
+```{r, fig.width=15, fig.height=4}
+plot_grid(fig1.D1 , fig1.D2, fig1.D3, nrow=1)
+```
+
+
+### Supplementary 
+
+
+
+```{r}
+sup.alt.1  <- ggplot(Int.TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    theme_bw() +
+        xlim(c(-300, 300))
+
+sup.alt.1
+```
+
+
+
+```{r}
+
+sup.alt.2  <- ggplot(MULTI1.TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    theme_bw() +
+        xlim(c(-300, 300))
+
+sup.alt.2
+
+
+```
+
+
+
+```{r}
+
+sup.alt.3  <- ggplot(MULTI2.TOTAL)+
+    geom_line(aes(x=Position,y=Enrrichment)) +
+    facet_grid( . ~ exon_pos ) +
+    theme_bw() +
+        xlim(c(-300, 300))
+
+sup.alt.3
+
+
+```
+
+
+
+```{r, fig.width=15, fig.height=4}
+plot_grid(sup.alt.1 , sup.alt.2, sup.alt.3, nrow=1, labels = "AUTO")
+```
+
+
+
+#### 
+
+
+```{r}
+intron_len.upstream.plus_plus <- fread("intron_size_TnT/Introns.hg19_upstream_100nt_window.bed.plus_strand_genome.plus_G4s")
+intron_len.upstream.minus_minus <- fread("intron_size_TnT/Introns.hg19_upstream_100nt_window.bed.minus_strand_genome.minus_G4s")
+
+intron_len.upstream.plus_minus <- fread("intron_size_TnT/Introns.hg19_upstream_100nt_window.bed.plus_strand_genome.minus_G4s")
+intron_len.upstream.minus_plus <- fread("intron_size_TnT/Introns.hg19_upstream_100nt_window.bed.minus_strand_genome.plus_G4s")
+
+
+intron_len.downstream.plus_plus <- fread("intron_size_TnT/Introns.hg19_downstream_100nt_window.bed.plus_strand_genome.plus_G4s")
+intron_len.downstream.minus_minus <- fread("intron_size_TnT/Introns.hg19_downstream_100nt_window.bed.minus_strand_genome.minus_G4s")
+
+intron_len.downstream.plus_minus <- fread("intron_size_TnT/Introns.hg19_downstream_100nt_window.bed.plus_strand_genome.minus_G4s")
+intron_len.downstream.minus_plus <- fread("intron_size_TnT/Introns.hg19_downstream_100nt_window.bed.minus_strand_genome.plus_G4s")
+
+
+intron_len.upstream.NT <- rbind(intron_len.upstream.plus_plus, intron_len.upstream.minus_minus)
+intron_len.upstream.T <- rbind(intron_len.upstream.plus_minus, intron_len.upstream.minus_plus)
+
+intron_len.downstream.NT <- rbind(intron_len.downstream.plus_plus, intron_len.downstream.minus_minus)
+intron_len.downstream.T <- rbind(intron_len.downstream.plus_minus, intron_len.downstream.minus_plus)
+
+
+intron_len.upstream.total <-  rbind(intron_len.upstream.NT[ V8>0 , .(intron_len=V6, strand="Non-template", pos="Upstream") ], 
+                                    intron_len.upstream.T[ V8>0 , .(intron_len=V6, strand="Template", pos="Upstream") ])
+intron_len.downstream.total <-  rbind(intron_len.downstream.NT[ V8>0 , .(intron_len=V6, strand="Non-template", pos="Downstream")  ], 
+                                      intron_len.downstream.T[ V8>0 , .(intron_len=V6, strand="Template", pos="Downstream") ])
+
+intron_len.total <- rbind(intron_len.upstream.total, intron_len.downstream.total)
+
+
+intron_len.total$pos <-  factor(intron_len.total$pos, levels = c("Upstream", "Do"))
+
+
+Fig3.sup.c <-  ggplot(intron_len.total, aes(strand, log10(intron_len))) +
+    geom_boxplot() +
+    xlab("G4 orientation") +
+
+    geom_signif( step_increase=0.1, map_signif_level=TRUE, test = "wilcox.test", comparisons = list(c("Non-template", "Template") ))+
+    facet_grid(. ~ pos) +
+    theme_bw()
+
+
+```
+
+```{r}
+intron_size_TOTAL[  G4>0, G4_type:="With G4" ]
+intron_size_TOTAL[  G4==0, G4_type:="Without G4" ]
+
+intron_size_TOTAL$exon_pos <- factor(intron_size_TOTAL$exon_pos, levels=c("upstream", "downstream"))
+
+Fig3.sup.a <-  ggplot(data=intron_size_TOTAL, aes(x=G4_type, y=log10(intron_size) )) +
+  geom_boxplot(  ) +
+  facet_grid( . ~  exon_pos ) +
+  xlab("")+
+ylab(expression(log[10]('Intron size')))+
+geom_signif( step_increase=0.1, map_signif_level=TRUE, test = "wilcox.test", comparisons = list(c("Without G4", "With G4") ))+    
+  theme_bw()
+
+
+```
+
+
+
+```{r, fig.width=20, fig.height=5}
+ plot_grid( Fig3.sup.a, Fig3.sup.B + theme_classic(), Fig3.sup.c, nrow=1, labels = "AUTO", rel_widths = c(1,2.5,1))
+```
+
+```{r}
+Fig3.sup
+```
+
+
+
+```{r}
+plot_grid(sup5c_1, sup5c_2)
+```
+
