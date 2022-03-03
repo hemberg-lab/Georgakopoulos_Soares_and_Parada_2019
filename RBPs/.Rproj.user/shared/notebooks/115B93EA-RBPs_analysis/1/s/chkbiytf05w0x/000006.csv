@@ -1,0 +1,6 @@
+"0","bk1 <- c(seq(-6,0.9,by=0.1),0.999)"
+"0","bk2 <- c(1.001,seq(1.1,6,by=0.1))"
+"0","bk <- c(bk1,bk2)  #combine the break limits for purpose of graphing"
+"0","my_palette <- c(colorRampPalette(colors = c(""darkblue"", ""lightblue""))(n = length(bk1)-1),"
+"0","              ""gray38"", ""gray38"","
+"0","              c(colorRampPalette(colors = c(""darkred"", ""tomato1""))(n = length(bk2)-1)))"

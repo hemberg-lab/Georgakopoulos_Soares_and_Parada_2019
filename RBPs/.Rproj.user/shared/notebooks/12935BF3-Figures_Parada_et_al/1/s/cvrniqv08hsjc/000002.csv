@@ -1,0 +1,17 @@
+"0","```r
+PPI_centrality[ mgi_symbol==\"Spna2\" ,  mgi_symbol:=\"Sptan1\"]
+
+Brain_string_interactions_out <- merge(Brain_string_interactions_out, PPI_centrality, by=\"mgi_symbol\")
+
+
+Brain_string_interactions_out_stats <-  Brain_string_interactions_out[ , .( median_eigen_centrality =median(eigen_centrality),
+                                                                            mean_eigen_centrality =mean(eigen_centrality),
+                                                                            median_betweenness =median(betweenness),
+                                                                            N=.N
+                                                                             )  , by=\"ME_cluster\" ]
+
+
+
+ggplot(Brain_string_interactions_out_stats[N>=10, ]) +
+  geom_text(aes(mean_eigen_centrality, median_betweenness, label=ME_cluster))
+```"

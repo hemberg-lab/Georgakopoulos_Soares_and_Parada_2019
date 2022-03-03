@@ -1,0 +1,13 @@
+"0","```r
+
+mm10_DanRer11[, Annotated:=Ensembl]
+mm10_DanRer11[, Organism:=\"Zebrafish\"]
+
+
+
+ME_cluster_info_con_danRer11[, Annotated:=GENCODE_VastDB]
+ME_cluster_info_con_danRer11[, Organism:=\"Mouse\"]
+
+
+mouse_zebrafish_total <- rbind(mm10_DanRer11[, c(\"ME\", \"ME_cluster\", \"Annotated\", \"Organism\")], ME_cluster_info_con_danRer11[, c(\"ME\", \"ME_cluster\",  \"Annotated\", \"Organism\")])
+```"

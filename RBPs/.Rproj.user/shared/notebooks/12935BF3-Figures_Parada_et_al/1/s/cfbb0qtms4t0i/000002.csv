@@ -1,0 +1,18 @@
+"0","```r
+
+Tissue_PSI_matrix_dcast_NO_NA <- reshape2::dcast(re_melted_Tissue_PSI_matrix, ME ~ FILE, value.var=\"PSI\")
+
+row.names(Tissue_PSI_matrix_dcast_NO_NA) <- Tissue_PSI_matrix_dcast_NO_NA[,1]
+Tissue_PSI_matrix_dcast_NO_NA <- data.matrix(Tissue_PSI_matrix_dcast_NO_NA)[,-1]
+
+
+d <- Tissue_PSI_matrix_dcast_NO_NA
+
+
+
+
+hc_cols_NO_NA <- hclust(dist(t(d)), method = \"ward.D2\")
+
+
+
+```"

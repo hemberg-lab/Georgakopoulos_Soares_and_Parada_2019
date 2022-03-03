@@ -1,0 +1,9 @@
+"0","```r
+
+TOTAL_diff_exons <- data.table(TOTAL_diff_exons)
+
+TOTAL_diff_exons_sig <-  TOTAL_diff_exons[  Probability>= 0.9 & abs(DeltaPsi) >=0.1,  ]
+
+
+
+```"

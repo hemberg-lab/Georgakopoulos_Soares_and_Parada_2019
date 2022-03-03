@@ -1,0 +1,61 @@
+"0","```r
+
+
+sub_ME_Tissues_clusters_PSI <- data.table(sub_ME_Tissues_clusters_PSI)
+
+sub_ME_Tissues_clusters_PSI <- sub_ME_Tissues_clusters_PSI
+
+sub_ME_Tissues_clusters_PSI_aggregated <-  sub_ME_Tissues_clusters_PSI[, list(PSI=mean(PSI, na.rm = TRUE)), by=list(ME, ME_clusters,  Tissue_clusters) ]
+
+
+sub_ME_Tissues_clusters_PSI_aggregated_mean <-  sub_ME_Tissues_clusters_PSI_aggregated[, list(PSI= mean(PSI, na.rm=TRUE) ), by=list(ME_clusters,  Tissue_clusters) ]
+
+
+
+
+ggplot( ) +
+        geom_line(data= sub_ME_Tissues_clusters_PSI_aggregated, aes(factor(Tissue_clusters), PSI, group=ME), colour=\"grey\") +
+        geom_line(data = sub_ME_Tissues_clusters_PSI_aggregated_mean, aes(factor(Tissue_clusters), PSI, group=ME_clusters),  colour=\"red\" ) +
+        facet_grid( ME_clusters ~ .) +
+        xlab(\"Sample clusters (sorted by PC1)\") +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'))
+
+
+
+
+
+#sub_ME_Tissues_clusters_PSI_brain <- subset(sub_ME_Tissues_clusters_PSI, (name==\"forebrain\" | name==\"midbrain\" | name==\"hindbrain\" | name==\"neural tube\") & (ME_clusters != 9))
+
+
+sub_ME_Tissues_clusters_PSI_brain <- subset(sub_ME_Tissues_clusters_PSI, (name==\"forebrain\" | name==\"midbrain\" | name==\"hindbrain\" | name==\"neural tube\") )
+
+
+#sub_ME_Tissues_clusters_PSI_aggregated_brain[ ME_clusters==9,]
+
+sub_ME_Tissues_clusters_PSI_aggregated_brain <-  sub_ME_Tissues_clusters_PSI_brain[, list(PSI=mean(PSI, na.rm = TRUE)), by=list(ME, ME_clusters,  age) ]
+sub_ME_Tissues_clusters_PSI_aggregated_brain_mean <-  sub_ME_Tissues_clusters_PSI_aggregated_brain[, list(PSI= mean(PSI, na.rm=TRUE) ), by=list(ME_clusters,  age) ]
+
+
+
+
+ggplot( ) +
+        geom_line(data= sub_ME_Tissues_clusters_PSI_aggregated_brain, aes(factor(age), PSI, group=ME), colour=\"grey\") +
+        geom_line(data = sub_ME_Tissues_clusters_PSI_aggregated_brain_mean, aes(factor(age), PSI, group=ME_clusters),  colour=\"red\" ) +
+        facet_grid( ME_clusters ~ .) +
+        xlab(\"Develomental stage\") +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'), axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+
+
+ME_len_cluster <- merge(ME_clusters, ME_final[, c(\"ME\", \"len_micro_exon_seq_found\")], by=\"ME\")
+
+
+ggplot( ME_len_cluster[ ME_clusters %in%  c(3, 7, 5, 11, 6, 12,  9, 4, 8, 16, 14),]) +
+  
+  geom_histogram(aes( len_micro_exon_seq_found), bins = 28) +
+  facet_grid( ME_clusters ~ .) +
+  theme(panel.background = element_rect(fill = 'white', colour = 'black'), axis.text.x = element_text(angle = 90, hjust = 1))
+
+  
+```"

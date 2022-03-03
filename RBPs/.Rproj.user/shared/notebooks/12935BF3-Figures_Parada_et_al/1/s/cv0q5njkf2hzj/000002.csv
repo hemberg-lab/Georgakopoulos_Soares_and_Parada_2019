@@ -1,0 +1,35 @@
+"0","```r
+
+ME_genes <- merge(ME_final[, c(\"ME\", \"transcript\")], unique(gene_info_total[, c(\"ensembl_transcript_id\", \"ensembl_gene_id\", \"mgi_symbol\")]) , by.x=\"transcript\", by.y=\"ensembl_transcript_id\")
+
+
+Adrenal_both <- compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==6 & Diff==\"Both\"  & abs(Delta.delta)<=0.25,]$exon_ID
+  <- rbind( TOTAL_diff_exons_ME_cluster_info_same_cluster[Tissue_cluster==6, ], TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==6  & exon_ID %in% Adrenal_both, ] )
+Adrenal_ME <- Adrenal_ME[ , .(ME_cluster=ME_clusters, max_DeltaPsi= max(abs(DeltaPsi)) * ((DeltaPsi>0)-0.5) * 2  , max_Entropy= max(Entropy)) , by=exon_ID]
+Adrenal_ME <- unique(Adrenal_ME)
+Adrenal_ME <- merge( Adrenal_ME, ME_genes, by.x=\"exon_ID\", by.y=\"ME\")
+
+
+Heart_both <- compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==4 & Diff==\"Both\" & abs(Delta.delta)<=0.25  ,]$exon_ID
+Heart_ME <- rbind( TOTAL_diff_exons_ME_cluster_info_same_cluster[Tissue_cluster==4, ], TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==4  & exon_ID %in% Heart_both, ] )
+Heart_ME <- Heart_ME[ , .(ME_cluster=ME_clusters, max_DeltaPsi= max(abs(DeltaPsi)) * ((DeltaPsi>0)-0.5) * 2  , max_Entropy= max(Entropy)) , by=exon_ID]
+Heart_ME <- unique(Heart_ME)
+Heart_ME <- merge( Heart_ME, ME_genes, by.x=\"exon_ID\", by.y=\"ME\")
+
+SKM_both <- compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==13 & Diff==\"Both\" & abs(Delta.delta)<=0.25  ,]$exon_ID
+SKM_ME <- rbind( TOTAL_diff_exons_ME_cluster_info_same_cluster[Tissue_cluster==13, ], TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==13 & exon_ID %in% SKM_both, ] )
+SKM_ME <- SKM_ME[ , .(ME_cluster=ME_clusters, max_DeltaPsi= max(abs(DeltaPsi)) * ((DeltaPsi>0)-0.5) * 2  , max_Entropy= max(Entropy)) , by=exon_ID]
+SKM_ME <- unique(SKM_ME)
+SKM_ME <- merge( SKM_ME, ME_genes, by.x=\"exon_ID\", by.y=\"ME\")
+
+
+
+
+Brain_both <- compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==2 & Diff==\"Both\"  & abs(Delta.delta)<=0.25 ,]$exon_ID
+Brain_ME <- rbind( TOTAL_diff_exons_ME_cluster_info_same_cluster[Tissue_cluster %in% c(10, 9, 3, 8, 11, 2) ], TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==2  & exon_ID %in% Brain_both, ] )
+Brain_ME <- Brain_ME[ , .(ME_cluster=ME_clusters, max_DeltaPsi= max(abs(DeltaPsi)) * ((DeltaPsi>0)-0.5) * 2  , max_Entropy= max(Entropy)) , by=exon_ID]
+Brain_ME <- unique(Brain_ME)
+Brain_ME <- merge( Brain_ME, ME_genes, by.x=\"exon_ID\", by.y=\"ME\")
+
+
+```"

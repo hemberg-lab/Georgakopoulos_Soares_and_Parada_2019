@@ -1,0 +1,23 @@
+"0","```r
+
+
+
+
+ME_cluster_info_genes <- merge(ME_cluster_info, ME_genes, by=\"ME\")
+
+
+ME_cluster_info_genes[ ME_clusters %in% c(\"I1\", \"I2\", \"I3\", \"I4\") , ME_cluster_class:=\"Included\"]
+ME_cluster_info_genes[ ME_clusters %in% c(\"E1\", \"E2\", \"E3\") , ME_cluster_class:=\"Excluded\"]
+ME_cluster_info_genes[ ME_clusters %in% c(\"N1\", \"N2\", \"N3\", \"N4\", \"N5\") , ME_cluster_class:=\"Neuronal\"]
+ME_cluster_info_genes[ ME_clusters %in% c(\"NM1\", \"NM2\", \"NM3\") , ME_cluster_class:=\"Neuromuscular\"]
+ME_cluster_info_genes[ ME_clusters %in% c(\"M1\") , ME_cluster_class:=\"Muscular\"]
+ME_cluster_info_genes[ ME_clusters %in% c(\"NN1\", \"NN2\") , ME_cluster_class:=\"Non-neuronal\"]
+
+ggplot( ME_cluster_info_genes[ ME %in% Sig_GABAergic_Neuron_vs_Glutamatergic_Neuron[ mgi_symbol %in% Pre_synaptic |  mgi_symbol %in% Post_synaptic |  mgi_symbol %in% PrePost_synaptic, exon_ID]] ) +
+  geom_bar(aes(x=ME_cluster_class), stat=\"count\") +
+  theme_bw()
+
+
+
+
+```"

@@ -1,0 +1,6 @@
+"0","```r
+
+exon <- as.character(unique(TOTAL_DIFF_ME$exon_ID))
+
+cat(as.character(unique(TOTAL_DIFF_ME$mgi_symbol)), sep=', ') 
+```"

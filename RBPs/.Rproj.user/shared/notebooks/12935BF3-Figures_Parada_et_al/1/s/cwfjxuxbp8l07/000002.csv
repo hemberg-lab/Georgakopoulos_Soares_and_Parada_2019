@@ -1,0 +1,6 @@
+"0","```r
+ME_cluster_info_genes[ ME %in% Sig_GABAergic_Neuron_vs_Glutamatergic_Neuron[ mgi_symbol %in% Pre_synaptic |  mgi_symbol %in% Post_synaptic |  mgi_symbol %in% PrePost_synaptic, exon_ID]]
+
+
+ Sig_GABAergic_Neuron_vs_Glutamatergic_Neuron[ mgi_symbol %in% Pre_synaptic |  mgi_symbol %in% Post_synaptic |  mgi_symbol %in% PrePost_synaptic, ]
+```"

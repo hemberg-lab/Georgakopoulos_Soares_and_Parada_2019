@@ -1,0 +1,7 @@
+"0","```r
+ggplot(Brain_string_interactions_out) +
+  geom_histogram(aes(x=eigen_centrality, bins=20)) +
+  xlab(\"Eigen entrality\") +
+  ylab(\"count\")
+
+```"

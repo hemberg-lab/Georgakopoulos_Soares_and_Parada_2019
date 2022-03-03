@@ -1,0 +1,47 @@
+"0","```r
+
+TOTAL_diff_exons_ME_cluster_info <-  merge(TOTAL_diff_exons_sig, ME_cluster_info, by.x=\"exon_ID\", by.y=\"ME\")
+TOTAL_diff_exons_ME_cluster_info_same_cluster <- TOTAL_diff_exons_ME_cluster_info[ME_cluster==ME_clusters,]
+
+
+TOTAL_quant_exons_ME_cluster_info <-  merge(TOTAL_diff_exons, ME_cluster_info, by.x=\"exon_ID\", by.y=\"ME\")
+TOTAL_quant_exons_ME_cluster_info_same_cluster <- TOTAL_quant_exons_ME_cluster_info[ME_cluster==ME_clusters,]
+
+TOTAL_quant_exons_ME_cluster_info_same_cluster_stats <- TOTAL_quant_exons_ME_cluster_info_same_cluster[ , .(Quant_ME_Cluster= .N) ,  by=c(\"ME_cluster\", \"Tissue_cluster\")]
+
+
+TOTAL_diff_exons_ME_cluster_info_same_cluster_stats <- TOTAL_diff_exons_ME_cluster_info_same_cluster[ , .(Diff_ME_Cluster= .N) ,  by=c(\"ME_cluster\", \"Tissue_cluster\")]
+
+
+
+ME_cluster_diff_stats <- merge(TOTAL_diff_exons_ME_cluster_info_same_cluster_stats, TOTAL_quant_exons_ME_cluster_info_same_cluster_stats,  by=c(\"ME_cluster\", \"Tissue_cluster\"))
+
+
+
+ME_cluster_diff_stats <- merge(ME_cluster_diff_stats, ME_cluster_info[ , .(TOTAL_ME_Cluster=.N ) ,  by=c(\"ME_clusters\")], by.x=\"ME_cluster\", by.y=\"ME_clusters\")
+
+
+
+
+
+
+
+
+
+N_TOTAL_exons <- TOTAL_diff_exons[, .(TOTAL_exons=.N), by=\"ME_cluster\"]
+N_TOTAL_diff_exons <- TOTAL_diff_exons[  Probability>= 0.9 & abs(DeltaPsi) >=0.1, .(TOTAL_diff_exons=.N), by=\"ME_cluster\"]
+
+
+
+ME_cluster_diff_stats <- merge(merge(ME_cluster_diff_stats, N_TOTAL_exons, by=\"ME_cluster\"), N_TOTAL_diff_exons, by=\"ME_cluster\")
+
+
+TOTAL_diff_exons_ME_cluster_info_same_cluster_stats[ , ME_cluster_diff_percent:=((100* Diff_ME_Cluster)/ TOTAL_ME_Cluster) ]
+
+
+
+ME_cluster_diff_stats[, paste(ME_cluster, Tissue_cluster, sep=\"_\")]
+
+dim(ME_cluster_diff_stats)
+
+```"

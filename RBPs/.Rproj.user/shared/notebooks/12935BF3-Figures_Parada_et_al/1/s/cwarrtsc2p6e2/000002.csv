@@ -1,0 +1,7 @@
+"0","```r
+d <- dist(Tissue_PSI_matrix_dcast[apply(Tissue_PSI_matrix_dcast, 1, function(x) length(which(is.na(x)))) < 210, ])
+
+tissue_heatmap <- pheatmap::pheatmap(d, fontsize = 4,  cutree_rows = 10, cutree_cols = 13, clustering_method = \"ward.D2\")
+
+
+```"

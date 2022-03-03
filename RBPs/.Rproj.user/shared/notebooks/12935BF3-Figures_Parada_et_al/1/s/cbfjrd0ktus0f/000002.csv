@@ -1,0 +1,24 @@
+"0","```r
+
+
+
+ME_cov_filtered_ENCODE <- unique(ME_cov_filtered[FILE_NAME %in% metadata[Biosample.term.name!=\"whole cortex\", File.accession],])
+
+
+
+Tissue_PSI_matrix_melt <- ME_cov_filtered_ENCODE[, c(\"ME\", \"FILE_NAME\", \"PSI\") ]
+Tissue_PSI_matrix_dcast <- reshape2::dcast(Tissue_PSI_matrix_melt, ME ~ FILE_NAME)
+
+
+
+
+row.names(Tissue_PSI_matrix_dcast) <- Tissue_PSI_matrix_dcast$ME
+Tissue_PSI_matrix_dcast <- data.matrix(Tissue_PSI_matrix_dcast)[,-1]
+
+
+#colnames(Tissue_PSI_matrix_dcast) <- as.character( paste(sep = \" \", Tissues[colnames(Tissue_PSI_matrix_dcast)], Ages[colnames(Tissue_PSI_matrix_dcast)])) #To replase the file name by the biological sample name
+
+#Tissue_PSI_matrix_dcast <- Tissue_PSI_matrix_dcast[, order(paste(sep = \" \", Tissues[colnames(Tissue_PSI_matrix_dcast)], Ages[colnames(Tissue_PSI_matrix_dcast)]))]
+
+
+```"

@@ -1,0 +1,28 @@
+"0","```r
+
+library(Hmisc)
+
+
+SFARI_Gene_animal_genes<- data.table(read_csv(\"~/Google_Drive/Results/ME/Paper/PPI/SFARI-Gene_animal-genes_export10-09-2018.csv\"))
+colnames(SFARI_Gene_animal_genes) = gsub(\"-\",\".\",colnames(SFARI_Gene_animal_genes))
+
+
+SFARI_Gene_animal_genes[ , gene.symbol:= paste0(substr(gene.symbol, 1, 1), tolower(substr(gene.symbol, 2, nchar(gene.symbol))))  ]
+
+length(unique( neuronal_clusters_genes[mgi_symbol %in% SFARI_Gene_animal_genes[model.species==\"Mus musculus\" , gene.symbol], ]$mgi_symbol))
+
+
+SFARI_Gene_animal_genes[model.species==\"Mus musculus\" , ]
+
+
+
+SFARI_Gene_human_genes <- data.table(read_csv(\"~/Google_Drive/Results/ME/Paper/PPI/SFARI-Gene_genes_human.csv\")) 
+
+colnames(SFARI_Gene_human_genes) = gsub(\"-\",\".\",colnames(SFARI_Gene_human_genes))
+
+SFARI_Gene_human_genes[ , gene.symbol:= paste0(substr(gene.symbol, 1, 1), tolower(substr(gene.symbol, 2, nchar(gene.symbol))))  ]
+
+
+neuronal_clusters_genes[mgi_symbol %in% SFARI_Gene_human_genes[ gene.score<=3 , gene.symbol], ]
+
+```"

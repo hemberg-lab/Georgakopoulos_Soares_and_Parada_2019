@@ -1,0 +1,66 @@
+"0","```r
+
+library(biomaRt)
+library(\"stringr\")
+
+
+ME_cluster_db
+
+VASTDB_EVENTS_Mmu139_mm10 <- data.table(read_delim(\"~/Google_Drive/Results/ME/mm10/VASTDB_EVENTS_Mmu139_mm10.tab\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+
+
+
+
+
+#write.table(ME_cluster_transcript$transcript
+
+
+#ME_cluster_transcript <- merge(ME_clusters, ME_final[, c(\"ME\", \"transcript\")], #by=\"ME\")
+#ME_cluster_transcript <- data.table(ME_cluster_transcript)
+
+ME_cluster_transcript$ME_clusters <- mapvalues(ME_cluster_transcript$ME_clusters, 
+          from =c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15, 1, 2, 11, 17),
+          to = c(\"NM1\", \"N1\", \"NM2\", \"N2\", \"NM3\", \"N3\", \"NM4\", \"N4\", \"N5\", \"M1\", \"E1\", \"NN1\", \"NN2\", \"NN3\", \"C1\", \"C2\", \"E2\", \"C3\"))
+
+
+
+neuronal_ME_cluster_transcript <- ME_cluster_transcript[ME_clusters %in% c(\"NM1\", \"N1\", \"NM2\", \"N2\", \"NM3\", \"N3\", \"NM4\", \"N4\", \"N5\", \"NN1\") , ]
+
+
+neuronal_ME_cluster_transcript[ , tstrsplit(transcript, \".\", fixed=TRUE)]
+
+
+neuronal_ME_clster_transcripts <- sapply(strsplit(as.character(neuronal_ME_cluster_transcript$transcript), \"[.]\"), `[`, 1)
+
+
+write(gene_table$mgi_symbol, file = \"../ME.transcripts.STRING.txt\", sep = \"\n\")
+
+
+
+str_split_fixed(neuronal_ME_cluster_transcript$transcript, \"[.]\", 1)
+
+str_split( as.character(neuronal_ME_cluster_transcript$transcript), sep=\".\")
+
+sapply( neuronal_ME_cluster_transcript$transcript, \".\", 1 )
+
+strsplit(as.character(neuronal_ME_cluster_transcript$transcript), '.' )
+
+ensembl = useEnsembl(biomart=\"ensembl\", dataset=\"mmusculus_gene_ensembl\")
+
+gene_table <- data.table(getBM(attributes=c('ensembl_gene_id_version', \"mgi_symbol\"),filters = 'ensembl_transcript_id_version', values = neuronal_ME_cluster_transcript$transcript , mart = ensembl))
+
+
+total_gene_table <- data.table(getBM(attributes=c(\"ensembl_transcript_id_version\", \"ensembl_transcript_id\", \"mgi_symbol\"),filters = 'ensembl_transcript_id_version', values = ME_final$transcript , mart = ensembl))
+
+
+gene_table[ensembl_transcript_id==\"ENSMUST00000186346\", ]
+
+
+gene_table[mgi_symbol==\"Ptk2\",]
+
+
+ME_cluster_transcript[transcript==\"ENSMUST00000057330.14\",]
+
+ENSMUST00000057330.14
+```"

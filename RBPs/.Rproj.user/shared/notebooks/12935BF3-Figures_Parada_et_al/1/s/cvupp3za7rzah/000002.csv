@@ -1,0 +1,50 @@
+"0","```r
+
+
+
+ME_clusters_PSI_cortex <- merge(ME_clusters_PSI, metadata[Biosample.term.name==\"whole cortex\", ], by.x=\"FILE_NAME\", by.y=\"File.accession\")
+
+
+
+ME_clusters_PSI_cortex_aggregated <-  ME_clusters_PSI_cortex[, .(PSI=mean(PSI, na.rm = TRUE)), by=c(\"ME\", \"ME_clusters\",  \"Biosample.Age\") ]
+
+
+
+Sub_ME_clusters_PSI_cortex_aggregated <- ME_clusters_PSI_cortex_aggregated[ ME_clusters %in% c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15), ]
+
+Sub_ME_clusters_PSI_cortex_aggregated$ME_clusters <- factor(Sub_ME_clusters_PSI_cortex_aggregated$ME_clusters, levels = c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15))
+
+
+Sub_ME_clusters_PSI_cortex_aggregated$ME_clusters <- mapvalues(Sub_ME_clusters_PSI_cortex_aggregated$ME_clusters, 
+          from =c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15),
+          to = c(\"NM1\", \"N1\", \"NM2\", \"N2\", \"NM3\", \"N3\", \"NM4\", \"N4\", \"N5\", \"M1\", \"E1\", \"NN1\", \"NN2\", \"NN3\"))
+
+
+
+Sub_ME_clusters_PSI_cortex_aggregated$Biosample.Age <- factor(Sub_ME_clusters_PSI_cortex_aggregated$Biosample.Age, levels = c(\"14.5 day\",
+                                                                                                      \"16.5 day\", 
+                                                                                                      \"0 day\",
+                                                                                                      \"P4 day\",
+                                                                                                      \"P7 day\",
+                                                                                                      \"P15 day\",
+                                                                                                      \"P30 day\",
+                                                                                                      \"P110 day\",
+                                                                                                      \"21 Months\"
+                                                                                                       ))
+
+
+
+
+Sub_ME_clusters_PSI_cortex_aggregated_mean <- Sub_ME_clusters_PSI_cortex_aggregated[, .(PSI = mean(PSI, na.rm = TRUE)), by = c(\"ME_clusters\", \"Biosample.Age\") ]
+
+
+
+ggplot( ) +
+        geom_line(data= Sub_ME_clusters_PSI_cortex_aggregated, aes(factor(Biosample.Age), PSI, group=ME), colour=\"grey\") +
+        geom_line(data = Sub_ME_clusters_PSI_cortex_aggregated_mean, aes(factor(Biosample.Age), PSI, group=ME_clusters),  colour=\"red\" ) +
+        facet_grid( ME_clusters ~ .) +
+        xlab(\"Develomental stage\") +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'), axis.text.x = element_text(angle = 90, hjust=1))
+
+
+```"

@@ -1,0 +1,7 @@
+"0","```r
+
+ggplot(Brain_string_interactions_out) +
+  geom_boxplot(aes(x = as.factor(ME_cluster), y = (eigen_centrality) )) +
+  geom_jitter(aes(x = as.factor(ME_cluster), y = (eigen_centrality) ))
+
+```"

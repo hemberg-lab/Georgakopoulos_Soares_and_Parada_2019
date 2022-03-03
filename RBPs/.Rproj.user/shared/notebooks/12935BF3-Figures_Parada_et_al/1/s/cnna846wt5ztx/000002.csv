@@ -1,0 +1,6 @@
+"0","```r
+SFARI_Gene_animal_genes[model.species==\"Mus musculus\",]
+
+SFARI_Gene_human_genes[gene.score<=3,]
+
+```"

@@ -1,0 +1,18 @@
+"0","    RBP_binomial_table_non_template <- plot_eql_diff_binomial_table(
+      paste(""./scores/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score."", sample, "".bed.list.out.num"", sep=""""),
+      paste(""./scores/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score."", sample, "".bed.list.out.num"", sep=""""),
+      paste(""./scores/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score."", sample, "".bed.list.out.num"", sep=""""),
+      paste(""./scores/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score."", sample, "".bed.list.out.num"", sep=""""),
+      paste(""./scores/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score."", sample, "".bed.list.out.num"", sep=""""),
+      paste(""./scores/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score."", sample, "".bed.list.out.num"", sep=""""),
+      paste(""./scores/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score."", sample, "".bed.list.out.num"", sep=""""),
+      paste(""./scores/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score."", sample, "".bed.list.out.num"", sep=""""),
+      110870 + 109467,
+      108638 + 107433,
+      3587 + 3431,
+      5819 + 5465,
+      0.05
+    )
+"
+"2","Error: './scores/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.ENCFF639MYI.bed.list.out.num' does not exist in current working directory ('/Users/gp7/Google_Drive/Results/Non_B').
+"

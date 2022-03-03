@@ -1,0 +1,7 @@
+"0","```r
+hcd <- as.dendrogram(hc_cols)
+
+
+plot(hcd, leaflab = \"none\") +
+rect.hclust(hc_cols_NO_NA, k = 14, border = my_col)
+```"

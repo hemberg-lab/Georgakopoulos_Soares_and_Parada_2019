@@ -1,0 +1,41 @@
+"0","```r
+
+library(\"ggrepel\")
+library(\"plyr\")
+
+ME_PSI_brain_age[ , c(\"ME\", \"days\")]
+
+Brain_string_interactions_out_PSI_min50
+
+sub <- merge(Brain_string_interactions_out[!exon_ID %in% ME_blacklist$ME], Brain_string_interactions_out_PSI_min50[ , c(\"exon_ID\", \"min50_day\")], by.y=\"exon_ID\", by.x=\"exon_ID\")
+
+
+sub$type <- mapvalues(sub$type, 
+          from = c(\"Annotated\", \"Novel in Genecode\", \"Novel in VastDB\", \"Novel in both\"),
+          to =  c(\"Annotated\", \"Missing in Genecode\", \"Missing in VastDB\", \"Missing in both\") )
+
+
+ggplot(sub) +
+  
+  geom_point( aes(x=eigen_centrality, y=min50_day, colour=type) )  +
+  
+  
+  
+    geom_text_repel(data=sub[ (type!=\"Annotated\" & eigen_centrality>=0.20) | (type==\"Annotated\" & eigen_centrality>=0.5)  ],
+                  aes(x=eigen_centrality, y=min50_day, colour=type), 
+                  nudge_y      = 0.5,
+                  direction    = \"x\",
+                  segment.size = 0.2,
+                  label=sub[(type!=\"Annotated\" & eigen_centrality>=0.15) | (type==\"Annotated\" & eigen_centrality>=0.5)  , mgi_symbol] ) +
+  xlab(\"Eigen centrality\") + 
+  ylab(\"Embryonic time to reach PSI 0.5\") +
+  theme_bw()
+
+
+
+
+  #  geom_text_repel(data = sub[type==\"Novel in both\"],
+ #                 colour=\"black\", aes(x=eigen_centrality, y=interactions), 
+#                  label= sub[type==\"Novel in both\", mgi_symbol] )
+    
+```"

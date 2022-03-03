@@ -1,0 +1,11 @@
+"0","```r
+
+mm10_DanRer11_cluster_class <- as.data.table(table(mm10_DanRer11[Ensembl==T]$ME_cluster_class))
+
+colnames(mm10_DanRer11_cluster_class) <- c(\"ME_cluster_class\", \"N\")
+
+ggplot(mm10_DanRer11_cluster_class, aes(x=\"\", y=N, fill=ME_cluster_class))+
+    geom_bar(width = 1, stat = \"identity\") +
+   coord_polar(\"y\", start=0)
+
+```"

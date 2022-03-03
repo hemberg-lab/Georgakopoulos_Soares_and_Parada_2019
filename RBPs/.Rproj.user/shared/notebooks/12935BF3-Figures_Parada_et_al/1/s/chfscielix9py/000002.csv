@@ -1,0 +1,86 @@
+"0","```r
+
+
+ME_clusters <- cutree(hc_rows, k=18)
+
+ME_clusters <- cbind(ME_clusters, names(ME_clusters))
+
+colnames(ME_clusters) <- c(\"ME_clusters\", \"ME\")
+
+ME_clusters_table <- data.table(ME_clusters)
+
+ME_clusters_PSI <-  merge(ME_cov_filtered, ME_clusters , by=c(\"ME\"))
+
+
+ME_clusters_PSI <- ME_clusters_PSI[, c(\"ME\", \"FILE_NAME\", \"ME_clusters\", \"PSI\")]
+  
+
+Tissue_clusters$FILE_NAME <- row.names(Tissue_clusters)
+
+
+colnames(Tissue_clusters) <- c(\"Tissue_clusters\", \"name\",  \"age\", \"date\", \"FILE_NAME\")
+
+ME_Tissues_clusters_PSI <- merge(ME_clusters_PSI, Tissue_clusters, by=\"FILE_NAME\")
+
+ME_Tissues_clusters_PSI <- data.table(ME_Tissues_clusters_PSI)
+
+
+ME_Tissues_clusters_PSI$ME_clusters <- mapvalues(ME_Tissues_clusters_PSI$ME_clusters, 
+          from =1:18,
+          to = c(\"I1\", \"E1\", \"E3\", \"I2\", \"N1\", \"M1\", \"N2\", \"NM3\", \"NM2\", \"N5\", \"NM1\", \"N3\", \"N4\", \"NN2\", \"E2\", \"I4\", \"I3\", \"NN1\"))
+
+
+#sub_ME_Tissues_clusters_PSI <- ME_Tissues_clusters_PSI[which(ME_Tissues_clusters_PSI$ME_clusters %in%  c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15)),]
+
+
+sub_ME_Tissues_clusters_PSI <- ME_Tissues_clusters_PSI[ME_clusters %in%  c(\"NM1\", \"N1\", \"NM2\", \"N2\", \"NM3\", \"N3\", \"N4\", \"N5\", \"NN1\"), ]
+sub_ME_Tissues_clusters_PSI$ME_clusters <- factor(sub_ME_Tissues_clusters_PSI$ME_clusters, levels = c(\"NM1\", \"N1\", \"NM2\", \"N2\", \"NM3\", \"N3\", \"N4\", \"N5\", \"NN1\"))
+
+
+
+#sub_ME_Tissues_clusters_PSI <- ME_Tissues_clusters_PSI[ME_clusters %in%  c(\"I1\", \"I2\", \"I3\", \"I4\", \"E1\", \"E2\", \"E3\", \"NN2\"), ]
+#sub_ME_Tissues_clusters_PSI$ME_clusters <- factor(sub_ME_Tissues_clusters_PSI$ME_clusters, levels = c(\"I1\", \"I2\", \"I3\", \"I4\", \"E1\", #\"E2\", \"E3\", \"NN2\"))
+
+
+#sub_ME_Tissues_clusters_PSI <- ME_Tissues_clusters_PSI
+
+
+
+
+
+#sub_ME_Tissues_clusters_PSI$ME_clusters <- factor(sub_ME_Tissues_clusters_PSI$ME_clusters, levels = c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15))
+
+
+#sub_ME_Tissues_clusters_PSI$ME_clusters <- mapvalues(sub_ME_Tissues_clusters_PSI$ME_clusters, 
+#          from =c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15),
+#          to = c(\"NM1\", \"N1\", \"NM2\", \"N2\", \"NM3\", \"N3\", \"NM4\", \"N4\", \"N5\", \"M1\", \"E1\", \"NN1\", \"NN2\", \"NN3\"))
+
+
+#sub_ME_Tissues_clusters_PSI$ME_clusters <- factor(sub_ME_Tissues_clusters_PSI$ME_clusters, levels = c(\"NM1\", \"N1\", \"NM2\", \"N2\", \"NM3\", \"N3\", \"NM4\", \"N4\", \"N5\", #\"M1\", \"E1\", \"NN1\", \"NN2\", \"NN3\"))
+
+
+#sub_ME_Tissues_clusters_PSI <- ME_Tissues_clusters_PSI[which(ME_Tissues_clusters_PSI$ME_clusters %in%  c(\"5\", \"4\", \"6\", \"8\", \"7\", \"9\")),]
+#sub_ME_Tissues_clusters_PSI$ME_clusters <- factor(sub_ME_Tissues_clusters_PSI$ME_clusters, levels = c(\"5\", \"4\", \"6\", \"8\", \"7\", \"9\"))
+
+
+
+#sub_ME_Tissues_clusters_PSI <- ME_Tissues_clusters_PSI
+
+
+
+
+
+sub_ME_Tissues_clusters_PSI$Tissue_clusters <- factor(sub_ME_Tissues_clusters_PSI$Tissue_clusters,  levels = c( 12, 7, 1, 5, 4, 14, 13, 6, 10, 9,  3, 8, 11, 2))
+
+
+ggplot(data= sub_ME_Tissues_clusters_PSI) +
+  geom_violin(aes(factor(Tissue_clusters), PSI)) +
+facet_grid( ME_clusters ~ .)
+  
+  
+
+
+
+
+
+```"

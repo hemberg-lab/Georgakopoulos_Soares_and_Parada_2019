@@ -1,0 +1,15 @@
+"0","```r
+
+mm10_DanRer11 <- fread(\"../../Zebrafish/mm10_clusters.conserved.DanRer11.txt\")
+
+mm10_DanRer11[ ME_cluster %in% c(\"I1\", \"I2\", \"I3\", \"I4\") , ME_cluster_class:=\"Included\"]
+mm10_DanRer11[ ME_cluster %in% c(\"E1\", \"E2\", \"E3\") , ME_cluster_class:=\"Excluded\"]
+mm10_DanRer11[ ME_cluster %in% c(\"N1\", \"N2\", \"N3\", \"N4\", \"N5\") , ME_cluster_class:=\"Neuronal\"]
+mm10_DanRer11[ ME_cluster %in% c(\"NM1\", \"NM2\", \"NM3\") , ME_cluster_class:=\"Neuromuscular\"]
+mm10_DanRer11[ ME_cluster %in% c(\"M1\") , ME_cluster_class:=\"Muscular\"]
+mm10_DanRer11[ ME_cluster %in% c(\"NN1\", \"NN2\") , ME_cluster_class:=\"Non-neuronal\"]
+
+ggplot(mm10_DanRer11) +
+  geom_point(aes(x= U2_score_mm10 - U2_score_DanRer11, y = Phylop, colour = Ensembl )) +
+  theme_bw()
+```"

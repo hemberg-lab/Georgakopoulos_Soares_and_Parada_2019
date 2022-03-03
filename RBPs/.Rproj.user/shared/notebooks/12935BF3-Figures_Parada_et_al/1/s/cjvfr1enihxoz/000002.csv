@@ -1,0 +1,5 @@
+"0","```r
+
+cor(sub$eigen_centrality, sub$gene_min50_day, method = \"pearson\")
+
+```"

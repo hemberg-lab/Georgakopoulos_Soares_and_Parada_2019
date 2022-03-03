@@ -1,0 +1,30 @@
+"0","```r
+
+targets <- merge(Sig_GABAergic_Neuron_vs_Glutamatergic_Neuron[ mgi_symbol %in% Pre_synaptic |  mgi_symbol %in% Post_synaptic |  mgi_symbol %in% PrePost_synaptic, ], ME_final[,c('ME', 'len_micro_exon_seq_found')], by.x=\"exon_ID\", by.y=\"ME\")
+
+
+targets[, max_len:=max(len_micro_exon_seq_found) , by='mgi_symbol']
+
+targets <- targets[mgi_symbol==\"Ptprd\" | len_micro_exon_seq_found==max_len]
+
+targets[ , ME_ID:=paste(mgi_symbol, rank(exon_ID), sep=\"_\")   , mgi_symbol]
+
+
+targets[mgi_symbol %in% c(\"Gabrg2\", \"Nrxn3\", \"Nrxn1\", \"Ptprd\")]
+
+
+ME_target <- c(\"chr10_+_69980823_69980850\", \"chr11_-_41913969_41913993\", \"chr14_-_23449199_23449208\",  \"chr11_+_53590716_53590725\", \"chr14_-_23449199_23449211\" )
+
+GABA <- c(\"chr10_+_69980823_69980850\", \"chr14_-_12472397_12472406\", )
+
+GLU <- c(\"chr17_+_70718195_70718225\", \"chr11_-_41913969_41913993\")
+
+
+
+GABA <- c(\"chr10_+_69980823_69980850\", \"chr14_-_12472397_12472406\", )
+GLU <- c(\"chr17_+_70718195_70718225\" \"\", )
+
+         
+       
+
+```"

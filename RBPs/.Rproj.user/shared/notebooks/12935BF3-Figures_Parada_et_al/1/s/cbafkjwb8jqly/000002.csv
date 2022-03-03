@@ -1,0 +1,7 @@
+"0","```r
+
+Brain_string_interactions_out_PSI_min50[min50_day==10.5, eigen_centrality]
+
+
+wilcox.test(Brain_string_interactions_out_PSI_min50[min50_day==10.5, eigen_centrality], Brain_string_interactions_out_PSI_min50[min50_day!=10.5, eigen_centrality])
+```"

@@ -1,0 +1,24 @@
+"0","```r
+
+
+#Tissue_clusters_sum <- Tissue_clusters %>% group_by(cluster, name, age ) %>% summarise(count = n())
+
+Tissue_clusters_DT <- data.table(Tissue_clusters)
+Tissue_clusters_sum <- Tissue_clusters_DT[, .(count=.N) , by=c(\"cluster\", \"name\", \"age\" )]
+
+## NA ###
+
+Tissue_clusters_sum$cluster <- factor(Tissue_clusters_sum$cluster , levels =c(2, 11, 8, 3, 10, 9, 13, 4, 14, 7, 1, 6, 12, 5))
+
+
+ggplot( Tissue_clusters_sum, aes(age, name) ) +
+  geom_tile(aes(fill = count)) +
+  scale_fill_gradient(low=\"grey\", high=\"red\")+
+  facet_grid(. ~ cluster ) +
+  theme_bw()+
+  labs(fill = \"Sample count\") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0),
+    axis.title = element_text(colour = NA),
+    strip.text = element_text(hjust = 0.5))
+
+```"

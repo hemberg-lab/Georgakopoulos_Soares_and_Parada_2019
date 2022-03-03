@@ -1,0 +1,42 @@
+"0","```r
+library(biomaRt)
+
+
+
+ensembl_mm = useEnsembl(biomart=\"ensembl\", dataset=\"mmusculus_gene_ensembl\")
+
+neuronal_clusters <- ME_clusters_table[ME_clusters %in% c(11, 5, 9, 7, 8, 12, 13, 10, 18), ]
+
+neuronal_clusters <- merge(neuronal_clusters, ME_final[, c(\"ME\", \"transcript\")], by=\"ME\")
+
+
+
+gene_info_total <- data.table(getBM(attributes=c('ensembl_gene_id','ensembl_transcript_id', 'entrezgene', \"wikigene_description\", \"mgi_symbol\"),filters = 'ensembl_transcript_id', values = ME_final[, transcript] , mart = ensembl_mm))
+
+
+gene_info <- data.table(getBM(attributes=c('ensembl_gene_id','ensembl_transcript_id', 'entrezgene', \"wikigene_description\", \"mgi_symbol\"),filters = 'ensembl_transcript_id', values = neuronal_clusters[, transcript] , mart = ensembl_mm))
+
+gene_info[mgi_symbol == \"Mapt\", ]
+
+
+gene_info_total[mgi_symbol == \"Mapt\",]
+
+
+write.table(gene_info[,mgi_symbol ])
+
+
+write.table(gene_info[,mgi_symbol ], file = \"../../Paper/neuronal.genes.PPI.txt\", append = FALSE, quote = FALSE, sep = \" \",
+            eol = \"\n\", na = \"NA\", dec = \".\", row.names = FALSE,
+            col.names = FALSE, qmethod = c(\"escape\", \"double\"),
+            fileEncoding = \"\")
+
+
+ data.table(getBM(attributes=c('ensembl_gene_id','ensembl_transcript_id', 'entrezgene', \"wikigene_description\", \"mgi_symbol\"),filters = 'ensembl_transcript_id', values = \"ENSMUST00000110036\", mart = ensembl_mm))
+
+ 
+
+ME_final[ transcript==\"ENSMUST00000106992\",]
+ \"ENSMUST00000106992\"
+
+
+```"

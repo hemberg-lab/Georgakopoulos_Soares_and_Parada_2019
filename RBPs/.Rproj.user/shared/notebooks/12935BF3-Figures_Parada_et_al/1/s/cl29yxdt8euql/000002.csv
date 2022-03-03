@@ -1,0 +1,20 @@
+"0","```r
+TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==2 & Coord==\"chr1:134311529-134311555\",  ]
+
+TOTAL_diff_exons[ME_cluster==\"NM3\" & Tissue_cluster==2 & 'chr7:102002294-102002336' == Coord, ]
+
+chr7_+_102002295_102002336
+
+chr7:102002295-102002,336
+
+
+chr7_+_102002294_102002309
+
+chr9_-_75521366_75521378
+
+chr9_+_47836743_47836770
+
+
+
+
+```"

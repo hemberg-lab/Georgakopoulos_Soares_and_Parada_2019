@@ -1,0 +1,8 @@
+"0","```r
+
+Heart_ME_strict <- Heart_ME
+
+Heart_ME[ !exon_ID %in% Heart_ME_strict$exon_ID,  ]
+
+Heart_ME[mgi_symbol==\"Araf\",]
+```"

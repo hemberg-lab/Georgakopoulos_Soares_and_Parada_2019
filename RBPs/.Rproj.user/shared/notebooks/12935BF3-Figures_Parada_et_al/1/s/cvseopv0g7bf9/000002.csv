@@ -1,0 +1,105 @@
+"0","```r
+
+
+
+neuronal_clusters_genes <- merge(neuronal_clusters, gene_info, by.x=\"transcript\", by.y=\"ensembl_transcript_id\")
+
+neuronal_clusters_genes$ME_clusters <- mapvalues(neuronal_clusters_genes$ME_clusters, 
+          from =1:18,
+          to = c(\"I1\", \"E1\", \"E3\", \"I2\", \"N1\", \"M1\", \"N2\", \"NM3\", \"NM2\", \"N5\", \"NM1\", \"N3\", \"N4\", \"NN2\", \"E2\", \"I4\", \"I3\", \"NN1\"))
+
+
+
+#Generaring values for pie vertics
+
+colour_pallete <- list( c(heat.colors(8), \"#1E90FFFF\"))
+values_clusters = list()
+
+ME_per_gene = list()
+
+vertex_shape = list()
+circle_color = list()
+
+label_color = list()
+
+for (i in 1:144){
+  
+
+  gene_name = nodes[i, ]$id
+
+
+  if (i==16){
+    
+    gene_name = \"Sptan1\"   # STRING DB changed the name from Spna2 to Spatan1
+  }
+  
+  if (i==49){
+    
+    gene_name = \"Diaph1\"   ## STRING DB changed the name from Diap1 to Diaph1
+  }
+  
+  
+  ME_per_gene[[i]] <- nrow(neuronal_clusters_genes[mgi_symbol==gene_name, ])
+
+
+  N1 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"N1\", ])
+  N2 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"N2\", ])
+  N3 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"N3\", ])
+  N4 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"N4\", ])
+  N5 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"N5\", ])
+  NM1 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"NM1\", ])
+  NM2 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"NM2\", ])
+  NM3 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"NM3\", ])
+  NN1 =  nrow(neuronal_clusters_genes[mgi_symbol==gene_name  & ME_clusters==\"NN1\", ])
+  
+  
+  #values_clusters[[i]] <- c(N1, N2, N3, N4, N5, NM1, NM2, NM3, NN1)
+  
+  cluster_counts <- c(NM1, N1, NM2,  N2, NM3, N3, N4, N5,  NN1)
+  
+  values_clusters[[i]] <- cluster_counts
+  
+  if (length(which(cluster_counts!=0) ) == 1  ) {
+    
+    vertex_shape[[i]] <- \"circle\"   #Nodes with only one kind of cluster need to be circles instead of pie to avoid pie border
+    circle_color[[i]] <-  colour_pallete[[1]][which(cluster_counts!=0)] 
+    
+    
+  } else {
+    
+    
+    vertex_shape[[i]] <- \"pie\"
+    circle_color[[i]] <-  \"#FFFF00FF\"   #This colour is not taken in consideration for pies
+    
+    
+  }
+  
+  
+  #if (gene_name %in%  SFARI_Gene_animal_genes[model.species==\"Mus musculus\" , gene.symbol]) {
+    
+  if (gene_name %in%  SFARI_Gene_human_genes[ gene.score<=3 , gene.symbol]) {  
+    
+    
+    
+    label_color[[i]] <- \"darkgreen\"
+    
+    
+  } else{
+    
+     label_color[[i]] <- \"black\"
+    
+  }
+  
+    
+    
+  if ( sum( c( N1, N2, N3, N4, N5, NM1, NM2, NM3, NN1)) == 0 ) {
+    
+    print( c(i, nodes[i, ]$id ) )
+  }
+  
+
+}
+
+
+
+```"

@@ -1,0 +1,12 @@
+"0","```r
+compare_whippet_MicroExonator[ , Delta.delta:=DeltaPsi.x-DeltaPsi.y]
+
+
+ggplot(compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==13, ]) +
+  
+  geom_histogram( aes(Delta.delta) )
+
+hist(compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==13, Delta.delta])
+
+compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==13 & exon_ID=='chr3_+_136932021_136932040',   c(\"exon_ID\", \"Psi_A.x\", \"Psi_A.y\", \"Psi_B.x\", \"Psi_B.y\", \"Diff\", \"Delta.delta\" )  ]
+```"

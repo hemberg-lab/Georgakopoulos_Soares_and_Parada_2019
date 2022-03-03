@@ -1,0 +1,6 @@
+"0","```r
+write.table(d, file = \"./ME_PSI_matrix.txt\", append = FALSE, quote = F, sep = \" \",
+            eol = \"\n\", na = \"NA\", dec = \".\", row.names = F,
+            col.names = TRUE, qmethod = c(\"escape\", \"double\"),
+            fileEncoding = \"\")
+```"

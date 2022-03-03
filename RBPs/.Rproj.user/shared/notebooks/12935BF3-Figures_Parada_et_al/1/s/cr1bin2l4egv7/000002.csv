@@ -1,0 +1,10 @@
+"0","```r
+Tasic_unpooled_diff_exons <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/New_report/Whippet_Delta/Tasic/GABA-ergic_Neuron_vs_Glutamatergic_Neuron.diff.Potential_Exon.exon_ID.only_ME.diff\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+
+Tasic_pooled_diff_exons <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/New_report/Whippet_Delta/Tasic/Pool/TOTAL.Pool.only_ME.diff\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+
+
+
+```"

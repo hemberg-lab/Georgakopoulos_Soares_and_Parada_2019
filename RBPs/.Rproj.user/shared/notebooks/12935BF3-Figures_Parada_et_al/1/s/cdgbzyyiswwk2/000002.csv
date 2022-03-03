@@ -1,0 +1,9 @@
+"0","```r
+ME_3_alt <- unique( ME_cov_filtered[is_alternative_3==\"True\", ME] )
+ME_5_alt <- unique( ME_cov_filtered[is_alternative_5==\"True\", ME] )
+
+ME_5_3_alt <- unique( ME_cov_filtered[is_alternative_5==\"True\" | is_alternative_3==\"True\" , ME] )
+
+
+
+```"

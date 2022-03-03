@@ -1,0 +1,59 @@
+"0","```r
+
+re_melted_Tissue_PSI_matrix <- data.table(melt(Tissue_PSI_matrix_dcast[apply(Tissue_PSI_matrix_dcast, 1, function(x) length(which(is.na(x)))) < 180, ]))
+
+
+
+colnames(re_melted_Tissue_PSI_matrix) <- c(\"ME\", \"FILE\", \"PSI\")
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==1), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==2), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==3), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==4), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==5), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==6), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==7), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==8), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==9), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==10), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==11), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==12), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==13), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[FILE %in% rownames(Tissue_clusters[which(Tissue_clusters$cluster==14), ]),
+                             mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[ , TOTAL_mean_PSI:=(mean(PSI, na.rm = TRUE)), by=\"ME\"]
+
+re_melted_Tissue_PSI_matrix[ mean_PSI == \"NaN\" , mean_PSI:=TOTAL_mean_PSI]
+
+re_melted_Tissue_PSI_matrix[ PSI == \"NaN\" , PSI:=mean_PSI]
+
+
+
+```"

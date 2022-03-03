@@ -1,0 +1,14 @@
+"0","```r
+
+write.table(metadata[ is.na(Paired.end)==T ,],  file = \"../../mm10/simple.metadata.txt\", append = FALSE, quote = F, sep = \"\t\",
+            eol = \"\n\", na = \"NA\", dec = \".\", row.names = F,
+            col.names = TRUE, qmethod = c(\"escape\", \"double\"),
+            fileEncoding = \"\")
+
+metadata[ is.na(Paired.end)==T ,]
+
+
+neural tube_11.5 day
+hindbrain_0 day
+
+```"

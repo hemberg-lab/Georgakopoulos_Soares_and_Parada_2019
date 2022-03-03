@@ -1,0 +1,45 @@
+"0","```r
+
+
+
+ME_cluster_info_con_danRer11[ ,  Ensembl:=(GENCODE==T | VastDB==T) ]
+
+
+ME_cluster_info_con_danRer11[, ME_cluster:=ME_clusters ]
+
+ME_cluster_info_con_danRer11[ ME_cluster %in% c(\"I1\", \"I2\", \"I3\", \"I4\") , ME_cluster_class:=\"Included\"]
+ME_cluster_info_con_danRer11[ ME_cluster %in% c(\"E1\", \"E2\", \"E3\") , ME_cluster_class:=\"Excluded\"]
+ME_cluster_info_con_danRer11[ ME_cluster %in% c(\"N1\", \"N2\", \"N3\", \"N4\", \"N5\") , ME_cluster_class:=\"Neuronal\"]
+ME_cluster_info_con_danRer11[ ME_cluster %in% c(\"NM1\", \"NM2\", \"NM3\") , ME_cluster_class:=\"Neuromuscular\"]
+ME_cluster_info_con_danRer11[ ME_cluster %in% c(\"M1\") , ME_cluster_class:=\"Muscular\"]
+ME_cluster_info_con_danRer11[ ME_cluster %in% c(\"NN1\", \"NN2\") , ME_cluster_class:=\"Non-neuronal\"]
+
+
+DanRer11_mouse_cluster_class_total <- ME_cluster_info_con_danRer11[  , .N , by=c(\"ME_cluster_class\", \"Ensembl\")]
+DanRer11_mouse_cluster_class_total[, type:=\"Total\"]
+
+DanRer11_mouse_cluster_class_mising <- ME_cluster_info_con_danRer11[ Ensembl==F , .N , by=c(\"ME_cluster_class\", \"Ensembl\")]
+DanRer11_mouse_cluster_class_mising[, type:=\"Missing\"]
+
+DanRer11_mouse_cluster_class <- rbind(DanRer11_mouse_cluster_class_total, DanRer11_mouse_cluster_class_mising)
+DanRer11_mouse_cluster_class$type <- factor(DanRer11_mouse_cluster_class$type, levels=c(\"Total\", \"Missing\"))
+
+
+
+mm10_DanRer11_cluster_class[, org:=\"zebrafish\"]
+DanRer11_mouse_cluster_class[, org:=\"mouse\"]
+
+TOTAL_cluster_class <- rbind(mm10_DanRer11_cluster_class, DanRer11_mouse_cluster_class)
+
+
+ggplot(TOTAL_cluster_class, aes(x=\"\", y=N, fill=ME_cluster_class))+
+  geom_bar(width = 1, stat = \"identity\") +
+  #coord_polar(\"y\", start=0) +
+  xlab(NULL) +
+  ylab(\"Microexons conserved between mouse and zebrafish\") +
+  labs(fill = \"Microexon cluster class\") +
+  facet_grid( org ~ type)  +
+  theme_bw()
+
+
+```"

@@ -1,0 +1,8 @@
+"0","```r
+Adrenal_ME[ !exon_ID %in% microexons_Vastdb, ]
+Heart_ME[ !exon_ID %in% microexons_Vastdb, ]
+SKM_ME[ !exon_ID %in% microexons_Vastdb, ]
+Brain_ME[ !exon_ID %in% microexons_Vastdb, ]
+
+rbin
+```"

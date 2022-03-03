@@ -1,0 +1,24 @@
+"0","```r
+
+sub <- Brain_string_interactions_out[ME_cluster == \"N2\"]
+
+sub$type <- factor(sub$type, levels = c(\"Annotated\", \"Novel in Genecode\", \"Novel in VastDB\", \"Novel in both\"))
+
+
+ggplot(sub) +
+  
+  geom_text( aes(x=eigen_centrality, y=interactions, colour=type, label=ME_cluster) ) 
+
+
+
+
+
+
+  geom_text_repel(data = sub[type==\"Novel in both\"],
+                  colour=\"black\", aes(x=eigen_centrality, y=interactions)), 
+                  label=)
+  
+sub$type
+
+
+```"

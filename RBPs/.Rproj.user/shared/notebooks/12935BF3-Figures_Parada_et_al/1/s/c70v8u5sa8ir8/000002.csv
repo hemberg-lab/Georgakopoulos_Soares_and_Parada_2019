@@ -1,0 +1,14 @@
+"0","```r
+  TOTAL_DIFF_ME[exon_ID %in% microexons_GENCODE |  exon_ID %in% microexons_Vastdb  , type:=\"Annotated\" ]
+  TOTAL_DIFF_ME[ !exon_ID %in% microexons_GENCODE  , type:=\"Novel in Genecode\" ]
+  TOTAL_DIFF_ME[ !exon_ID %in% microexons_Vastdb  , type:=\"Novel in VastDB\" ]
+  TOTAL_DIFF_ME[!exon_ID %in% microexons_GENCODE &  !exon_ID %in% microexons_Vastdb  , type:=\"Novel in both\" ]
+  
+  
+ggplot(TOTAL_DIFF_ME) +
+  geom_bar( aes(x=Tissue, fill=type), stat=\"count\", position=\"fill\" ) +
+  theme_bw()
+
+
+  
+```"

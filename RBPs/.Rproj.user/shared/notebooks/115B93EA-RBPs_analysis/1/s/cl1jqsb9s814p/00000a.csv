@@ -1,0 +1,11 @@
+"0","cat(unique(RBP_clusters.table[ cluster==""10"", Gene]), sep=""\n"" )
+"
+"1","DDX59"
+"1","
+"
+"1","HNRNPK"
+"1","
+"
+"1","PCBP2"
+"1","
+"

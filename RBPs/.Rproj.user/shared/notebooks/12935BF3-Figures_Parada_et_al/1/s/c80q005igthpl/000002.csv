@@ -1,0 +1,11 @@
+"0","```r
+neuronal_clusters_genes[, exon_ID:= ME]
+
+old_Brain_string_interactions <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/PPI/ME.PPI.tsv\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+old_Brain_string_interactions_nodes <- plot_interactions_string(old_Brain_string_interactions, neuronal_clusters_genes)
+
+
+
+
+```"

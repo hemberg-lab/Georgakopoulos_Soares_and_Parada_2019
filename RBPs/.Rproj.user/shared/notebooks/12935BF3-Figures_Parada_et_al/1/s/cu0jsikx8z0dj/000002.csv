@@ -1,0 +1,6 @@
+"0","```r
+write.table(Tissue_clusters, file = \"./../New_report/Tissue.clusters.txt\", append = FALSE, quote = F, sep = \"\t\",
+            eol = \"\n\", na = \"NA\", dec = \".\", row.names = F,
+            col.names = TRUE, qmethod = c(\"escape\", \"double\"),
+            fileEncoding = \"\")
+```"

@@ -1,0 +1,19 @@
+"0","```r
+
+TOTAL_diff_exons_ME_cluster_info_same_cluster
+
+
+TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==6, ]
+
+
+TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==4, ]
+
+
+TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==13, ]
+
+
+
+TOTAL_diff_exons_ME_cluster_info[ME_cluster==\"NM3\" & Tissue_cluster==2, ]
+
+
+```"

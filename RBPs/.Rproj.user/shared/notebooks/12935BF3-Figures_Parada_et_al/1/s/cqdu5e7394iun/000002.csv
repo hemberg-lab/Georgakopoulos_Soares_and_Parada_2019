@@ -1,0 +1,28 @@
+"0","```r
+
+get_colors_continuos <- function(variable, breaks, colours  ){
+  
+  rbPal <- colorRampPalette(colours)
+
+  color <- rbPal(breaks)[as.numeric(cut(variable,breaks = breaks))]
+  
+
+  return(color)
+}
+
+
+plot_PCA_PSI <- function(comp, sub_ME_Tissues_clusters_PSI_aggregated_PCA, cluster_number, Tissue_clusters_NO_NA){
+
+
+  PSI_col = sub_ME_Tissues_clusters_PSI_aggregated_PCA[ ME_clusters==cluster_number, PSI]
+  names(PSI_col) <- sub_ME_Tissues_clusters_PSI_aggregated_PCA[ ME_clusters==cluster_number, FILE_NAME]
+
+  
+  my_col_PSI <- get_colors_continuos(PSI_col[rownames(comp)], 10,  c(\"grey40\", \"grey50\", \"grey60\", \"gold\",   \"orange\", \"red\"))
+  
+  plot(comp, pch=16, col=\"white\" ) +
+  text( comp , labels=Tissue_clusters_NO_NA$cluster, col=my_col_PSI) +
+  title( paste(\"Cluster\", cluster_number, sep= \" \") )
+
+}
+```"

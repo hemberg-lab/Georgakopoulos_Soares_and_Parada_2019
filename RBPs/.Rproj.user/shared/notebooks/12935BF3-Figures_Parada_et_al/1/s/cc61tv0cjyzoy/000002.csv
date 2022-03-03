@@ -1,0 +1,12 @@
+"0","```r
+library(ggplot2)
+
+ggplot(mouse_zebrafish_total) +
+  geom_bar(aes(x=ME_cluster,  fill=Annotated), stat = \"count\", position = \"fill\") +
+  facet_grid( Organism ~ .) +
+  theme_bw() + 
+  theme(axis.title = element_text(size = 13, 
+    colour = NA), axis.text.x = element_text(angle = 45))
+
+mouse_zebrafish_total
+```"

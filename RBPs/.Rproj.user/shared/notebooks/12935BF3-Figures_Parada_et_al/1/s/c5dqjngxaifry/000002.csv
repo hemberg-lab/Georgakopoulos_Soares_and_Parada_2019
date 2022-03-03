@@ -1,0 +1,14 @@
+"0","```r
+
+sub[, gene_min50_day:=min(min50_day), by=gene]
+
+
+
+ggplot(unique(sub[, c(\"gene\", \"gene_min50_day\", \"eigen_centrality\")])) +
+  
+  geom_boxplot(aes(x= eigen_centrality >= 0.5, y = gene_min50_day)) +
+  geom_jitter( aes(x= eigen_centrality >= 0.5, y = gene_min50_day) ) + 
+    ylab(\"Embryonic time to reach PSI 0.5\") +
+  theme_bw()
+
+```"

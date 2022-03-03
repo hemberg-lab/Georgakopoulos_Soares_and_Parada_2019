@@ -1,0 +1,53 @@
+"0","library(DescTools)"
+"2","package ‘DescTools’ was built under R version 3.5.2"
+"0","library(stringr)"
+"2","package ‘stringr’ was built under R version 3.5.2"
+"0","library(ggplot2)"
+"2","package ‘ggplot2’ was built under R version 3.5.2"
+"0","library(data.table)"
+"2","package ‘data.table’ was built under R version 3.5.2"
+"2","data.table 1.12.2 using 2 threads (see ?getDTthreads).  Latest news: r-datatable.com
+"
+"2","
+Attaching package: ‘data.table’
+
+"
+"2","The following object is masked from ‘package:DescTools’:
+
+    %like%
+
+"
+"0","library(readr)"
+"0","library(Hmisc)"
+"2","package ‘Hmisc’ was built under R version 3.5.2"
+"2","Loading required package: lattice
+"
+"2","Loading required package: survival
+"
+"2","Loading required package: Formula
+"
+"2","
+Attaching package: ‘Hmisc’
+
+"
+"2","The following objects are masked from ‘package:DescTools’:
+
+    %nin%, Label, Mean, Quantile
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    format.pval, units
+
+"
+"0","library(cowplot)"
+"2","package ‘cowplot’ was built under R version 3.5.2"
+"2","
+Attaching package: ‘cowplot’
+
+"
+"2","The following object is masked from ‘package:ggplot2’:
+
+    ggsave
+
+"

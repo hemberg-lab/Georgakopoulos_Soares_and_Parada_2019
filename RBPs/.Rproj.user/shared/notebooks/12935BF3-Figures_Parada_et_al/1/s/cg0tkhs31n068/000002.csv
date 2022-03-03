@@ -1,0 +1,17 @@
+"0","```r
+
+ME_Tissues_clusters_PSI_aggregated_PCA <- ME_Tissues_clusters_PSI[, list(PSI=mean(PSI, na.rm = TRUE)), by=list( ME_clusters,  FILE_NAME) ]
+
+comp <- data.frame(pc$x[,c(1,2)])
+
+for (i in c(\"I1\", \"I2\", \"I3\", \"I4\", \"E1\", \"E2\", \"E3\",  \"N1\", \"N2\", \"N3\", \"N4\", \"N5\", \"M1\", \"NM1\", \"NM2\", \"NM3\", \"NN1\", \"NN2\")) {
+
+plot_PCA_PSI(comp, ME_Tissues_clusters_PSI_aggregated_PCA, i, Tissue_clusters_NO_NA)
+  
+}
+
+
+
+
+
+```"

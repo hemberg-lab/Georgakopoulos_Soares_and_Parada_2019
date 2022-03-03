@@ -1,0 +1,11 @@
+"0","```r
+
+target_info2 <- merge(targets, ME_cov_filtered_tasic_primary_type, by.x=\"exon_ID\", by.y=\"ME\") 
+
+table(target_info2[, mgi_symbol])
+
+chr11_-_41913969_41913993
+
+ME_cov_filtered_tasic_primary_type[ME==\"chr11_-_41913969_41913993\"]
+
+```"

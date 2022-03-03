@@ -1,0 +1,30 @@
+"0","```r
+
+links[, .N , by=\"from\"]
+links[, .N , by=\"to\"]
+
+
+edge_count <- table(c(links$to, links$from))
+
+
+edge_count <- data.table(cbind(edge_count, names(edge_count)))
+
+
+colnames(edge_count) <- c(\"count\", \"gene\")
+
+
+edge_count$count <- as.numeric(edge_count$count)
+
+edge_count[order(-count)]
+
+
+ggplot(edge_count) +
+  geom_histogram(aes(count))
+
+
+edge_count[ gene==\"Diap1\", ]
+
+edge_count
+
+edge_count[count >= 10, gene]
+```"

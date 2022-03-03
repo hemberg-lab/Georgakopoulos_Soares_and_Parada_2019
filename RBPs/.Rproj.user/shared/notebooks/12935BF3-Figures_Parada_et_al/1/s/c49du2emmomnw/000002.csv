@@ -1,0 +1,7 @@
+"0","```r
+library(cowplot)
+
+
+plot_grid(adrenal_int, brain_int, heart_int, SKM_int, nrow=1) 
+
+```"

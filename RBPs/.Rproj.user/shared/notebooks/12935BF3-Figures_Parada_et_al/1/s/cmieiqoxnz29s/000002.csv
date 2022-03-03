@@ -1,0 +1,11 @@
+"0","```r
+library(readr)
+library(data.table)
+TOTAL_diff_exons <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/New_report/Whippet_Delta/TOTAL.diff.exon_ID.only_ME\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+
+
+
+TOTAL_diff_exons.ME <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/New_report/Whippet_Delta/TOTAL.ME.diff.exon_ID.only_ME\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+```"

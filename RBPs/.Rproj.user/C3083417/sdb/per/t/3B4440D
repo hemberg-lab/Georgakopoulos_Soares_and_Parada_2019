@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1574968313456.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "3B4440D",
+    "lastKnownWriteTime" : 4229804999675984640,
+    "last_content_update" : 1574968313456,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "2226B971",
+        "caption" : "clustering.total",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=clustering.total&cache_key=2226B971",
+        "displayedObservations" : "677",
+        "environment" : "",
+        "object" : "clustering.total",
+        "preview" : "0",
+        "totalObservations" : "677",
+        "variables" : "3"
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

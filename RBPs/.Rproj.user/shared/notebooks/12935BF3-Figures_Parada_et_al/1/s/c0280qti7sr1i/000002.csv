@@ -1,0 +1,25 @@
+"0","```r
+
+
+
+ME_len_cluster <- merge(ME_clusters, ME_final[, c(\"ME\", \"len_micro_exon_seq_found\")], by=\"ME\")
+
+colnames(ME_len_cluster) <- c(\"ME\", \"ME_cluster\", \"len_micro_exon_seq_found\")
+
+ME_len_cluster <- data.table(ME_len_cluster)
+
+
+sub_ME_len_cluster <- ME_len_cluster[ ME_cluster %in%  c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15),]
+
+
+sub_ME_len_cluster$ME_cluster <- factor(sub_ME_len_cluster$ME_cluster, level =c(12, 3, 7, 5, 8, 13, 6, 14, 10, 9 , 4, 18, 16, 15))
+
+ggplot( data =sub_ME_len_cluster) +
+  
+  geom_histogram(aes( len_micro_exon_seq_found), bins = 28) +
+  facet_grid( ME_cluster ~ .) +
+  theme(panel.background = element_rect(fill = 'white', colour = 'black'), axis.text.x = element_text(angle = 90, hjust = 1))
+
+  
+
+```"

@@ -1,0 +1,22 @@
+"0","```r
+
+Adrenal_ME[ , Tissue:=\"Adrenal\"]
+Heart_ME[ , Tissue:=\"Heart\" ]
+SKM_ME[ , Tissue:=\"SKM\" ]
+Brain_ME[ , Tissue:=\"Brain\" ]
+
+TOTAL_DIFF_ME <- rbind(Adrenal_ME, Heart_ME, SKM_ME, Brain_ME)
+
+TOTAL_DIFF_ME[ ME_cluster %in% c(\"I1\", \"I2\", \"I3\", \"I4\") , ME_cluster_class:=\"Included\"]
+TOTAL_DIFF_ME[ ME_cluster %in% c(\"E1\", \"E2\", \"E3\") , ME_cluster_class:=\"Excluded\"]
+TOTAL_DIFF_ME[ ME_cluster %in% c(\"N1\", \"N2\", \"N3\", \"N4\", \"N5\") , ME_cluster_class:=\"Neuronal\"]
+TOTAL_DIFF_ME[ ME_cluster %in% c(\"NM1\", \"NM2\", \"NM3\") , ME_cluster_class:=\"Neuromuscular\"]
+TOTAL_DIFF_ME[ ME_cluster %in% c(\"M1\") , ME_cluster_class:=\"Muscular\"]
+TOTAL_DIFF_ME[ ME_cluster %in% c(\"NN1\", \"NN2\") , ME_cluster_class:=\"Non-neuronal\"]
+
+ggplot(TOTAL_DIFF_ME) +
+  geom_bar( aes(x=Tissue, fill=ME_cluster_class), stat=\"count\" ) +
+  theme_bw()
+
+
+```"

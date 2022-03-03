@@ -1,0 +1,5 @@
+"0","```r
+whippet_only <-  compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==2 & Diff==\"Whippet\" & exon_ID %in% ME_5_3_alt , c(\"exon_ID\", \"Psi_A.x\", \"Psi_A.y\", \"Psi_B.x\", \"Psi_B.y\") ]
+
+whippet_only[order( -abs((Psi_B.x-Psi_A.x)-(Psi_B.y-Psi_A.y )) ) ]
+```"

@@ -1,0 +1,9 @@
+"0","```r
+
+TOTAL_ME[ (Adrenal==TRUE | Heart==TRUE | SKM==TRUE | Brain==TRUE) & ! ME %in% microexons_GENCODE & !  ME %in% microexons_Vastdb ,  ]
+
+TOTAL_ME[ ! ME %in% microexons_GENCODE, ]
+
+77/337
+35/337
+```"

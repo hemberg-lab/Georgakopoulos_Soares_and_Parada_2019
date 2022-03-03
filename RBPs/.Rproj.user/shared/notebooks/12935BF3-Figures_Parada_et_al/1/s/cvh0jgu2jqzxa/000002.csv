@@ -1,0 +1,10 @@
+"0","```r
+
+
+cat( unique(Adrennal_ME$mgi_symbol), sep='\n')
+cat( unique(SKM_ME$mgi_symbol), sep='\n')
+
+cat( unique(Heart_ME$mgi_symbol), sep='\n')
+
+cat( unique(Brain_ME[!exon_ID %in% ME_blacklist$ME  ]$mgi_symbol), sep='\n')
+```"

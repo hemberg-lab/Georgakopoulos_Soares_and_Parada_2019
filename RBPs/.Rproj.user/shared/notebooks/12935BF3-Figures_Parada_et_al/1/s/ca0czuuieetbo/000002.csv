@@ -1,0 +1,7 @@
+"0","```r
+SKM_string_interactions <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/PPI/SKM/string_interactions.tsv\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+SKM_int <-  plot_interactions_string(SKM_string_interactions, SKM_ME)
+
+
+```"

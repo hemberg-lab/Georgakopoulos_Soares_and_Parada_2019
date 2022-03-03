@@ -1,0 +1,49 @@
+"0","```r
+
+
+
+plot_interactions_string <-  function (tissue_string_interactions, tissue_ME ){
+  
+  
+  
+  node_counts <- table(cbind(tissue_string_interactions$node1 , tissue_string_interactions$node2))
+  
+  node_count_table <- data.table( node_counts)
+  colnames(node_count_table) <- c(\"gene\", \"interactions\")
+  
+  
+  
+  node_count_table[, mgi_symbol:=gene ]
+  node_count_table[ gene==\"Spna2\" ,  mgi_symbol:=\"Sptan1\"]
+  
+  
+  node_count_table <- merge(node_count_table, tissue_ME, by=\"mgi_symbol\")
+  
+  node_count_table <- node_count_table[order(-interactions)]
+  node_count_table$mgi_symbol <- factor(node_count_table$mgi_symbol , levels = unique(node_count_table$mgi_symbol))
+  node_count_table$exon_ID <- factor(node_count_table$exon_ID , levels = unique(node_count_table$exon_ID))
+  
+  node_count_table[exon_ID %in% microexons_GENCODE |  exon_ID %in% microexons_Vastdb  , type:=\"Annotated\" ]
+  node_count_table[ !exon_ID %in% microexons_GENCODE  , type:=\"Novel in Genecode\" ]
+  node_count_table[ !exon_ID %in% microexons_Vastdb  , type:=\"Novel in VastDB\" ]
+  node_count_table[!exon_ID %in% microexons_GENCODE &  !exon_ID %in% microexons_Vastdb  , type:=\"Novel in both\" ]
+  
+   node_count_table$type <- factor(node_count_table$type , levels = c(\"Annotated\", \"Novel in Genecode\", \"Novel in VastDB\", \"Novel in both\"  ))
+   
+   node_count_table[ , N_genes:=.N  , by=\"mgi_symbol\"]
+   top <- unique(node_count_table$mgi_symbol)[ 1:15 ]
+  
+  ggplot( node_count_table[mgi_symbol %in% top, ] ) +
+    geom_bar(aes(x=mgi_symbol, y=interactions/N_genes, fill=type), colour=\"black\", stat=\"identity\") +
+    #scale_x_discrete(labels= node_count_table$mgi_symbol) +
+    xlab(\"Microexon gene\") +
+    ylab(\"Number of protein interactions per gene\") +
+    theme(panel.background = element_rect(fill = 'white', colour = 'black'), axis.text.x = element_text(angle = 45), legend.position=\"none\" )
+  
+  return(node_count_table)
+}
+
+
+  
+  #return(node_count_table)
+```"

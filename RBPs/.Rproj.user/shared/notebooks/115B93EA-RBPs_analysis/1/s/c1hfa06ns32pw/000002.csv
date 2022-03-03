@@ -1,0 +1,4 @@
+"0","data_table.template <- fread(""./RBPs/tables/template.RBP.matrix"")"
+"2","Detected 80 column names but the data has 81 columns (i.e. invalid file). Added 1 extra default column name for the first column which is guessed to be row names or an index. Use setnames() afterwards if this guess is not correct, or fix the file write command that created the file to create a valid file."
+"0","matrix.template <- as.matrix(data_table.template[, c(paste0(""UP"",  as.character(seq(-200,190, 10)) ), paste0(""DOWN"",  as.character(seq(-200,190, 10)) ))])"
+"0","rownames(matrix.template) <- data_table.template$V1"

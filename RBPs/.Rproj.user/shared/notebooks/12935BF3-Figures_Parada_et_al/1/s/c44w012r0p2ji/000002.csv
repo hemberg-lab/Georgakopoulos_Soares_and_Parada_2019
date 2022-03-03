@@ -1,0 +1,20 @@
+"0","```r
+
+ME_cov_filtered <- read_delim(\"~/Google_Drive/Results/ME/Paper/New_report/out_filtered_ME.cov.txt\", \"\t\", escape_double = FALSE, trim_ws = TRUE, progress = FALSE)
+ME_cov_filtered <- data.table(ME_cov_filtered)
+
+
+\"chr11:104302410+104306625\"
+
+
+ME_final <- data.table(read.delim(\"~/Google_Drive/Results/ME/Paper/New_report/out_filtered_ME.txt\", header=TRUE, sep=\"\t\"))
+
+
+ME_low_score <- data.table(read.delim(\"~/Google_Drive/Results/ME/Paper/New_report/out_low_scored_ME.txt\", header=TRUE, sep=\"\t\"))
+
+
+ME_final <- rbind(ME_final, ME_low_score[ME_type==\"RESCUED\", ])
+
+
+
+```"

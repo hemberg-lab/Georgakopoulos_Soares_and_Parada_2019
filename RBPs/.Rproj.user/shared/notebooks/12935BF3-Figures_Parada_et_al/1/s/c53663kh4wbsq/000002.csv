@@ -1,0 +1,25 @@
+"0","```r
+
+mm10_DanRer11_cluster_class_total <- mm10_DanRer11[  , .N , by=c(\"ME_cluster_class\", \"Ensembl\")]
+mm10_DanRer11_cluster_class_total[, type:=\"Total\"]
+
+mm10_DanRer11_cluster_class_mising <- mm10_DanRer11[ Ensembl==F , .N , by=c(\"ME_cluster_class\", \"Ensembl\")]
+mm10_DanRer11_cluster_class_mising[, type:=\"Missing\"]
+
+mm10_DanRer11_cluster_class <- rbind(mm10_DanRer11_cluster_class_total, mm10_DanRer11_cluster_class_mising)
+mm10_DanRer11_cluster_class$type <- factor(mm10_DanRer11_cluster_class$type, levels=c(\"Total\", \"Missing\"))
+
+
+
+ggplot(mm10_DanRer11_cluster_class, aes(x=\"\", y=N, fill=ME_cluster_class))+
+  geom_bar(width = 1, stat = \"identity\") +
+  coord_polar(\"y\", start=0) +
+  xlab(NULL) +
+  ylab(\"Microexons conserved between mouse and zebrafish\") +
+  labs(fill = \"Microexon cluster class\") +
+  facet_grid( . ~ type)  +
+  theme_bw()
+
+
+
+```"

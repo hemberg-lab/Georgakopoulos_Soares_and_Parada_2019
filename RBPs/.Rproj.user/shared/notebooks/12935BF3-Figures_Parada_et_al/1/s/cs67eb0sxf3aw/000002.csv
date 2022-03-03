@@ -1,0 +1,6 @@
+"0","```r
+
+'chr6_+_83183935_83183956' %in% microexons_GENCODE
+
+node_count_table[mgi_symbol==\"Dctn1\",]
+```"

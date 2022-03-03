@@ -1,0 +1,3 @@
+"0","```r
+wilcox.test(Brain_string_interactions_out[ME_cluster==\"N2\" , eigen_centrality], Brain_string_interactions_out[ME_cluster==\"N4\", eigen_centrality],   mu=0, alt=\"greater\", conf.int=T, conf.level=0.95, paired=FALSE, exact=T, correct=T)
+```"

@@ -1,0 +1,20 @@
+"0","```r
+
+a <- Brain_string_interactions_out[!exon_ID %in% ME_blacklist$ME]
+
+ggplot(a) +
+  
+    geom_point( aes(x=eigen_centrality, y=max_Entropy, colour=type) )
+
+
+  
+    geom_text_repel(data = sub[ (type!=\"Annotated\" & eigen_centrality>=0.20) | (type==\"Annotated\" & eigen_centrality>=0.7)  ],
+                  aes(x=eigen_centrality, y=min50_day, colour=type), 
+                  nudge_y      = 0.5,
+                  direction    = \"x\",
+                  segment.size = 0.2,
+                  label=sub[(type!=\"Annotated\" & eigen_centrality>=0.15) | (type==\"Annotated\" & eigen_centrality>=0.7)  , mgi_symbol] )
+
+  
+
+```"

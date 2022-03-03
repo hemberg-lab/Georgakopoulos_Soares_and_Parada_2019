@@ -1,0 +1,24 @@
+"0","```r
+
+
+\"NM1\", \"N1\", \"NM2\", \"N2\", \"NM3\", \"N3\", \"NM4\", \"N4\", \"N5\", \"N6\"
+
+11, 5, 9, 7, 8, 12, 13, 10, 18
+
+
+ME_clusters_table <- data.table(ME_clusters)
+
+ME_clusters_table[ME_clusters %in% c(11, 5, 9, 7, 8, 12, 13, 10, 18), ]
+
+
+ME_clusters_table[ME==\"chr17_-_56421832_56421844\", ]
+
+.
+table(ME_clusters_table$ME_clusters)
+
+
+ME_clusters_table[ME==\"chr4_-_56922386_56922410\", ]
+
+chr4_-_56922386_56922410
+
+```"

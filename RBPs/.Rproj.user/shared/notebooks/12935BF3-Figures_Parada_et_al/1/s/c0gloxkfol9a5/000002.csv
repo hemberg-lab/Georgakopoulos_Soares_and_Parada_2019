@@ -1,0 +1,34 @@
+"0","```r
+metadata[Biosample.term.name==\"whole cortex\", Biosample.Age]
+
+
+
+
+
+
+metadata[Biosample.Age==\"E14.5\", Biosample.Age:=\"14.5 day\"]
+metadata[Biosample.Age==\"E16.5\", Biosample.Age:=\"16.5 day\"]
+
+
+metadata[Biosample.Age==\"P0a\", Biosample.Age:=\"0 day\"]
+metadata[Biosample.Age==\"P0b\", Biosample.Age:=\"0 day\"]
+metadata[Biosample.Age==\"P4a\", Biosample.Age:=\"P4 day\"]
+metadata[Biosample.Age==\"P4b\", Biosample.Age:=\"P4 day\"]
+
+metadata[Biosample.Age==\"P7a\", Biosample.Age:=\"P7 day\"]
+metadata[Biosample.Age==\"P7b\", Biosample.Age:=\"P7 day\"]
+metadata[Biosample.Age==\"P15a\", Biosample.Age:=\"P15 day\"]
+metadata[Biosample.Age==\"P15b\", Biosample.Age:=\"P15 day\"]
+
+metadata[Biosample.Age==\"P30a\", Biosample.Age:=\"P30 day\"]
+metadata[Biosample.Age==\"P30b\", Biosample.Age:=\"P30 day\"]
+metadata[Biosample.Age==\"P110a\", Biosample.Age:=\"P110 day\"]
+metadata[Biosample.Age==\"P110b\", Biosample.Age:=\"P110 day\"]
+
+metadata[Biosample.Age==\"21Ma\", Biosample.Age:=\"21 Months\"]
+metadata[Biosample.Age==\"21Mb\", Biosample.Age:=\"21 Months\"]
+
+
+
+
+```"

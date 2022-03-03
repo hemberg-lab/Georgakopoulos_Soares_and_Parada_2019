@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1574814362525.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "5B6F584D",
+    "lastKnownWriteTime" : 7088472582902513670,
+    "last_content_update" : 1574814362525,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "2D9A0EE9",
+        "caption" : "RBP_binomial_table_non_template",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=RBP_binomial_table_non_template&cache_key=2D9A0EE9",
+        "displayedObservations" : 7996,
+        "environment" : "",
+        "object" : "RBP_binomial_table_non_template",
+        "preview" : 0,
+        "totalObservations" : 7996,
+        "variables" : 18
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

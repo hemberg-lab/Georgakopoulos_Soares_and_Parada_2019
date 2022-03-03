@@ -1,0 +1,7 @@
+"0","```r
+compare_whippet_MicroExonator[ , Delta.delta:=DeltaPsi.x-DeltaPsi.y]
+
+ggplot(compare_whippet_MicroExonator) +
+  geom_histogram(aes(x=Delta.delta))
+
+```"

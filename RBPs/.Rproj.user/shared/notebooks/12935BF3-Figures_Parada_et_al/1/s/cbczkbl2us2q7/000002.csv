@@ -1,0 +1,43 @@
+"0","```r
+
+
+ME_cov_filtered_tasic_broad_type <- ME_cov_filtered_tasic[, .(sum_ME_coverage=sum(sum_ME_coverage),
+                          sum_SJ_coverage =sum(sum_SJ_coverage),
+                          total_cov_alternatives_3 = sum(total_cov_alternatives_3),
+                          total_cov_alternatives_5 = sum(total_cov_alternatives_5)
+                          ), by=c( \"broad_type\", \"ME\") ]
+
+
+
+
+
+
+ME_cov_filtered_tasic_broad_type[,PSI:=(sum_ME_coverage/(sum_ME_coverage+sum_SJ_coverage+total_cov_alternatives_3+total_cov_alternatives_5))]
+
+min_PSI_sum <- 5
+  
+ME_cov_filtered_tasic_broad_type[sum_ME_coverage+sum_SJ_coverage+total_cov_alternatives_3+total_cov_alternatives_5<min_PSI_sum, PSI:=NaN]
+
+
+
+ME_cov_filtered_tasic_broad_type[ , 
+            `:=`(
+              lower=binconf(x=sum_ME_coverage, n=(sum_ME_coverage+sum_SJ_coverage+total_cov_alternatives_3+total_cov_alternatives_5) )[, \"Lower\"],
+              upper=binconf(x=sum_ME_coverage, n=(sum_ME_coverage+sum_SJ_coverage+total_cov_alternatives_3+total_cov_alternatives_5) )[, \"Upper\"]
+              ) ]
+
+
+
+ME_cov_filtered_tasic_broad_type[ , mean_PSI:=mean(PSI, na.rm = TRUE )  , by=\"ME\"  ]
+ME_cov_filtered_tasic_broad_type[ , sd_PSI:=sd(PSI, na.rm = TRUE )  , by=\"ME\"  ]
+
+ME_cov_filtered_tasic_broad_type[, zscore:=(PSI-mean_PSI)/sd_PSI ]
+
+
+ggplot(ME_cov_filtered_tasic_broad_type) +
+  
+  geom_jitter(aes(x=broad_type, y=zscore))
+ 
+
+
+```"

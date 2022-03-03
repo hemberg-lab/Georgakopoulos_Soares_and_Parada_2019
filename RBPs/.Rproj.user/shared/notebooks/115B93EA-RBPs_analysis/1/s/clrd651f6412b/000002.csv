@@ -1,0 +1,155 @@
+"0","delta.non_template.rows <- c()"
+"0","for (sample in samples){"
+"0","  "
+"0","  if (length( list.files(""./RBPs/"", pattern = sample))==16 & (metadata[`File accession`==sample, Assembly]==""hg19"" ) ){"
+"0","  RBP_binomial_table_non_template <- plot_eql_diff_binomial_table("
+"0","  paste(""./RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score."", sample, "".bed.list.out.num"", sep=""""),"
+"0","  paste(""./RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score."", sample, "".bed.list.out.num"", sep=""""),"
+"0","  paste(""./RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score."", sample, "".bed.list.out.num"", sep=""""),"
+"0","  paste(""./RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score."", sample, "".bed.list.out.num"", sep=""""),"
+"0","  paste(""./RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score."", sample, "".bed.list.out.num"", sep=""""),"
+"0","  paste(""./RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score."", sample, "".bed.list.out.num"", sep=""""),"
+"0","  paste(""./RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score."", sample, "".bed.list.out.num"", sep=""""),"
+"0","  paste(""./RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score."", sample, "".bed.list.out.num"", sep=""""),"
+"0","  110870 + 109467,"
+"0","  108638 + 107433,"
+"0","  3587 + 3431,"
+"0","  5819 + 5465,"
+"0","  0.05"
+"0","  )"
+"0","  Total.deltas.non_template <- c()"
+"0","  "
+"0","    for (i in seq(-200, 150, 50)){"
+"0","    "
+"0","    O.Upstream <- Overlap("
+"0","    RBP_binomial_table_non_template_stats[ exon_pos==""Upstream"" & pos_int==i & type==""wG4"", c(""Enrrichment_l"", ""Enrrichment_u"")],"
+"0","    RBP_binomial_table_non_template_stats[ exon_pos==""Upstream"" & pos_int==i & type==""woG4"", c(""Enrrichment_l"", ""Enrrichment_u"")]"
+"0","    )"
+"0","    "
+"0","    O.Downstream <- Overlap("
+"0","    RBP_binomial_table_non_template_stats[ exon_pos==""Downstream"" & pos_int==i & type==""wG4"", c(""Enrrichment_l"", ""Enrrichment_u"")],"
+"0","    RBP_binomial_table_non_template_stats[ exon_pos==""Downstream"" & pos_int==i & type==""woG4"", c(""Enrrichment_l"", ""Enrrichment_u"")]"
+"0","    )"
+"0","    "
+"0","    delta.up <- 0"
+"0","    "
+"0","    if (O.Upstream!=0 ) {"
+"0","      "
+"0","      delta.up <- RBP_binomial_table_non_template_stats[ exon_pos==""Upstream"" & pos_int==i & type==""wG4"", ""Enrrichment""] - RBP_binomial_table_non_template_stats[ exon_pos==""Upstream"" & pos_int==i & type==""woG4"", ""Enrrichment""]"
+"0","      "
+"0","      "
+"0","    }"
+"0","      "
+"0","      "
+"0","    delta.down <- 0"
+"0","    "
+"0","    if (O.Downstream!=0 ) {"
+"0","      "
+"0","      delta.down <- RBP_binomial_table_non_template_stats[ exon_pos==""Downstream"" & pos_int==i & type==""wG4"", ""Enrrichment""] - RBP_binomial_table_non_template_stats[ exon_pos==""Downstream"" & pos_int==i & type==""woG4"", ""Enrrichment""]"
+"0","      "
+"0","      "
+"0","    }"
+"0","        "
+"0","    Total.deltas.non_template <- rbind(Total.deltas.non_template, c(i, delta.up, delta.down))"
+"0","    "
+"0","    }"
+"0","  "
+"0","  protein = metadata[`File accession`==sample, `Experiment target` ]"
+"0","  cell_line = metadata[`File accession`==sample, `Biosample term name`]"
+"0","  name = paste(protein, cell_line, sample, sep=""_"")"
+"0","  "
+"0","  delta.non_template.rows <- cbind(delta.non_template.rows,  c(name, unlist(Total.deltas.non_template[ , 2 ]) , unlist(Total.deltas.non_template[ , 3 ])))"
+"0","  }"
+"0","  "
+"0","}"
+"2","Parsed with column specification:
+cols(
+  .default = col_double()
+)
+"
+"2","See spec(...) for full column specifications.
+"
+"2","1 parsing failure.
+row col     expected       actual                                                                                                                              file
+  2  -- 2001 columns 2002 columns './RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.ENCFF002MQE.bed.list.out.num'
+"
+"2","Parsed with column specification:
+cols(
+  .default = col_double()
+)
+"
+"2","See spec(...) for full column specifications.
+"
+"2","1 parsing failure.
+row col     expected       actual                                                                                                                                file
+  2  -- 2001 columns 2002 columns './RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.ENCFF002MQE.bed.list.out.num'
+"
+"2","Parsed with column specification:
+cols(
+  .default = col_double()
+)
+"
+"2","See spec(...) for full column specifications.
+"
+"2","1 parsing failure.
+row col     expected       actual                                                                                                                                file
+  2  -- 2001 columns 2002 columns './RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.wG4.score.ENCFF002MQE.bed.list.out.num'
+"
+"2","Parsed with column specification:
+cols(
+  .default = col_double()
+)
+"
+"2","See spec(...) for full column specifications.
+"
+"2","1 parsing failure.
+row col     expected       actual                                                                                                                                  file
+  2  -- 2001 columns 2002 columns './RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score.ENCFF002MQE.bed.list.out.num'
+"
+"2","Parsed with column specification:
+cols(
+  .default = col_double()
+)
+"
+"2","See spec(...) for full column specifications.
+"
+"2","1 parsing failure.
+row col     expected       actual                                                                                                                               file
+  2  -- 2001 columns 2002 columns './RBPs/exon.up_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.ENCFF002MQE.bed.list.out.num'
+"
+"2","Parsed with column specification:
+cols(
+  .default = col_double()
+)
+"
+"2","See spec(...) for full column specifications.
+"
+"2","1 parsing failure.
+row col     expected       actual                                                                                                                                 file
+  2  -- 2001 columns 2002 columns './RBPs/exon.up_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.ENCFF002MQE.bed.list.out.num'
+"
+"2","Parsed with column specification:
+cols(
+  .default = col_double()
+)
+"
+"2","See spec(...) for full column specifications.
+"
+"2","1 parsing failure.
+row col     expected       actual                                                                                                                                 file
+  2  -- 2001 columns 2002 columns './RBPs/exon.down_plus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_plus_strand.woG4.score.ENCFF002MQE.bed.list.out.num'
+"
+"2","Parsed with column specification:
+cols(
+  .default = col_double()
+)
+"
+"2","See spec(...) for full column specifications.
+"
+"2","1 parsing failure.
+row col     expected       actual                                                                                                                                   file
+  2  -- 2001 columns 2002 columns './RBPs/exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.woG4.score.ENCFF002MQE.bed.list.out.num'
+"
+"2","Error in rbind(x) : 
+  object 'RBP_binomial_table_non_template_stats' not found
+"

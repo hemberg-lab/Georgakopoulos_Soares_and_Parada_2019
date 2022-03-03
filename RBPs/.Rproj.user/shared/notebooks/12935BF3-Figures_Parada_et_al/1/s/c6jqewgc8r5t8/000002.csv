@@ -1,0 +1,20 @@
+"0","```r
+
+paired_metadata <- metadata[Paired.end==\"1\", c(\"File.accession\", \"Paired.with\")]
+
+paired_end_sum <- ME_cov_filtered[FILE_NAME %in% paired_metadata$File.accession, c(\"sum_ME_coverage\", \"sum_SJ_coverage\", \"total_cov_alternatives_3\", \"total_cov_alternatives_5\")] +
+
+ME_cov_filtered[FILE_NAME %in% paired_metadata$Paired.with, c(\"sum_ME_coverage\", \"sum_SJ_coverage\", \"total_cov_alternatives_3\", \"total_cov_alternatives_5\")]
+
+
+
+
+ME_cov_filtered <- ME_cov_filtered[ FILE_NAME  %in% as.character(paired_metadata$Paired.with) ==FALSE ]
+
+ME_cov_filtered[ FILE_NAME  %in% as.character(paired_metadata$File.accession),
+                 `:=`(sum_ME_coverage=paired_end_sum$sum_ME_coverage,
+                      sum_SJ_coverage=paired_end_sum$sum_SJ_coverage,
+                       total_cov_alternatives_3=paired_end_sum$total_cov_alternatives_3,
+                       total_cov_alternatives_5=paired_end_sum$total_cov_alternatives_5)] 
+
+```"

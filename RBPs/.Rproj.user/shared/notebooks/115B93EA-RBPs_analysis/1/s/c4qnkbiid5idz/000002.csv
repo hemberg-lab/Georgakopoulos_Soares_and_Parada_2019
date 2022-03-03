@@ -1,0 +1,4 @@
+"0","files <- list.files(""./RBPs/"", pattern =""exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score."")"
+"0","samples <- str_replace(str_replace(files,  ""exon.down_minus.bed.filtered.100bp_intron.intersect_wao.All_G4.tsv.clean_minus_strand.wG4.score."", """" ), "".bed.list.out.num"", """")"
+"0","metadata <- fread(""./RBPs/metadata.tsv"")"
+"0","#sample = 'ENCFF786JAM'"

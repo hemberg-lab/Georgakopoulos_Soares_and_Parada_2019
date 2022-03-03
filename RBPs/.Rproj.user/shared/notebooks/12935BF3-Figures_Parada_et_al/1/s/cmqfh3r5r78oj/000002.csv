@@ -1,0 +1,9 @@
+"0","```r
+Brain_string_interactions <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/PPI/Brain/string_interactions.tsv\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+
+
+brain_int <- plot_interactions_string(Brain_string_interactions, Brain_ME[!exon_ID %in% ME_blacklist$ME])
+
+
+```"

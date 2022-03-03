@@ -1,0 +1,5 @@
+"0","```r
+summary(lm(symetrical_fraction ~ cluster_mean_conservations_vertebrates, ME_cluster_info_by_con))$r.squared
+
+cor(ME_cluster_info_by_con$symetrical_fraction, ME_cluster_info_by_con$cluster_mean_conservations_vertebrates, method = \"pearson\")
+```"

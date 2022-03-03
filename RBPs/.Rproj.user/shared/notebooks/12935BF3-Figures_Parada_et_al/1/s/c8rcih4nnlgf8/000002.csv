@@ -1,0 +1,12 @@
+"0","```r
+
+
+write.table(TOTAL_DIFF_ME, file = \"../../Paper/New_report/Alternative_microexons.txt\", append = FALSE, quote = F, sep = \"\t\",
+            eol = \"\n\", na = \"NA\", dec = \".\", row.names = F,
+            col.names = TRUE, qmethod = c(\"escape\", \"double\"),
+            fileEncoding = \"\")
+
+TOTAL_DIFF_ME
+
+
+```"

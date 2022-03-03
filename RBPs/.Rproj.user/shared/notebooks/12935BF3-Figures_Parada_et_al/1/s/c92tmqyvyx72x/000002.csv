@@ -1,0 +1,24 @@
+"0","```r
+
+
+
+library(limma)
+
+TOTAL_ME <- ME_cluster_info[ , c(\"ME\", \"ME_clusters\")]
+
+TOTAL_ME[ , Adrenal:=FALSE]
+TOTAL_ME[ ME %in% Adrenal_ME$exon_ID ,  Adrenal:=TRUE]
+
+TOTAL_ME[ , Heart:=FALSE]
+TOTAL_ME[ ME %in% Heart_ME$exon_ID ,  Heart:=TRUE]
+
+TOTAL_ME[ , SKM:=FALSE]
+TOTAL_ME[ ME %in% SKM_ME$exon_ID ,  SKM:=TRUE]
+
+TOTAL_ME[ , Brain:=FALSE]
+TOTAL_ME[ ME %in% Brain_ME$exon_ID ,  Brain:=TRUE]
+
+TOTAL_ME_diff_counts <- vennCounts(TOTAL_ME[, c(\"Adrenal\", \"Heart\", \"SKM\", \"Brain\")])
+
+vennDiagram(TOTAL_ME_diff_counts)
+```"

@@ -1,0 +1,53 @@
+"0","```r
+
+
+vertex.pie.color=list(heat.colors(9))
+
+
+library(igraph)
+
+ME_PPI <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/PPI/ME.PPI.tsv\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+
+
+
+
+links <- ME_PPI[, c(\"#node1\", \"node2\", \"combined_score\")]
+
+
+
+colnames(links) <- c(\"from\", \"to\", \"score\")
+
+nodes.1 <- ME_PPI[, c(\"#node1\")]
+colnames(nodes.1) <- c(\"id\")
+
+nodes.2 <- ME_PPI[, c(\"node2\")]
+colnames(nodes.2) <- c(\"id\")
+
+
+nodes <- rbind(nodes.1, nodes.2)
+
+
+nodes <- unique(  nodes[ , , by=\"id\"] )
+
+
+
+net <- graph_from_data_frame(d=links, vertices=nodes, directed=F)
+
+E(net)$size <- log(2-  E(net)$score)
+
+E(net)$width <- (1-  E(net)$score)  * 10
+
+
+
+
+V(net)$size <- log(unlist(ME_per_gene) + 2) * 4
+
+E(net)$score
+
+plot(net, vertex.shape= unlist(vertex_shape), vertex.color = unlist(circle_color)  , vertex.pie=values_clusters, rescale=T, pie.lty=2, vertex.pie.color=colour_pallete, vertex.label.font=2, vertex.label.dist=0.4, vertex.label.color=unlist(label_color), vertex.label.cex=1.2)
+
+colour_pallete
+
+
+```"

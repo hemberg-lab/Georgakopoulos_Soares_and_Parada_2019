@@ -1,0 +1,35 @@
+"0","```r
+library(plyr)
+
+ME_PSI_brain_age <- sub_ME_Tissues_clusters_PSI_brain[ , .(mean_PSI=mean(PSI, rm.na=T)) , by=c(\"ME\", \"ME_clusters\", \"age\") ]
+
+
+ME_PSI_brain_age$days <- mapvalues(ME_PSI_brain_age$age, 
+          from = c(\"10.5 day\", \"11.5 day\", \"12.5 day\", \"13.5 day\", \"14.5 day\", \"15.5 day\", \"16.5 day\", \"0 day\", \"8 week\"),
+          to = c(10.5, 11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 21, 59) )
+
+
+
+Brain_string_interactions_out_PSI <- merge(Brain_string_interactions_out, ME_PSI_brain_age, by.x=\"exon_ID\", by.y=\"ME\")
+
+Brain_string_interactions_out_PSI$days <- as.numeric(as.character(Brain_string_interactions_out_PSI$days))
+
+
+
+Brain_string_interactions_out_PSI_min50 <- Brain_string_interactions_out_PSI[ mean_PSI>=0.5 ,  .(min50_day=min(days)) ,  by = c(\"exon_ID\", \"betweenness\", \"eigen_centrality\", \"ME_clusters\")]
+
+Brain_string_interactions_out_PSI_min50[ , N:=.N, by=\"min50_day\"]
+
+
+Brain_string_interactions_out_PSI_min50_stats <- Brain_string_interactions_out_PSI_min50[ , .( median_eigen_centrality =median(eigen_centrality),
+                                                                            mean_eigen_centrality =mean(eigen_centrality),
+                                                                            median_betweenness =median(betweenness),
+                                                                            N=.N),
+                                                                            by=\"min50_day\" ]
+
+
+ggplot(Brain_string_interactions_out_PSI_min50_stats[N>=10, ] ) +
+  
+  geom_text(aes(median_eigen_centrality, median_betweenness, label=min50_day))
+  
+```"

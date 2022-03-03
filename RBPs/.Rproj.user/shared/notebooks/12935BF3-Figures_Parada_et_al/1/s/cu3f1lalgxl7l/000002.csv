@@ -1,0 +1,15 @@
+"0","```r
+
+ggplot(sub) +
+  geom_text_repel(data=sub[ (type!=\"Annotated\" & eigen_centrality>=0.20) | (type==\"Annotated\" & eigen_centrality>=0.5)  ],
+                  aes(x=eigen_centrality, y=min50_day, colour=type), 
+                  nudge_y      = 0.5,
+                  direction    = \"x\",
+                  segment.size = 0.2,
+                  label=sub[(type!=\"Annotated\" & eigen_centrality>=0.15) | (type==\"Annotated\" & eigen_centrality>=0.5)  , mgi_symbol] ) +
+  
+geom_jitter( aes(x=eigen_centrality, y=min50_day, colour=type), width = 0.01, height = 0.25)  +
+  xlab(\"Eigen centrality\") + 
+  ylab(\"Embryonic time to reach PSI 0.5\") +
+  theme_bw()
+```"

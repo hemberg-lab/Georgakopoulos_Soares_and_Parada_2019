@@ -1,0 +1,10 @@
+"0","```r
+library(RColorBrewer)
+
+mycolors = colorRampPalette(colors = c(\"red\", \"grey\", \"yellow\", \"red\"))(100)
+
+mycolors <- colorRampPalette(rev(brewer.pal(n = 7, name =\"RdYlBu\")))(100)
+
+tissue_heatmap <- pheatmap::pheatmap(Tissue_PSI_matrix_dcast_NO_NA,  , fontsize = 4,  cutree_rows = 16, cutree_cols = 13, clustering_method = \"ward.D2\", col = mycolors)
+
+```"

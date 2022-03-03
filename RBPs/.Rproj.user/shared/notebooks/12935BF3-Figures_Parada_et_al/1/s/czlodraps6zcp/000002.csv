@@ -1,0 +1,10 @@
+"0","```r
+neural_net_corr <- fread(\"../New_report/neural_net/Total_up_seqs_with_highest_correlation.tsv\")
+
+ggplot(neural_net_corr, aes(x = Cluster, y=cor, color=ClusterClass)) + 
+  geom_boxplot() + xlab(\"Cluster\") + ylab(\"Correlation (Pearson R)\") + 
+  ggtitle(\"Gene-wise correlations between actual and predicted microexon inclusion rates per cluster\") + theme_bw() + 
+  guides(color=guide_legend(title=\"Cluster class\")) + scale_color_discrete() +
+    theme(axis.title = element_text(size = 13, 
+    colour = NA), axis.text.x = element_text(angle = 45))
+```"

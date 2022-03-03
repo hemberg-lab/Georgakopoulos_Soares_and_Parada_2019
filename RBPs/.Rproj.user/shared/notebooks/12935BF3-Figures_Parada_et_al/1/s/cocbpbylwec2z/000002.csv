@@ -1,0 +1,5 @@
+"0","```r
+adrenal_string_interactions <- data.table(read_delim(\"~/Google_Drive/Results/ME/Paper/PPI/Adrenal/string_interactions.tsv\", 
+    \"\t\", escape_double = FALSE, trim_ws = TRUE))
+adrenal_int <- plot_interactions_string(adrenal_string_interactions, Adrenal_ME)
+```"

@@ -1,0 +1,16 @@
+"0","```r
+
+chr1_+_151812756_151812768
+
+compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==2 & exon_ID=='chr13_-_55507863_55507874',  c(\"exon_ID\", \"Psi_A.x\", \"Psi_A.y\", \"Psi_B.x\", \"Psi_B.y\", \"Diff\") ]
+
+
+compare_whippet_MicroExonator[ME_cluster==\"NM3\"  & exon_ID=='chr1_+_151812756_151812768',   ]
+
+
+ME_cov_filtered[ME=='chr11_+_120001073_120001089',]
+
+Brain_ME[exon_ID=='chr1_+_151812756_151812768'	,]
+
+'chr1_+_151812756_151812768'	
+```"

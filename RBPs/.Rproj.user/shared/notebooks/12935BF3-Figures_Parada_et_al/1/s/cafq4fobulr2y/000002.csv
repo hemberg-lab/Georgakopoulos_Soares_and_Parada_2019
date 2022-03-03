@@ -1,0 +1,19 @@
+"0","```r
+
+ME_cluster_diff_stats_sub <- ME_cluster_diff_stats[ME_cluster==\"NN1\" & Tissue_cluster==2, ]
+
+
+TOTAL_DIFF <-  ME_cluster_diff_stats_sub$TOTAL_diff_exons
+TOTAL_NOT_DIFF <- ME_cluster_diff_stats_sub$TOTAL_exons -   ME_cluster_diff_stats_sub$TOTAL_diff_exons
+
+ME_DIFF <- ME_cluster_diff_stats_sub$Diff_ME_Cluster
+ME_NOT_DIFF <- ME_cluster_diff_stats_sub$Quant_ME_Cluster - ME_cluster_diff_stats_sub$Diff_ME_Cluster
+
+
+
+chisq.test(cbind(c(TOTAL_NOT_DIFF, TOTAL_DIFF), c(ME_NOT_DIFF, ME_DIFF)))
+
+
+
+
+```"

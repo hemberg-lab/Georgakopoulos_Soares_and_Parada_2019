@@ -1,0 +1,18 @@
+"0","```r
+library(ggplot2)
+compare_whippet_MicroExonator <- merge(TOTAL_diff_exons.ME, TOTAL_diff_exons, by=c(\"ME_cluster\", \"Tissue_cluster\", \"exon_ID\"))
+
+compare_whippet_MicroExonator[ , Diff.x:=(Probability.x>= 0.9 & abs(DeltaPsi.x) >=0.1) ]
+compare_whippet_MicroExonator[ , Diff.y:=(Probability.y>= 0.9 & abs(DeltaPsi.y) >=0.1) ]
+
+compare_whippet_MicroExonator[Diff.x==TRUE & Diff.y==TRUE, Diff:=\"Both\"]
+compare_whippet_MicroExonator[Diff.x==TRUE & Diff.y==FALSE, Diff:=\"MicroExonator\"]
+compare_whippet_MicroExonator[Diff.x==FALSE & Diff.y==TRUE, Diff:=\"Whippet\"]
+
+ggplot(compare_whippet_MicroExonator[ME_cluster==\"NM3\" & Tissue_cluster==2, ]) +
+  geom_point(aes(x=-DeltaPsi.x, y=-DeltaPsi.y,  colour=Diff ), alpha=0.5 ) +
+  facet_grid( exon_ID %in% ME_5_3_alt ~ .)
+
+
+
+```"
